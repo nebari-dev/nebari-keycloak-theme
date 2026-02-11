@@ -1,0 +1,121 @@
+{
+    "id": "nebari",
+    "realm": "nebari",
+    "displayName": "Nebari",
+    "displayNameHtml": "<strong>Nebari</strong>",
+    "enabled": true,
+    "sslRequired": "external",
+    "registrationAllowed": true,
+    "registrationEmailAsUsername": false,
+    "rememberMe": true,
+    "verifyEmail": false,
+    "loginWithEmailAllowed": true,
+    "duplicateEmailsAllowed": false,
+    "resetPasswordAllowed": true,
+    "editUsernameAllowed": false,
+    "bruteForceProtected": true,
+    "loginTheme": "nebari",
+    "accountTheme": "keycloak.v3",
+    "emailTheme": "keycloak",
+    "internationalizationEnabled": false,
+    "supportedLocales": [
+        "en"
+    ],
+    "defaultLocale": "en",
+    "eventsEnabled": true,
+    "eventsListeners": [
+        "jboss-logging"
+    ],
+    "enabledEventTypes": [
+        "LOGIN",
+        "LOGIN_ERROR",
+        "LOGOUT",
+        "REGISTER",
+        "REGISTER_ERROR"
+    ],
+    "adminEventsEnabled": true,
+    "adminEventsDetailsEnabled": true,
+    "roles": {
+        "realm": [
+            {
+                "name": "user",
+                "description": "Regular user role"
+            },
+            {
+                "name": "admin",
+                "description": "Administrator role"
+            },
+            {
+                "name": "developer",
+                "description": "Developer role"
+            }
+        ]
+    },
+    "defaultRoles": [
+        "user"
+    ],
+    "clients": [
+        {
+            "clientId": "nebari-app",
+            "name": "Nebari Application",
+            "description": "Main Nebari application client",
+            "enabled": true,
+            "publicClient": false,
+            "bearerOnly": false,
+            "standardFlowEnabled": true,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": true,
+            "serviceAccountsEnabled": false,
+            "protocol": "openid-connect",
+            "fullScopeAllowed": true,
+            "redirectUris": [
+                "http://localhost:8000/*",
+                "https://*.nebari.dev/*"
+            ],
+            "webOrigins": [
+                "http://localhost:8000",
+                "https://*.nebari.dev"
+            ],
+            "defaultClientScopes": [
+                "web-origins",
+                "acr",
+                "profile",
+                "roles",
+                "email"
+            ],
+            "attributes": {
+                "pkce.code.challenge.method": "S256"
+            }
+        }
+    ],
+    "users": [
+        {
+            "username": "demo",
+            "enabled": true,
+            "emailVerified": true,
+            "firstName": "Demo",
+            "lastName": "User",
+            "email": "demo@nebari.dev",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "demo",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": [
+                "user"
+            ],
+            "requiredActions": []
+        }
+    ],
+    "smtpServer": {},
+    "browserSecurityHeaders": {
+        "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+        "xContentTypeOptions": "nosniff",
+        "xFrameOptions": "SAMEORIGIN",
+        "xRobotsTag": "none",
+        "xXSSProtection": "1; mode=block",
+        "strictTransportSecurity": "max-age=31536000; includeSubDomains"
+    }
+}
