@@ -6,9 +6,16 @@ import type { KcContext } from "./login/KcContext";
 import KcPage from "./login/KcPage";
 import "./theme.css";
 
-const result = getKcContextMock({
-    pageId: "login.ftl"
-});
+// Read ?page=register.ftl from the URL, default to login.ftl
+const supportedPages = ["login.ftl", "register.ftl", "info.ftl", "error.ftl"] as const;
+type PageId = typeof supportedPages[number];
+
+const urlPage = new URLSearchParams(window.location.search).get("page");
+const pageId: PageId = supportedPages.includes(urlPage as PageId)
+    ? (urlPage as PageId)
+    : "login.ftl";
+
+const result = getKcContextMock({ pageId });
 
 const kcContext = result as KcContext | undefined;
 

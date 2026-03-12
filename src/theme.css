@@ -1,260 +1,422 @@
-/* Nebari Keycloak Theme - Enhanced Styles */
+/* NIC/Nebari Keycloak Theme — Matches NIC Landing Page Design System */
+
+/* IBM Plex Sans — same font as the NIC landing page */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+/* ========================
+   DESIGN TOKENS
+   Default: dark mode (matches NIC landing page default appearance)
+   ======================== */
 
 :root {
-    /* Primary Colors - From Nebari Config */
-    --nebari-primary: #4f4173;
-    --nebari-primary-hover: #5e4f8a;
-    --nebari-primary-light: rgba(79, 65, 115, 0.1);
-    --nebari-secondary: #957da6;
+    /* Brand Accent Colors — mirrored from NIC landing page CSS */
+    --nebari-purple:      #9b3dcc;
+    --nebari-purple-dark: #7a2fa3;
+    --nebari-blue:        #0b70e0;
+    --nebari-teal:        #20aaa1;
+    --nebari-green:       #10b981;
+    --nebari-red:         #ef4444;
+    --nebari-orange:      #f59e0b;
 
-    /* Accent Colors */
-    --nebari-accent: #32C574;
-    --nebari-accent-hover: #28a95e;
-    --nebari-accent-light: rgba(50, 197, 116, 0.1);
+    /* Dark theme surfaces (default — matches NIC page) */
+    --bg-primary:   #0a0a0b;
+    --bg-secondary: #141417;
+    --bg-elevated:  #1c1c21;
+    --bg-hover:     #232329;
 
-    /* Navbar/Dark Colors */
-    --nebari-navbar: #1c1d26;
-    --nebari-navbar-hover: #db96f3;
-    --nebari-navbar-text: #f1f1f6;
+    /* Dark theme text */
+    --text-primary:   #ffffff;
+    --text-secondary: #e5e5e5;
+    --text-muted:     #b3b3b3;
 
-    /* Header Colors */
-    --nebari-h1: #652e8e;
-    --nebari-h2: #652e8e;
+    /* Dark theme borders */
+    --border-color:  #2d2d2d;
+    --border-subtle: #404040;
 
-    /* Text Colors */
-    --nebari-text: #111111;
-    --nebari-text-secondary: #666666;
-    --nebari-text-light: #999999;
+    /* Active accent */
+    --accent:      var(--nebari-purple);
+    --accent-dark: var(--nebari-purple-dark);
 
-    /* Background Colors - Light Theme */
-    --nebari-bg-page: #f5f5f7;
-    --nebari-bg-card: #ffffff;
-    --nebari-bg-input: #ffffff;
-    --nebari-bg-hover: #fafafa;
-
-    /* Border Colors */
-    --nebari-border: #e5e5e7;
-    --nebari-border-hover: #d1d1d6;
-    --nebari-border-focus: var(--nebari-primary);
-
-    /* Shadow Levels */
-    --nebari-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --nebari-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --nebari-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --nebari-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
-    /* Spacing */
-    --nebari-space-xs: 4px;
-    --nebari-space-sm: 8px;
-    --nebari-space-md: 16px;
-    --nebari-space-lg: 24px;
-    --nebari-space-xl: 32px;
-    --nebari-space-2xl: 48px;
-
-    /* Border Radius */
-    --nebari-radius-sm: 6px;
-    --nebari-radius-md: 8px;
-    --nebari-radius-lg: 12px;
-    --nebari-radius-xl: 16px;
-
-    /* Transitions */
-    --nebari-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Transition */
+    --transition-fast: all 0.15s ease;
 }
 
-/* Global Styles */
+/* Light mode — OS preference */
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+        --bg-primary:   #ffffff;
+        --bg-secondary: #fafafa;
+        --bg-elevated:  #f5f5f5;
+        --bg-hover:     #ebebeb;
+
+        --text-primary:   #1a1a1a;
+        --text-secondary: #404040;
+        --text-muted:     #666666;
+
+        --border-color:  #e0e0e0;
+        --border-subtle: #cccccc;
+    }
+}
+
+/* Manual overrides via data-theme attribute */
+[data-theme="light"] {
+    --bg-primary:   #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-elevated:  #f5f5f5;
+    --bg-hover:     #ebebeb;
+
+    --text-primary:   #1a1a1a;
+    --text-secondary: #404040;
+    --text-muted:     #666666;
+
+    --border-color:  #e0e0e0;
+    --border-subtle: #cccccc;
+}
+
+[data-theme="dark"] {
+    --bg-primary:   #0a0a0b;
+    --bg-secondary: #141417;
+    --bg-elevated:  #1c1c21;
+    --bg-hover:     #232329;
+
+    --text-primary:   #ffffff;
+    --text-secondary: #e5e5e5;
+    --text-muted:     #b3b3b3;
+
+    --border-color:  #2d2d2d;
+    --border-subtle: #404040;
+}
+
+/* ========================
+   BASE RESET
+   ======================== */
+
 *,
 *::before,
 *::after {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html,
 body {
-    margin: 0;
-    padding: 0;
     min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Helvetica Neue', sans-serif;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.6;
+    font-weight: 500;
 }
 
 body {
-    background: var(--nebari-bg-page);
-    color: var(--nebari-text);
+    background: var(--bg-primary);
+    color: var(--text-primary);
 }
 
-/* Login Wrapper */
+button,
+input,
+select,
+textarea {
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ========================
+   PAGE LAYOUT
+   ======================== */
+
 .nebari-login-wrapper {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--nebari-space-lg);
-    background: linear-gradient(135deg, #f5f5f7 0%, #ebe8f0 100%);
+    padding: 2rem;
+    background: var(--bg-primary);
+    /* Subtle radial glows matching NIC landing-page aesthetic */
+    background-image:
+        radial-gradient(ellipse at 25% 45%, rgba(155, 61, 204, 0.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 20%, rgba(11, 112, 224, 0.04) 0%, transparent 55%);
 }
 
 .nebari-login-container {
     width: 100%;
-    max-width: 440px;
+    max-width: 420px;
 }
 
 .nebari-login-card {
-    background: var(--nebari-bg-card);
-    border-radius: var(--nebari-radius-xl);
-    box-shadow: var(--nebari-shadow-xl);
-    padding: var(--nebari-space-2xl);
-    border: 1px solid var(--nebari-border);
+    position: relative;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2.25rem 2.5rem 2rem;
 }
 
-/* Logo */
+@media (prefers-color-scheme: light) {
+    .nebari-login-card {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+    }
+}
+
+/* ========================
+   LOGO HEADER
+   ======================== */
+
 .nebari-logo-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.75rem;
+}
+
+/* Footer */
+.nebari-footer {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
     text-align: center;
-    margin-bottom: var(--nebari-space-xl);
-    padding: 0 var(--nebari-space-md);
+}
+
+/* Card controls group — absolute top-right of the card */
+.nebari-card-controls {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Shared style for help + theme toggle buttons */
+.nebari-help-btn,
+.nebari-theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.nebari-help-btn:hover,
+.nebari-theme-toggle:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--border-subtle);
+}
+
+/* Help tooltip popover */
+.nebari-help-wrap {
+    position: relative;
+}
+
+.nebari-help-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 260px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.875rem 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nebari-help-tooltip::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    background: var(--bg-elevated);
+    border-top: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    transform: rotate(45deg);
+}
+
+.nebari-help-tooltip-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.nebari-help-tooltip p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
 }
 
 .nebari-logo {
-    width: clamp(240px, 70%, 400px);
-    height: auto;
-    max-height: 100px;
+    /* Both SVGs share viewBox 0 0 128 32 (4:1 ratio), so this container
+       renders them at exactly the same size in both light and dark mode */
+    display: block;
+    width: 160px;
+    height: 40px; /* 160 / 4 = 40 */
     object-fit: contain;
-    transition: var(--nebari-transition);
+    object-position: center;
+    margin: 0 auto;
 }
 
-/* Header */
+/* ========================
+   PAGE TITLE
+   ======================== */
+
 .nebari-header {
     text-align: center;
-    margin-bottom: var(--nebari-space-lg);
+    margin-bottom: 1.75rem;
 }
 
 .nebari-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--nebari-h1);
-    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--text-primary);
     line-height: 1.3;
+    letter-spacing: -0.01em;
 }
 
-/* Language Selector */
+.nebari-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 0.375rem;
+    font-weight: 400;
+}
+
+/* ========================
+   LOCALE SELECTOR
+   ======================== */
+
 .nebari-locale-selector {
-    margin-bottom: var(--nebari-space-lg);
+    margin-bottom: 1.25rem;
 }
 
 .nebari-locale-dropdown {
     width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--nebari-border);
-    border-radius: var(--nebari-radius-md);
-    background: var(--nebari-bg-input);
-    color: var(--nebari-text);
-    font-size: 14px;
-    transition: var(--nebari-transition);
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: var(--transition-fast);
     cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
 }
 
-.nebari-locale-dropdown:hover {
-    border-color: var(--nebari-border-hover);
-}
+.nebari-locale-dropdown:hover  { border-color: var(--border-subtle); }
 
 .nebari-locale-dropdown:focus {
     outline: none;
-    border-color: var(--nebari-primary);
-    box-shadow: 0 0 0 3px var(--nebari-primary-light);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
 }
 
-/* Alert Messages */
+/* ========================
+   ALERT MESSAGES
+   ======================== */
+
 .nebari-alert {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px;
-    border-radius: var(--nebari-radius-md);
-    margin-bottom: var(--nebari-space-lg);
-    font-size: 14px;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+    font-size: 0.875rem;
     line-height: 1.5;
+    border: 1px solid transparent;
 }
 
-.nebari-alert-icon {
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.nebari-alert-content {
-    flex: 1;
-}
+.nebari-alert-icon    { flex-shrink: 0; margin-top: 1px; }
+.nebari-alert-content { flex: 1; font-weight: 400; }
 
 .nebari-alert-success {
-    background: #f0fdf4;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-}
-
-.nebari-alert-success .nebari-alert-icon {
-    color: #16a34a;
+    background: rgba(16, 185, 129, 0.10);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.25);
 }
 
 .nebari-alert-error {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-}
-
-.nebari-alert-error .nebari-alert-icon {
-    color: #dc2626;
+    background: rgba(239, 68, 68, 0.10);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.25);
 }
 
 .nebari-alert-warning {
-    background: #fffbeb;
-    color: #92400e;
-    border: 1px solid #fde68a;
-}
-
-.nebari-alert-warning .nebari-alert-icon {
-    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.10);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.25);
 }
 
 .nebari-alert-info {
-    background: #eff6ff;
-    color: #1e40af;
-    border: 1px solid #bfdbfe;
+    background: rgba(11, 112, 224, 0.10);
+    color: #60a5fa;
+    border-color: rgba(11, 112, 224, 0.25);
 }
 
-.nebari-alert-info .nebari-alert-icon {
-    color: #3b82f6;
+/* Darker text in light mode */
+@media (prefers-color-scheme: light) {
+    .nebari-alert-success { color: #059669; }
+    .nebari-alert-error   { color: #dc2626; }
+    .nebari-alert-warning { color: #d97706; }
+    .nebari-alert-info    { color: #2563eb; }
 }
 
-/* Form Container */
+/* ========================
+   FORM CONTAINER
+   ======================== */
+
 .nebari-form-container {
-    margin-bottom: var(--nebari-space-lg);
+    margin-bottom: 0;
 }
 
-/* Form Groups */
+/* ========================
+   FORM GROUPS
+   ======================== */
+
 .nebari-form-group {
-    margin-bottom: var(--nebari-space-md);
+    margin-bottom: 1rem;
 }
 
 .nebari-form-group:last-child {
     margin-bottom: 0;
 }
 
-/* Labels */
+/* ========================
+   LABELS
+   ======================== */
+
 .nebari-label {
     display: block;
-    margin-bottom: var(--nebari-space-sm);
-    font-size: 14px;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
     font-weight: 500;
-    color: var(--nebari-text);
+    color: var(--text-secondary);
 }
 
 .nebari-required-asterisk {
-    color: #dc2626;
+    color: var(--nebari-red);
     margin-left: 2px;
 }
 
-/* Input Fields */
+/* ========================
+   INPUT FIELDS
+   ======================== */
+
 .nebari-input,
 input[type="text"],
 input[type="email"],
@@ -263,60 +425,69 @@ input[type="tel"],
 select,
 textarea {
     width: 100%;
-    padding: 11px 14px;
-    font-size: 14px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9375rem;
     line-height: 1.5;
-    color: var(--nebari-text);
-    background: var(--nebari-bg-input);
-    border: 1px solid var(--nebari-border);
-    border-radius: var(--nebari-radius-md);
-    transition: var(--nebari-transition);
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: border-color 0.15s, box-shadow 0.15s;
     font-family: inherit;
+    font-weight: 500;
+}
+
+.nebari-input::placeholder,
+input::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
 }
 
 .nebari-input:hover,
 input[type="text"]:hover,
 input[type="email"]:hover,
 input[type="password"]:hover,
+input[type="tel"]:hover,
 select:hover {
-    border-color: var(--nebari-border-hover);
+    border-color: var(--border-subtle);
 }
 
 .nebari-input:focus,
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
+input[type="tel"]:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: var(--nebari-primary);
-    box-shadow: 0 0 0 3px var(--nebari-primary-light);
-}
-
-.nebari-input::placeholder {
-    color: var(--nebari-text-light);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
 }
 
 .nebari-input[aria-invalid="true"],
 input[aria-invalid="true"] {
-    border-color: #dc2626;
+    border-color: var(--nebari-red);
 }
 
 .nebari-input[aria-invalid="true"]:focus,
 input[aria-invalid="true"]:focus {
-    border-color: #dc2626;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    border-color: var(--nebari-red);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
-/* Input Error Messages */
+/* Input error messages */
 .nebari-input-error {
     display: block;
-    margin-top: var(--nebari-space-sm);
-    font-size: 13px;
-    color: #dc2626;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--nebari-red);
+    font-weight: 400;
 }
 
-/* Buttons */
+/* ========================
+   BUTTONS
+   ======================== */
+
 .nebari-button,
 button[type="submit"],
 input[type="submit"],
@@ -325,391 +496,376 @@ input[type="submit"],
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 12px 20px;
-    font-size: 15px;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     line-height: 1.5;
     text-align: center;
-    border-radius: var(--nebari-radius-md);
+    border-radius: 8px;
     border: none;
     cursor: pointer;
-    transition: var(--nebari-transition);
+    transition: var(--transition-fast);
     font-family: inherit;
+    text-decoration: none;
 }
 
 .nebari-button-primary,
 button[type="submit"],
 input[type="submit"] {
-    background: var(--nebari-primary);
-    color: white;
+    background: var(--accent);
+    color: #ffffff;
 }
 
 .nebari-button-primary:hover,
 button[type="submit"]:hover,
 input[type="submit"]:hover {
-    background: var(--nebari-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--nebari-shadow-md);
+    background: var(--accent-dark);
 }
 
 .nebari-button-primary:active,
 button[type="submit"]:active,
 input[type="submit"]:active {
-    transform: translateY(0);
-    box-shadow: var(--nebari-shadow-sm);
+    background: var(--accent-dark);
+    transform: scale(0.99);
 }
 
 .nebari-button-primary:disabled,
 button[type="submit"]:disabled,
 input[type="submit"]:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
 }
 
 .nebari-button-secondary {
     background: transparent;
-    color: var(--nebari-primary);
-    border: 1px solid var(--nebari-primary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
 }
 
 .nebari-button-secondary:hover {
-    background: var(--nebari-primary-light);
+    background: var(--bg-hover);
+    color: var(--text-primary);
 }
 
-/* Checkbox */
+/* Link buttons — prevent underline override */
+a.nebari-button,
+a.nebari-button-primary,
+a.nebari-button-secondary {
+    text-decoration: none !important;
+}
+
+a.nebari-button:hover,
+a.nebari-button-primary:hover,
+a.nebari-button-secondary:hover {
+    text-decoration: none !important;
+}
+
+/* ========================
+   CHECKBOX
+   ======================== */
+
 .nebari-checkbox {
     display: flex;
     align-items: center;
-    gap: var(--nebari-space-sm);
-    margin: var(--nebari-space-md) 0;
+    gap: 0.5rem;
 }
 
 .nebari-checkbox input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     margin: 0;
     cursor: pointer;
-    accent-color: var(--nebari-primary);
+    accent-color: var(--accent);
+    border-radius: 4px;
 }
 
 .nebari-checkbox label {
-    font-size: 14px;
-    color: var(--nebari-text);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
     cursor: pointer;
     margin: 0;
+    font-weight: 400;
 }
 
-/* Links */
+/* ========================
+   LINKS
+   ======================== */
+
 a {
-    color: var(--nebari-primary);
+    color: var(--accent);
     text-decoration: none;
     font-weight: 500;
-    transition: var(--nebari-transition);
+    transition: color 0.15s;
 }
 
 a:hover {
-    color: var(--nebari-primary-hover);
+    color: var(--accent-dark);
     text-decoration: underline;
 }
 
-/* Form Options (Forgot Password, etc) */
+/* ========================
+   FORM OPTIONS (remember me / forgot password row)
+   ======================== */
+
 .nebari-form-options {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: var(--nebari-space-md) 0;
-    font-size: 14px;
+    margin: 0.875rem 0 1.25rem;
+    font-size: 0.875rem;
 }
 
-.nebari-form-options a {
-    font-size: 14px;
+/* ========================
+   DIVIDER
+   ======================== */
+
+.nebari-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin: 1.5rem 0 1.25rem;
 }
 
-/* Social Login Section */
+.nebari-divider::before,
+.nebari-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.nebari-divider-text {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-weight: 400;
+}
+
+/* ========================
+   SOCIAL PROVIDERS
+   ======================== */
+
 .nebari-social-section {
-    margin-top: var(--nebari-space-xl);
-    padding-top: var(--nebari-space-lg);
-    border-top: 1px solid var(--nebari-border);
+    margin-top: 1.5rem;
 }
 
 .nebari-social-header {
-    text-align: center;
-    margin-bottom: var(--nebari-space-md);
-    font-size: 14px;
+    font-size: 0.8125rem;
     font-weight: 500;
-    color: var(--nebari-text-secondary);
+    color: var(--text-muted);
+    margin-bottom: 0.625rem;
+    text-align: center;
 }
 
 .nebari-social-providers {
     display: flex;
     flex-direction: column;
-    gap: var(--nebari-space-sm);
+    gap: 0.5rem;
 }
 
 .nebari-social-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--nebari-space-sm);
+    gap: 0.5rem;
     width: 100%;
-    padding: 11px 16px;
-    border: 1px solid var(--nebari-border);
-    border-radius: var(--nebari-radius-md);
-    background: var(--nebari-bg-input);
-    color: var(--nebari-text);
-    font-size: 14px;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.875rem;
     font-weight: 500;
-    transition: var(--nebari-transition);
+    transition: var(--transition-fast);
     cursor: pointer;
-}
-
-.nebari-social-button:hover {
-    border-color: var(--nebari-primary);
-    background: var(--nebari-primary-light);
     text-decoration: none;
 }
 
-/* Info Section (Registration, etc) */
+.nebari-social-button:hover {
+    border-color: var(--accent);
+    background: var(--bg-hover);
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+/* ========================
+   INFO SECTION (register / back-to-login link)
+   ======================== */
+
 .nebari-info-section {
-    margin-top: var(--nebari-space-lg);
-    padding-top: var(--nebari-space-lg);
-    border-top: 1px solid var(--nebari-border);
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
     text-align: center;
-    font-size: 14px;
-    color: var(--nebari-text-secondary);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 400;
 }
 
-/* Required Notice */
+/* ========================
+   REQUIRED FIELDS NOTICE
+   ======================== */
+
 .nebari-required-notice {
-    margin-top: var(--nebari-space-md);
-    font-size: 13px;
-    color: var(--nebari-text-secondary);
+    margin-top: 1rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    font-weight: 400;
 }
 
-/* Footer */
-.nebari-footer {
-    margin-top: var(--nebari-space-xl);
-    padding-top: var(--nebari-space-lg);
-    border-top: 1px solid var(--nebari-border);
-    text-align: center;
-}
+/* ========================
+   FOOTER
+   ======================== */
 
 .nebari-footer-text {
-    font-size: 13px;
-    color: var(--nebari-text-secondary);
+    font-size: 0.8125rem;
+    color: var(--text-muted);
     margin: 0;
+    font-weight: 400;
 }
 
-/* Responsive Design */
-@media (max-width: 640px) {
+.nebari-footer-text a {
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.nebari-footer-text a:hover {
+    color: var(--accent-dark);
+}
+
+/* ========================
+   TEXT UTILITIES
+   ======================== */
+
+.nebari-text-secondary {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+/* ========================
+   RESPONSIVE
+   ======================== */
+
+@media (max-width: 480px) {
     .nebari-login-wrapper {
-        padding: var(--nebari-space-md);
+        padding: 1rem;
+        align-items: flex-start;
+        padding-top: 3rem;
     }
 
     .nebari-login-card {
-        padding: var(--nebari-space-lg);
+        padding: 1.75rem 1.25rem 1.5rem;
     }
 
     .nebari-title {
-        font-siz-header {
-            margin-bottom: var(--nebari-space-lg);
-        }
+        font-size: 1.25rem;
     }
+}
 
-    @media (max-width: 480px) {
-        .nebari-login-card {
-            padding: var(--nebari-space-md);
-        }
+/* ========================
+   KEYCLOAK BUILT-IN CLASS OVERRIDES
+   ======================== */
 
-        .nebari-title {
-            font-size: 18px;
-        }
-    }
+.kcLabelClass {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
 
-    @media (min-width: 768px) {
-        .nebari-logo {
-            min-height: 48 .nebari-logo {
-                height: 40px;
-            }
-        }
+.kcInputClass {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+    font-weight: 500;
+}
 
-        /* Dark Theme */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --nebari-text: #f1f1f6;
-                --nebari-text-secondary: #b0b0b8;
-                --nebari-text-light: #808089;
+.kcInputClass:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
+}
 
-                --nebari-bg-page: #121218;
-                --nebari-bg-card: #1c1d26;
-                --nebari-bg-input: #2a2b35;
-                --nebari-bg-hover: #35364a;
+.kcInputErrorMessageClass {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--nebari-red);
+    font-weight: 400;
+}
 
-                --nebari-border: #35364a;
-                --nebari-border-hover: #404152;
+.kcButtonClass {
+    width: 100%;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-family: inherit;
+}
 
-                --nebari-h1: #b794f6;
-                --nebari-h2: #b794f6;
+.kcButtonPrimaryClass {
+    background: var(--accent);
+    color: white;
+}
 
-                --nebari-primary: #8b7bb8;
-                --nebari-primary-hover: #a393cc;
-            }
+.kcButtonPrimaryClass:hover {
+    background: var(--accent-dark);
+}
 
-            .nebari-login-wrapper {
-                background: linear-gradient(135deg, #121218 0%, #1e1a2e 100%);
-            }
+.kcFormOptionsClass {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.875rem 0 1.25rem;
+    font-size: 0.875rem;
+}
 
-            .nebari-login-card {
-                border-color: var(--nebari-border);
-            }
+.kcFormSocialAccountSectionClass hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 1.5rem 0;
+}
 
-            .nebari-input:hover,
-            input[type="text"]:hover,
-            input[type="email"]:hover,
-            input[type="password"]:hover {
-                background: var(--nebari-bg-hover);
-            }
+.kcFormSocialAccountListClass {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
-            /* Dark theme alerts */
-            .nebari-alert-success {
-                background: rgba(34, 197, 94, 0.15);
-                color: #86efac;
-                border-color: rgba(34, 197, 94, 0.3);
-            }
+.kcFormSocialAccountListButtonClass {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
 
-            .nebari-alert-error {
-                background: rgba(239, 68, 68, 0.15);
-                color: #fca5a5;
-                border-color: rgba(239, 68, 68, 0.3);
-            }
-
-            .nebari-alert-warning {
-                background: rgba(245, 158, 11, 0.15);
-                color: #fcd34d;
-                border-color: rgba(245, 158, 11, 0.3);
-            }
-
-            .nebari-alert-info {
-                background: rgba(59, 130, 246, 0.15);
-                color: #93c5fd;
-                border-color: rgba(59, 130, 246, 0.3);
-            }
-
-            /* Dark theme links */
-            a {
-                color: var(--nebari-primary-hover);
-            }
-
-            a:hover {
-                color: #b794f6;
-
-                .kcLabelClass {
-                    display: block;
-                    margin-bottom: var(--nebari-space-sm);
-                    font-size: 14px;
-                    font-weight: 500;
-                    color: var(--nebari-text);
-                }
-
-                .kcInputClass {
-                    width: 100%;
-                    padding: 11px 14px;
-                    font-size: 14px;
-                    color: var(--nebari-text);
-                    background: var(--nebari-bg-input);
-                    border: 1px solid var(--nebari-border);
-                    border-radius: var(--nebari-radius-md);
-                    transition: var(--nebari-transition);
-                }
-
-                .kcInputClass:focus {
-                    outline: none;
-                    border-color: var(--nebari-primary);
-                    box-shadow: 0 0 0 3px var(--nebari-primary-light);
-                }
-
-                .kcInputErrorMessageClass {
-                    display: block;
-                    margin-top: var(--nebari-space-sm);
-                    font-size: 13px;
-                    color: #dc2626;
-                }
-
-                .kcButtonClass {
-                    width: 100%;
-                    padding: 12px 20px;
-                    font-size: 15px;
-                    font-weight: 500;
-                    border-radius: var(--nebari-radius-md);
-                    border: none;
-                    cursor: pointer;
-                    transition: var(--nebari-transition);
-                }
-
-                .kcButtonPrimaryClass {
-                    background: var(--nebari-primary);
-                    color: white;
-                }
-
-                .kcButtonPrimaryClass:hover {
-                    background: var(--nebari-primary-hover);
-                    transform: translateY(-1px);
-                    box-shadow: var(--nebari-shadow-md);
-                }
-
-                .kcFormOptionsClass {
-                    margin-top: var(--nebari-space-md);
-                    font-size: 14px;
-                }
-
-                .kcFormSocialAccountSectionClass hr {
-                    border: none;
-                    border-top: 1px solid var(--nebari-border);
-                    margin: var(--nebari-space-lg) 0;
-                }
-
-                .kcFormSocialAccountListClass {
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                    display: flex;
-                    flex-direction: column;
-                    gap: var(--nebari-space-sm);
-                }
-
-                .kcFormSocialAccountListButtonClass {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: var(--nebari-space-sm);
-                    width: 100%;
-                    padding: 11px 16px;
-                    border: 1px solid var(--nebari-border);
-                    border-radius: var(--nebari-radius-md);
-                    background: var(--nebari-bg-input);
-                    color: var(--nebari-text);
-                    font-size: 14px;
-                    font-weight: 500;
-                    transition: var(--nebari-transition);
-                }
-
-                .kcFormSocialAccountListButtonClass:hover {
-                    border-color: var(--nebari-primary);
-                    background: var(--nebari-primary-light);
-                    text-decoration: none;
-                }
-
-
-                /* Link buttons - after line 393 */
-                a.nebari-button,
-                a.nebari-button-primary,
-                a.nebari-button-secondary {
-                    text-decoration: none !important;
-                }
-
-                a.nebari-button:hover,
-                a.nebari-button-primary:hover,
-                a.nebari-button-secondary:hover {
-                    text-decoration: none !important;
-                }
+.kcFormSocialAccountListButtonClass:hover {
+    border-color: var(--accent);
+    background: var(--bg-hover);
+    text-decoration: none;
+}
