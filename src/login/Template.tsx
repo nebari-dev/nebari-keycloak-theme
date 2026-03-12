@@ -1,10 +1,50 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { kcSanitize } from "keycloakify/lib/kcSanitize";
 import { clsx } from "keycloakify/tools/clsx";
 import type { TemplateProps } from "keycloakify/login/TemplateProps";
 import { getKcClsx } from "keycloakify/login/lib/kcClsx";
 import { useSetClassName } from "keycloakify/tools/useSetClassName";
 import type { KcContext } from "./KcContext";
 import type { I18n } from "./i18n";
+
+const STORAGE_KEY = "nebari-theme";
+
+function getInitialTheme(): "dark" | "light" {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === "dark" || stored === "light") return stored;
+    // Default to light — matches NIC landing page default appearance.
+    // OS dark-mode preference is respected only when the user explicitly
+    // toggles the theme (stored in localStorage).
+    return "light";
+}
+
+const SunIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+);
+
+const MoonIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+);
+
+const HelpIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+);
 
 export default function Template(props: TemplateProps<KcContext, I18n>) {
     const {
@@ -26,10 +66,40 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
     const { msg, msgStr } = i18n;
 
-    // Detect dark mode
-    const isDarkMode = typeof window !== 'undefined' &&
-        window.matchMedia &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Reactively track dark/light mode preference
+    const [theme, setTheme] = useState<"dark" | "light">(getInitialTheme);
+    const isDarkMode = theme === "dark";
+    const [showHelp, setShowHelp] = useState(false);
+    const helpRef = useRef<HTMLDivElement>(null);
+
+    // Apply data-theme to <html> and persist to localStorage whenever it changes
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem(STORAGE_KEY, theme);
+    }, [theme]);
+
+    useEffect(() => {
+        if (!showHelp) return;
+        function handleClickOutside(e: MouseEvent) {
+            if (helpRef.current && !helpRef.current.contains(e.target as Node)) {
+                setShowHelp(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [showHelp]);
+
+    // Follow OS preference changes only when no manual override is stored
+    useEffect(() => {
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        const handler = (e: MediaQueryListEvent) => {
+            if (!localStorage.getItem(STORAGE_KEY)) {
+                setTheme(e.matches ? "dark" : "light");
+            }
+        };
+        mq.addEventListener("change", handler);
+        return () => mq.removeEventListener("change", handler);
+    }, []);
 
     useEffect(() => {
         document.title = documentTitle ?? msgStr("loginTitle", kcContext.realm.displayName);
@@ -52,7 +122,9 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                     {/* Logo Header */}
                     <div className="nebari-logo-header">
                         <img
-                            src={isDarkMode ? "/logo/Nebari-Logo-Horizontal-Lockup-White-text.svg" : "/logo/Nebari-Logo-Horizontal-Lockup.png"}
+                            src={isDarkMode
+                                ? "/logo/nebari-logo-dark.svg"
+                                : "/logo/nebari-logo-light.svg"}
                             alt="Nebari"
                             className="nebari-logo"
                         />
@@ -99,7 +171,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                                 )}
                             </div>
                             <div className="nebari-alert-content">
-                                <span dangerouslySetInnerHTML={{ __html: kcContext.message.summary }} />
+                                <span dangerouslySetInnerHTML={{ __html: kcSanitize(kcContext.message.summary) }} />
                             </div>
                         </div>
                     )}
@@ -119,6 +191,11 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                     {/* Social Providers */}
                     {socialProvidersNode && (
                         <div className="nebari-social-section">
+                            <div className="nebari-divider">
+                                <span className="nebari-divider-text">
+                                    {msgStr("identity-provider-login-label")}
+                                </span>
+                            </div>
                             {socialProvidersNode}
                         </div>
                     )}
@@ -130,10 +207,43 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                         </div>
                     )}
 
+                    {/* Card controls — top-right corner */}
+                    <div className="nebari-card-controls">
+                        <div className="nebari-help-wrap" ref={helpRef}>
+                            <button
+                                className="nebari-help-btn"
+                                onClick={() => setShowHelp(v => !v)}
+                                aria-label="About this login"
+                                aria-expanded={showHelp}
+                            >
+                                <HelpIcon />
+                            </button>
+                            {showHelp && (
+                                <div className="nebari-help-tooltip" role="tooltip">
+                                    <p className="nebari-help-tooltip-title">Secured service</p>
+                                    <p>You are visiting a protected Nebari route. Authentication is required to continue.</p>
+                                    <p>If you need access or are having trouble signing in, please contact your team administrator.</p>
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            className="nebari-theme-toggle"
+                            onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
+                            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                        >
+                            {isDarkMode ? <SunIcon /> : <MoonIcon />}
+                        </button>
+                    </div>
+
                     {/* Footer */}
                     <div className="nebari-footer">
                         <p className="nebari-footer-text">
-                            Powered by <a href="https://nebari.dev" target="_blank" rel="noopener noreferrer">Nebari</a>
+                            Built with care by the{" "}
+                            <a href="https://nebari.dev" target="_blank" rel="noopener noreferrer">
+                                Nebari
+                            </a>{" "}
+                            team
                         </p>
                     </div>
                 </div>
