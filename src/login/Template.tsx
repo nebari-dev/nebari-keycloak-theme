@@ -12,7 +12,10 @@ const STORAGE_KEY = "nebari-theme";
 function getInitialTheme(): "dark" | "light" {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "dark" || stored === "light") return stored;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    // Default to light — matches NIC landing page default appearance.
+    // OS dark-mode preference is respected only when the user explicitly
+    // toggles the theme (stored in localStorage).
+    return "light";
 }
 
 const SunIcon = () => (

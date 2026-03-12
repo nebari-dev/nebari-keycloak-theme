@@ -37,7 +37,8 @@
     "reactflow": "^11.11.4",
     "use-react-router-breadcrumbs": "^4.0.1",
     "yaml": "^2.8.2",
-    "oidc-spa": "~10.0.5"
+    "oidc-spa": "~10.0.5",
+    "@keycloakify/keycloak-account-ui": "~260502.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

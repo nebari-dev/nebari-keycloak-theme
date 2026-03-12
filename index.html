@@ -9,38 +9,6 @@
 </head>
 
 <body>
-    <!-- Dev-only page switcher — not included in the Keycloak theme build -->
-    <div id="dev-nav" style="
-        position: fixed;
-        top: 0; left: 0; right: 0;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 6px 12px;
-        background: #1c1c21;
-        border-bottom: 1px solid #2d2d2d;
-        font-family: 'IBM Plex Sans', monospace, sans-serif;
-        font-size: 12px;
-    ">
-        <span style="color:#b3b3b3;margin-right:6px;font-weight:600;">DEV PREVIEW</span>
-        <a href="?page=login.ftl"    id="nav-login"    style="padding:3px 10px;border-radius:5px;text-decoration:none;font-weight:500;color:#e5e5e5;border:1px solid #2d2d2d;">Login</a>
-        <a href="?page=register.ftl" id="nav-register" style="padding:3px 10px;border-radius:5px;text-decoration:none;font-weight:500;color:#e5e5e5;border:1px solid #2d2d2d;">Register</a>
-        <a href="?page=info.ftl"     id="nav-info"     style="padding:3px 10px;border-radius:5px;text-decoration:none;font-weight:500;color:#e5e5e5;border:1px solid #2d2d2d;">Info</a>
-        <a href="?page=error.ftl"    id="nav-error"    style="padding:3px 10px;border-radius:5px;text-decoration:none;font-weight:500;color:#e5e5e5;border:1px solid #2d2d2d;">Error</a>
-    </div>
-    <script>
-        // Highlight the active page tab
-        const page = new URLSearchParams(location.search).get('page') || 'login.ftl';
-        const map = { 'login.ftl': 'nav-login', 'register.ftl': 'nav-register', 'info.ftl': 'nav-info', 'error.ftl': 'nav-error' };
-        const el = document.getElementById(map[page]);
-        if (el) { el.style.background = '#9b3dcc'; el.style.borderColor = '#9b3dcc'; el.style.color = '#fff'; }
-        // Push main content below the nav bar
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('root').style.paddingTop = '34px';
-        });
-    </script>
-
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 </body>

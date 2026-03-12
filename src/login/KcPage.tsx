@@ -1,14 +1,48 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, Component, type ReactNode } from "react";
 import type { KcContext } from "./KcContext";
 import { useI18n } from "./i18n";
 import DefaultPage from "keycloakify/login/DefaultPage";
 import Template from "./Template";
 
-// Lazy load custom pages
+// Error boundary: catches DefaultPage's assert(false) for unrecognised Keycloak
+// page IDs (e.g. pages introduced in KC 26 that keycloakify doesn't know yet).
+class DefaultPageErrorBoundary extends Component<
+    { children: ReactNode },
+    { hasError: boolean; pageId?: string }
+> {
+    state = { hasError: false, pageId: undefined as string | undefined };
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="nebari-login-wrapper">
+                    <div className="nebari-login-container">
+                        <div className="nebari-login-card" style={{ textAlign: "center" }}>
+                            <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+                                This Keycloak page is not yet styled. Please contact your administrator.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Info = lazy(() => import("./pages/Info"));
 const Error = lazy(() => import("./pages/Error"));
+const LoginResetPassword = lazy(() => import("./pages/LoginResetPassword"));
+const LoginUpdatePassword = lazy(() => import("./pages/LoginUpdatePassword"));
+const LoginVerifyEmail = lazy(() => import("./pages/LoginVerifyEmail"));
+const LoginUpdateProfile = lazy(() => import("./pages/LoginUpdateProfile"));
+const UserProfileFormFields = lazy(() => import("keycloakify/login/UserProfileFormFields"));
 
 // Fallback component for lazy loading
 const Fallback = () => (
@@ -63,18 +97,57 @@ export default function KcPage(props: { kcContext: KcContext }) {
                                 doUseDefaultCss={false}
                             />
                         );
-                    default:
-                        // For all other pages, use the default Keycloakify implementation
+                    case "login-reset-password.ftl":
                         return (
-                            <DefaultPage
-                                kcContext={kcContext}
-                                i18n={i18n}
+                            <LoginResetPassword
+                                {...{ kcContext, i18n, Template }}
                                 classes={undefined}
-                                Template={Template}
                                 doUseDefaultCss={false}
-                                UserProfileFormFields={lazy(() => import("keycloakify/login/UserProfileFormFields"))}
-                                doMakeUserConfirmPassword={true}
                             />
+                        );
+                    case "login-update-password.ftl":
+                        return (
+                            <LoginUpdatePassword
+                                {...{ kcContext, i18n, Template }}
+                                classes={undefined}
+                                doUseDefaultCss={false}
+                            />
+                        );
+                    case "login-verify-email.ftl":
+                        return (
+                            <LoginVerifyEmail
+                                {...{ kcContext, i18n, Template }}
+                                classes={undefined}
+                                doUseDefaultCss={false}
+                            />
+                        );
+                    case "login-update-profile.ftl":
+                        return (
+                            <LoginUpdateProfile
+                                {...{ kcContext, i18n, Template }}
+                                classes={undefined}
+                                doUseDefaultCss={false}
+                                UserProfileFormFields={UserProfileFormFields}
+                                doMakeUserConfirmPassword
+                            />
+                        );
+                    default:
+                        // For pages we haven't custom-implemented, use the
+                        // Keycloak default CSS so DefaultPage renders correctly.
+                        // Wrapped in an error boundary so unknown KC 26 page IDs
+                        // degrade gracefully instead of crashing with assert(false).
+                        return (
+                            <DefaultPageErrorBoundary>
+                                <DefaultPage
+                                    kcContext={kcContext}
+                                    i18n={i18n}
+                                    classes={undefined}
+                                    Template={Template}
+                                    doUseDefaultCss={true}
+                                    UserProfileFormFields={lazy(() => import("keycloakify/login/UserProfileFormFields"))}
+                                    doMakeUserConfirmPassword={true}
+                                />
+                            </DefaultPageErrorBoundary>
                         );
                 }
             })()}

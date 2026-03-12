@@ -1,90 +1,125 @@
 /* NIC/Nebari Keycloak Theme — Matches NIC Landing Page Design System */
 
-/* IBM Plex Sans — same font as the NIC landing page */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+/* DM Sans + DM Mono — NIC dashboard font stack */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
 /* ========================
    DESIGN TOKENS
-   Default: dark mode (matches NIC landing page default appearance)
+   Default: light mode (NIC landing page aesthetic)
    ======================== */
 
 :root {
-    /* Brand Accent Colors — mirrored from NIC landing page CSS */
-    --nebari-purple:      #9b3dcc;
-    --nebari-purple-dark: #7a2fa3;
-    --nebari-blue:        #0b70e0;
-    --nebari-teal:        #20aaa1;
-    --nebari-green:       #10b981;
-    --nebari-red:         #ef4444;
-    --nebari-orange:      #f59e0b;
+    /* Brand Accent Colors — aligned with NIC dashboard design system */
+    --nebari-purple: #7c3aed;
+    --nebari-purple-dark: #6d28d9;
+    --nebari-purple-light: #f0ebff;
+    --nebari-blue: #0b70e0;
+    --nebari-teal: #06b6d4;
+    --nebari-green: #10b981;
+    --nebari-red: #ef4444;
+    --nebari-orange: #f59e0b;
 
-    /* Dark theme surfaces (default — matches NIC page) */
-    --bg-primary:   #0a0a0b;
-    --bg-secondary: #141417;
-    --bg-elevated:  #1c1c21;
-    --bg-hover:     #232329;
+    /* Light theme surfaces (default) — NIC dashboard tokens */
+    --bg-primary: #f4f4f6;
+    --bg-secondary: #ffffff;
+    --bg-elevated: #efeff3;
+    --bg-hover: #e3e3ea;
 
-    /* Dark theme text */
-    --text-primary:   #ffffff;
-    --text-secondary: #e5e5e5;
-    --text-muted:     #b3b3b3;
+    /* Light theme text — NIC dashboard tokens */
+    --text-primary: #111118;
+    --text-secondary: #374151;
+    --text-muted: #6a6a7a;
+    --text-dim: #b0b0c0;
 
-    /* Dark theme borders */
-    --border-color:  #2d2d2d;
-    --border-subtle: #404040;
+    /* Light theme borders — NIC dashboard tokens */
+    --border-color: #e3e3ea;
+    --border-subtle: #efeff3;
+
+    /* Shadows — NIC dashboard tokens */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, .04);
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+
+    /* Border radius — NIC dashboard tokens */
+    --radius: 12px;
+    --radius-sm: 8px;
 
     /* Active accent */
-    --accent:      var(--nebari-purple);
+    --accent: var(--nebari-purple);
     --accent-dark: var(--nebari-purple-dark);
+    --accent-light: var(--nebari-purple-light);
 
     /* Transition */
     --transition-fast: all 0.15s ease;
 }
 
-/* Light mode — OS preference */
-@media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) {
-        --bg-primary:   #ffffff;
-        --bg-secondary: #fafafa;
-        --bg-elevated:  #f5f5f5;
-        --bg-hover:     #ebebeb;
+/* OS dark preference when no manual override is set */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg-primary: #0d0d14;
+        --bg-secondary: #17171f;
+        --bg-elevated: #1e1e28;
+        --bg-hover: #26262f;
 
-        --text-primary:   #1a1a1a;
-        --text-secondary: #404040;
-        --text-muted:     #666666;
+        --text-primary: #f0f0f8;
+        --text-secondary: #c8c8d8;
+        --text-muted: #8888a0;
+        --text-dim: #555568;
 
-        --border-color:  #e0e0e0;
-        --border-subtle: #cccccc;
+        --border-color: #26262f;
+        --border-subtle: #1e1e28;
+
+        --nebari-purple: #a78bfa;
+        --nebari-purple-dark: #7c3aed;
+        --nebari-purple-light: rgba(124, 58, 237, 0.15);
+        --accent: var(--nebari-purple);
+        --accent-dark: var(--nebari-purple-dark);
+        --accent-light: var(--nebari-purple-light);
     }
 }
 
 /* Manual overrides via data-theme attribute */
 [data-theme="light"] {
-    --bg-primary:   #ffffff;
-    --bg-secondary: #fafafa;
-    --bg-elevated:  #f5f5f5;
-    --bg-hover:     #ebebeb;
+    --bg-primary: #f4f4f6;
+    --bg-secondary: #ffffff;
+    --bg-elevated: #efeff3;
+    --bg-hover: #e3e3ea;
 
-    --text-primary:   #1a1a1a;
-    --text-secondary: #404040;
-    --text-muted:     #666666;
+    --text-primary: #111118;
+    --text-secondary: #374151;
+    --text-muted: #6a6a7a;
+    --text-dim: #b0b0c0;
 
-    --border-color:  #e0e0e0;
-    --border-subtle: #cccccc;
+    --border-color: #e3e3ea;
+    --border-subtle: #efeff3;
+
+    --nebari-purple: #7c3aed;
+    --nebari-purple-dark: #6d28d9;
+    --nebari-purple-light: #f0ebff;
+    --accent: var(--nebari-purple);
+    --accent-dark: var(--nebari-purple-dark);
+    --accent-light: var(--nebari-purple-light);
 }
 
 [data-theme="dark"] {
-    --bg-primary:   #0a0a0b;
-    --bg-secondary: #141417;
-    --bg-elevated:  #1c1c21;
-    --bg-hover:     #232329;
+    --bg-primary: #0d0d14;
+    --bg-secondary: #17171f;
+    --bg-elevated: #1e1e28;
+    --bg-hover: #26262f;
 
-    --text-primary:   #ffffff;
-    --text-secondary: #e5e5e5;
-    --text-muted:     #b3b3b3;
+    --text-primary: #f0f0f8;
+    --text-secondary: #c8c8d8;
+    --text-muted: #8888a0;
+    --text-dim: #555568;
 
-    --border-color:  #2d2d2d;
-    --border-subtle: #404040;
+    --border-color: #26262f;
+    --border-subtle: #1e1e28;
+
+    --nebari-purple: #a78bfa;
+    --nebari-purple-dark: #7c3aed;
+    --nebari-purple-light: rgba(124, 58, 237, 0.15);
+    --accent: var(--nebari-purple);
+    --accent-dark: var(--nebari-purple-dark);
+    --accent-light: var(--nebari-purple-light);
 }
 
 /* ========================
@@ -102,7 +137,7 @@
 html,
 body {
     min-height: 100vh;
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-size: 16px;
@@ -119,7 +154,14 @@ button,
 input,
 select,
 textarea {
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+code,
+pre,
+kbd,
+samp {
+    font-family: 'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 }
 
 /* ========================
@@ -133,10 +175,19 @@ textarea {
     justify-content: center;
     padding: 2rem;
     background: var(--bg-primary);
-    /* Subtle radial glows matching NIC landing-page aesthetic */
+    /* Radial glows matching NIC landing-page aesthetic — visible in both themes */
     background-image:
-        radial-gradient(ellipse at 25% 45%, rgba(155, 61, 204, 0.06) 0%, transparent 55%),
-        radial-gradient(ellipse at 75% 20%, rgba(11, 112, 224, 0.04) 0%, transparent 55%);
+        radial-gradient(ellipse at 20% 60%, rgba(155, 61, 204, 0.10) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 15%, rgba(11, 112, 224, 0.07) 0%, transparent 55%);
+}
+
+[data-theme="dark"] .nebari-login-wrapper,
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .nebari-login-wrapper {
+        background-image:
+            radial-gradient(ellipse at 25% 45%, rgba(155, 61, 204, 0.06) 0%, transparent 55%),
+            radial-gradient(ellipse at 75% 20%, rgba(11, 112, 224, 0.04) 0%, transparent 55%);
+    }
 }
 
 .nebari-login-container {
@@ -148,13 +199,21 @@ textarea {
     position: relative;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-top: 3px solid var(--nebari-purple);
+    border-radius: var(--radius);
     padding: 2.25rem 2.5rem 2rem;
+    /* Shadow — NIC dashboard shadow-sm */
+    box-shadow: var(--shadow-sm), 0 4px 24px rgba(124, 58, 237, 0.06);
 }
 
-@media (prefers-color-scheme: light) {
-    .nebari-login-card {
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+/* Lighter shadow in dark mode — glows don't need heavy shadow */
+[data-theme="dark"] .nebari-login-card {
+    box-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .nebari-login-card {
+        box-shadow: none;
     }
 }
 
@@ -265,7 +324,8 @@ textarea {
        renders them at exactly the same size in both light and dark mode */
     display: block;
     width: 160px;
-    height: 40px; /* 160 / 4 = 40 */
+    height: 40px;
+    /* 160 / 4 = 40 */
     object-fit: contain;
     object-position: center;
     margin: 0 auto;
@@ -317,7 +377,9 @@ textarea {
     font-weight: 500;
 }
 
-.nebari-locale-dropdown:hover  { border-color: var(--border-subtle); }
+.nebari-locale-dropdown:hover {
+    border-color: var(--border-subtle);
+}
 
 .nebari-locale-dropdown:focus {
     outline: none;
@@ -341,39 +403,81 @@ textarea {
     border: 1px solid transparent;
 }
 
-.nebari-alert-icon    { flex-shrink: 0; margin-top: 1px; }
-.nebari-alert-content { flex: 1; font-weight: 400; }
+.nebari-alert-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
 
+.nebari-alert-content {
+    flex: 1;
+    font-weight: 400;
+}
+
+/* Alert colours — defaults for light mode (now the default theme) */
 .nebari-alert-success {
     background: rgba(16, 185, 129, 0.10);
-    color: #34d399;
+    color: #059669;
     border-color: rgba(16, 185, 129, 0.25);
 }
 
 .nebari-alert-error {
-    background: rgba(239, 68, 68, 0.10);
-    color: #f87171;
-    border-color: rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+    border-color: rgba(239, 68, 68, 0.22);
 }
 
 .nebari-alert-warning {
-    background: rgba(245, 158, 11, 0.10);
-    color: #fbbf24;
-    border-color: rgba(245, 158, 11, 0.25);
+    background: rgba(245, 158, 11, 0.08);
+    color: #d97706;
+    border-color: rgba(245, 158, 11, 0.22);
 }
 
 .nebari-alert-info {
-    background: rgba(11, 112, 224, 0.10);
-    color: #60a5fa;
-    border-color: rgba(11, 112, 224, 0.25);
+    background: rgba(11, 112, 224, 0.08);
+    color: #2563eb;
+    border-color: rgba(11, 112, 224, 0.22);
 }
 
-/* Darker text in light mode */
-@media (prefers-color-scheme: light) {
-    .nebari-alert-success { color: #059669; }
-    .nebari-alert-error   { color: #dc2626; }
-    .nebari-alert-warning { color: #d97706; }
-    .nebari-alert-info    { color: #2563eb; }
+/* Lighter text for dark mode where backgrounds are already dark */
+[data-theme="dark"] .nebari-alert-success,
+[data-theme="dark"] .nebari-alert-error,
+[data-theme="dark"] .nebari-alert-warning,
+[data-theme="dark"] .nebari-alert-info {
+    /* handled per-class below */
+}
+
+[data-theme="dark"] .nebari-alert-success {
+    color: #34d399;
+}
+
+[data-theme="dark"] .nebari-alert-error {
+    color: #f87171;
+}
+
+[data-theme="dark"] .nebari-alert-warning {
+    color: #fbbf24;
+}
+
+[data-theme="dark"] .nebari-alert-info {
+    color: #60a5fa;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .nebari-alert-success {
+        color: #34d399;
+    }
+
+    :root:not([data-theme="light"]) .nebari-alert-error {
+        color: #f87171;
+    }
+
+    :root:not([data-theme="light"]) .nebari-alert-warning {
+        color: #fbbf24;
+    }
+
+    :root:not([data-theme="light"]) .nebari-alert-info {
+        color: #60a5fa;
+    }
 }
 
 /* ========================
@@ -559,6 +663,65 @@ a.nebari-button:hover,
 a.nebari-button-primary:hover,
 a.nebari-button-secondary:hover {
     text-decoration: none !important;
+}
+
+/* Full-width button modifier */
+.nebari-button-full {
+    width: 100%;
+}
+
+/* Form actions row (back-link left, submit right, or stacked) */
+.nebari-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.nebari-form-actions .nebari-button-full {
+    flex: 1;
+}
+
+/* Inline link style */
+.nebari-link {
+    color: var(--nebari-purple);
+    text-decoration: none;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    transition: color var(--transition-fast);
+}
+
+.nebari-link:hover {
+    color: var(--text-accent-hover);
+    text-decoration: underline;
+}
+
+/* Field-level validation error (below input) */
+.nebari-field-error {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--nebari-red);
+}
+
+/* Checkbox label row (e.g. "Log out of other sessions") */
+.nebari-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.nebari-checkbox-label input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--nebari-purple);
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
 /* ========================

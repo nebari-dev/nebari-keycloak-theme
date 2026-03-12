@@ -5,3 +5,6 @@
 
 # === @keycloakify/keycloak-admin-ui v260502.0.0 ===
 /admin/early-color-scheme.js
+
+# === @keycloakify/keycloak-account-ui v260502.0.2 ===
+/account/early-color-scheme.js

@@ -1,0 +1,254 @@
+/*
+ * Nebari brand overrides for PatternFly 5
+ * Applied to both the Account and Admin themes.
+ *
+ * Design system: NIC dashboard (nebari-dashboard.html reference)
+ *   Accent  light: #7c3aed  (violet)
+ *   Accent  dark:  #a78bfa
+ *   BG      light: #f4f4f6   surface: #ffffff   border: #e3e3ea
+ *   BG      dark:  #0d0d14   surface: #17171f   border: #26262f
+ *   Font: DM Sans (300–800) + DM Mono
+ *
+ * Key insight: PatternFly dark mode sets vars inside `.pf-v5-theme-dark`
+ * which has higher specificity than `:root`. We must override inside both.
+ */
+
+/* DM Sans + DM Mono — NIC dashboard font stack */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT MODE (default PatternFly behaviour — no .pf-v5-theme-dark class)
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+    /* ── Font ─────────────────────────────────────────────────────────────── */
+    --pf-v5-global--FontFamily--sans-serif:
+        'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --pf-v5-global--FontFamily--monospace:
+        'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --pf-v5-global--FontFamily--redhatdisplay:
+        'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --pf-v5-global--FontFamily--redhattext:
+        'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --pf-v5-global--FontFamily--overpass:
+        'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* ── Brand violet — overrides PF blue (#06c) ──────────────────────────── */
+    --pf-v5-global--primary-color--100: #7c3aed;
+    --pf-v5-global--primary-color--200: #6d28d9;
+    --pf-v5-global--primary-color--300: #5b21b6;
+
+    /* Active state (nav left-border accent uses active-color--400) */
+    --pf-v5-global--active-color--100: #7c3aed;
+    --pf-v5-global--active-color--400: #7c3aed;
+
+    /* Links */
+    --pf-v5-global--link--Color: #7c3aed;
+    --pf-v5-global--link--Color--hover: #9b3dcc;
+    --pf-v5-global--link--Color--visited: #6d28d9;
+
+    /* Buttons */
+    --pf-v5-c-button--m-primary--BackgroundColor: #7c3aed;
+    --pf-v5-c-button--m-primary--hover--BackgroundColor: #6d28d9;
+    --pf-v5-c-button--m-primary--active--BackgroundColor: #5b21b6;
+    --pf-v5-c-button--m-primary--focus--BackgroundColor: #6d28d9;
+
+    /* Nav sidebar current-page indicator */
+    --pf-v5-c-nav__link--m-current--after--BorderColor: #7c3aed;
+
+    /* Focus outline */
+    --pf-v5-global--primary-color--light-100: rgba(124, 58, 237, 0.14);
+
+    /* Toggle switch / checkbox / radio */
+    --pf-v5-c-check__input--checked--BackgroundColor: #7c3aed;
+    --pf-v5-c-radio__input--checked--BackgroundColor: #7c3aed;
+    --pf-v5-c-switch__input--checked__toggle--BackgroundColor: #7c3aed;
+
+    /* Radio / check label colours */
+    --pf-v5-c-radio__label--Color: #111118;
+    --pf-v5-c-check__label--Color: #111118;
+    --pf-v5-c-radio__description--Color: #6a6a7a;
+    --pf-v5-c-check__description--Color: #6a6a7a;
+
+    /* Secondary / outline buttons — lighter purple, same weight as sidebar fills */
+    --pf-v5-c-button--m-secondary--Color: #7c3aed;
+    --pf-v5-c-button--m-secondary--BorderColor: rgba(124, 58, 237, 0.40);
+    --pf-v5-c-button--m-secondary--hover--Color: #6d28d9;
+    --pf-v5-c-button--m-secondary--hover--BorderColor: rgba(124, 58, 237, 0.70);
+    --pf-v5-c-button--m-secondary--hover--BackgroundColor: rgba(124, 58, 237, 0.06);
+    --pf-v5-c-button--m-secondary--focus--BorderColor: rgba(124, 58, 237, 0.70);
+    --pf-v5-c-button--m-secondary--focus--BackgroundColor: rgba(124, 58, 237, 0.06);
+    --pf-v5-c-button--m-secondary--active--Color: #5b21b6;
+    --pf-v5-c-button--m-secondary--active--BorderColor: rgba(124, 58, 237, 0.85);
+    --pf-v5-c-button--m-secondary--active--BackgroundColor: rgba(124, 58, 237, 0.10);
+
+    /* Link-variant buttons */
+    --pf-v5-c-button--m-link--Color: #7c3aed;
+    --pf-v5-c-button--m-link--hover--Color: #6d28d9;
+
+    /* ── NIC dashboard surface tokens mapped to PF vars ───────────────────── */
+    --pf-v5-c-page--BackgroundColor: #f4f4f6;
+    --pf-v5-c-page__main-section--m-light--BackgroundColor: #ffffff;
+    --pf-v5-c-page__main-section--BackgroundColor: #f4f4f6;
+    --pf-v5-c-masthead--BackgroundColor: #ffffff;
+    --pf-v5-c-page__sidebar--BackgroundColor: #f4f4f6;
+    --pf-v5-c-card--BackgroundColor: #ffffff;
+    --pf-v5-c-card--BorderRadius: 12px;
+    --pf-v5-global--BorderRadius--sm: 8px;
+    --pf-v5-global--BorderRadius--lg: 12px;
+    --pf-v5-global--BorderColor--100: #e3e3ea;
+    --pf-v5-global--BorderColor--200: #efeff3;
+    --pf-v5-global--BoxShadow--sm: 0 1px 4px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+    --pf-v5-global--BoxShadow--xs: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE — PatternFly adds .pf-v5-theme-dark to <html>.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.pf-v5-theme-dark {
+    /* ── Font (keep DM Sans in dark too) ─────────────────────────────────── */
+    --pf-v5-global--FontFamily--sans-serif:
+        'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --pf-v5-global--FontFamily--monospace:
+        'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+
+    /* ── Brand violet dark ────────────────────────────────────────────────── */
+    --pf-v5-global--primary-color--100: #a78bfa;
+    --pf-v5-global--primary-color--200: #7c3aed;
+    --pf-v5-global--primary-color--300: #6d28d9;
+
+    --pf-v5-global--active-color--100: #a78bfa;
+    --pf-v5-global--active-color--400: #a78bfa;
+
+    --pf-v5-global--link--Color: #a78bfa;
+    --pf-v5-global--link--Color--hover: #c4b5fd;
+
+    --pf-v5-c-button--m-primary--BackgroundColor: #7c3aed;
+    --pf-v5-c-button--m-primary--hover--BackgroundColor: #6d28d9;
+    --pf-v5-c-button--m-primary--active--BackgroundColor: #5b21b6;
+    --pf-v5-c-button--m-primary--focus--BackgroundColor: #6d28d9;
+
+    --pf-v5-c-nav__link--m-current--after--BorderColor: #a78bfa;
+
+    --pf-v5-c-check__input--checked--BackgroundColor: #7c3aed;
+    --pf-v5-c-radio__input--checked--BackgroundColor: #7c3aed;
+    --pf-v5-c-switch__input--checked__toggle--BackgroundColor: #7c3aed;
+
+    /* Radio / check label colours */
+    --pf-v5-c-radio__label--Color: #e0e0f0;
+    --pf-v5-c-check__label--Color: #e0e0f0;
+    --pf-v5-c-radio__description--Color: #8888a0;
+    --pf-v5-c-check__description--Color: #8888a0;
+
+    /* ── NIC dashboard dark surface tokens ────────────────────────────────── */
+    --pf-v5-c-page--BackgroundColor: #0d0d14;
+    --pf-v5-c-page__main-section--m-light--BackgroundColor: #17171f;
+    --pf-v5-c-page__main-section--BackgroundColor: #0d0d14;
+    --pf-v5-c-masthead--BackgroundColor: #17171f;
+    --pf-v5-c-page__sidebar--BackgroundColor: #0d0d14;
+    --pf-v5-c-card--BackgroundColor: #17171f;
+    --pf-v5-global--BorderColor--100: #26262f;
+    --pf-v5-global--BorderColor--200: #1e1e28;
+    --pf-v5-global--BoxShadow--sm: 0 1px 4px rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .2);
+    --pf-v5-global--BoxShadow--xs: 0 1px 2px rgba(0, 0, 0, .2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FONT APPLICATION — force DM Sans on all PF components
+   ═══════════════════════════════════════════════════════════════════════════ */
+.pf-v5-c-page,
+.pf-v5-c-masthead,
+.pf-v5-c-nav,
+.pf-v5-c-card,
+.pf-v5-c-form,
+.pf-v5-c-button,
+.pf-v5-c-table,
+.pf-v5-c-tabs,
+.pf-v5-c-modal-box,
+.pf-v5-c-dropdown,
+.pf-v5-c-select,
+.pf-v5-c-toolbar,
+.pf-v5-c-title,
+.pf-v5-c-label,
+.pf-v5-c-badge {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+code,
+pre,
+kbd,
+samp,
+.pf-v5-c-code-block,
+.pf-v5-c-code-editor {
+    font-family: 'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MASTHEAD — NIC nav style: white surface, thin border-bottom separator
+   PF5 sets individual background vars for __main and __content sub-sections;
+   we must override them all or the parts come out black/dark.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.pf-v5-c-masthead {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e3e3ea;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    /* Override PF5 component-level sub-section vars */
+    --pf-v5-c-masthead--BackgroundColor: #ffffff;
+    --pf-v5-c-masthead__main--BackgroundColor: #ffffff;
+    --pf-v5-c-masthead__content--BackgroundColor: #ffffff;
+}
+
+.pf-v5-c-masthead__main,
+.pf-v5-c-masthead__content,
+.pf-v5-c-masthead__toggle {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Toolbar inside masthead — PF5 sets its own dark bg var */
+.pf-v5-c-masthead .pf-v5-c-toolbar,
+.pf-v5-c-masthead .pf-v5-c-toolbar__content {
+    background: transparent !important;
+    --pf-v5-c-toolbar--BackgroundColor: transparent;
+}
+
+.pf-v5-theme-dark .pf-v5-c-masthead {
+    background: #17171f !important;
+    border-bottom-color: #26262f;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+    --pf-v5-c-masthead--BackgroundColor: #17171f;
+    --pf-v5-c-masthead__main--BackgroundColor: #17171f;
+    --pf-v5-c-masthead__content--BackgroundColor: #17171f;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARDS — 12px radius, NIC shadow-sm, 1px border
+   ═══════════════════════════════════════════════════════════════════════════ */
+.pf-v5-c-card {
+    border-radius: 12px;
+    border: 1px solid #e3e3ea;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.pf-v5-theme-dark .pf-v5-c-card {
+    border-color: #26262f;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOGO SIZING
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Account theme — KeycloakMasthead renders <img> with the .brand CSS module class */
+.pf-v5-c-masthead img,
+img.pf-v5-c-brand {
+    height: 32px;
+    width: auto;
+    max-width: none;
+}
+
+/* Admin theme — PageHeader uses className="keycloak__pageheader_brand" */
+img.keycloak__pageheader_brand {
+    height: 32px;
+    width: auto;
+    max-width: none;
+}
