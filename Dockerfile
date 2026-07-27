@@ -6,7 +6,7 @@ ENV KC_METRICS_ENABLED=true
 
 # Copy the custom theme
 WORKDIR /opt/keycloak
-COPY dist_keycloak/keycloak-theme-*.jar /opt/keycloak/providers/
+COPY dist_keycloak/keycloak-theme-for-kc-22-to-25.jar /opt/keycloak/providers/nebari-theme.jar
 
 # Build Keycloak with the custom theme
 RUN /opt/keycloak/bin/kc.sh build

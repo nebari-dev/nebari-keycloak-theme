@@ -1,0 +1,53 @@
+import { Input as InputPrimitive } from '@base-ui/react/input';
+import { TriangleAlert } from 'lucide-react';
+import type { ComponentProps, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
+
+type InputProps = ComponentProps<typeof InputPrimitive> & {
+  /** Interactive or decorative content rendered inside the input's trailing edge. */
+  endAdornment?: ReactNode;
+};
+
+/**
+ * Input is the single-line text-entry primitive, implemented from the Nebari
+ * Figma spec on top of Base UI's `Input`. Dropped inside a `Field`, it wires its
+ * accessible name and `aria-describedby` to `FieldLabel` / `FieldDescription`
+ * automatically — no manual `htmlFor` / `id`. Standalone, pair it with `Label`
+ * via `htmlFor` / `id`.
+ *
+ * States map to the design: `border-input` at rest, `border-border-strong` on
+ * hover, a `ring` focus outline, `bg-muted` + dimmed when disabled, and — when
+ * the field is invalid (driven by `aria-invalid` / Base UI's `data-invalid`) — a
+ * 2px `destructive` outline plus a trailing `triangle-alert` icon. The icon is a
+ * non-color cue so the invalid state stays compliant with WCAG 1.4.1 on its own.
+ */
+function Input({ className, endAdornment, ...props }: InputProps) {
+  return (
+    <div className="relative w-full" data-slot="input-wrapper">
+      <InputPrimitive
+        data-slot="input"
+        className={cn(
+          'peer flex w-full rounded-md border border-input bg-background px-3 py-1.5 text-foreground text-sm outline-none placeholder:text-muted-foreground motion-safe:transition-[color,background-color,border-color,box-shadow] motion-safe:duration-[--duration-fast] motion-safe:ease-[--ease-standard] hover:border-border-strong focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 aria-invalid:border-destructive-foreground aria-invalid:pr-9 aria-invalid:ring-2 aria-invalid:ring-destructive-foreground aria-invalid:focus-visible:ring-destructive-foreground data-[invalid]:border-destructive-foreground data-[invalid]:pr-9 data-[invalid]:ring-2 data-[invalid]:ring-destructive-foreground',
+          endAdornment && 'pr-10',
+          className,
+        )}
+        {...props}
+      />
+      {endAdornment && (
+        <div
+          className="absolute top-1/2 right-1.5 flex -translate-y-1/2 items-center"
+          data-slot="input-end-adornment"
+        >
+          {endAdornment}
+        </div>
+      )}
+      <TriangleAlert
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 right-3 hidden size-[18px] -translate-y-1/2 text-warning-foreground peer-aria-invalid:block peer-data-[invalid]:block"
+      />
+    </div>
+  );
+}
+
+export type { InputProps };
+export { Input };
