@@ -9,10 +9,26 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "./theme.css";
 
-// Keep the initial palette coherent. An explicitly supplied theme remains
-// authoritative, and changing this attribute later updates the UI via CSS.
+const THEME_STORAGE_KEY = "nebari-admin-theme";
+
+function getInitialTheme(): "light" | "dark" {
+    try {
+        const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+
+        if (storedTheme === "light" || storedTheme === "dark") {
+            return storedTheme;
+        }
+    } catch {
+        // Storage can be unavailable in privacy-restricted browser contexts.
+    }
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+// The Account and Admin pages save their preference under the same key.
+// Applying it before React renders prevents the login page flashing light.
 if (document.documentElement.dataset.theme === undefined) {
-    document.documentElement.dataset.theme = "light";
+    document.documentElement.dataset.theme = getInitialTheme();
 }
 
 // window.kcContext is declared (with the full union type) in kc.gen.tsx.

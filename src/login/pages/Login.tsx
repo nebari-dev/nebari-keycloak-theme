@@ -54,7 +54,7 @@ export default function Login(
                             >
                                 {p.providerId === "google" ? (
                                     <img
-                                        src="/google-g-logo.svg"
+                                        src={`${import.meta.env.BASE_URL}google-g-logo.svg`}
                                         alt=""
                                         className="nebari-social-icon"
                                     />
@@ -95,8 +95,8 @@ export default function Login(
                                 autoComplete="username"
                                 aria-invalid={messagesPerField.existsError("username", "password")}
                             />
-                            {messagesPerField.existsError("username", "password") && (
-                                <FieldError aria-live="polite">
+                            {hasLoginError && (
+                                <FieldError match={true} className="nebari-login-error" aria-live="polite">
                                     {messagesPerField.getFirstError("username", "password")}
                                 </FieldError>
                             )}
@@ -107,7 +107,7 @@ export default function Login(
                     <Field>
                         <div className="nebari-label-row">
                             <FieldLabel htmlFor="password">{msg("password")}</FieldLabel>
-                            {auth.showResetCredentials && (
+                            {realm.resetPasswordAllowed && (
                                 <a tabIndex={5} href={url.loginResetCredentialsUrl} className="nebari-forgot-link">
                                     {msg("doForgotPassword")}
                                 </a>
@@ -134,7 +134,7 @@ export default function Login(
                             ) : undefined}
                         />
                         {hasLoginError && (
-                            <FieldError aria-live="polite">
+                            <FieldError match={true} className="nebari-login-error" aria-live="polite">
                                 {messagesPerField.getFirstError("username", "password")}
                             </FieldError>
                         )}

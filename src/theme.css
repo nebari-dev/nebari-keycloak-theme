@@ -1759,6 +1759,7 @@ a.nebari-button.nebari-button-primary:visited {
     --font-sans: "Geist Variable", "Geist", sans-serif;
     --Font-Sans: var(--font-sans);
     --color-foreground-default: var(--foreground, #262628);
+    --color-foreground-destructive: var(--destructive-foreground, #d2161c);
 }
 
 .nebari-header .nebari-title {
@@ -1784,4 +1785,27 @@ a.nebari-button.nebari-button-primary:visited {
     font-weight: 500;
     line-height: 20px;
     letter-spacing: normal;
+}
+
+.nebari-label-row .nebari-forgot-link {
+    margin: 0;
+    padding: 0;
+    color: var(--color-foreground-default, #262628);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0;
+}
+
+[data-slot="field-error"].nebari-login-error {
+    margin-top: 0;
+    color: var(--color-foreground-destructive, #d2161c);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: 0;
 }
