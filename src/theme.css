@@ -1730,7 +1730,7 @@ a.nebari-button.nebari-button-primary:visited {
     --accent: oklch(40% 0.0269 250.57);
     --accent-foreground: oklch(95.04% 0.0042 236.50);
     --destructive: oklch(33.1% 0.1332 27.42);
-    --destructive-foreground: oklch(78.02% 0.1024 27.78);
+    --destructive-foreground: #F29E93;
     --warning: oklch(33.09% 0.0677 92.20);
     --warning-foreground: oklch(87.09% 0.1248 91.93);
     --success: oklch(32.88% 0.0887 149.73);
@@ -1801,11 +1801,34 @@ a.nebari-button.nebari-button-primary:visited {
 
 [data-slot="field-error"].nebari-login-error {
     margin-top: 0;
-    color: var(--color-foreground-destructive, #d2161c);
+    color: var(--color-foreground-destructive, #F29E93);
     font-family: var(--Font-Sans, Geist);
     font-size: 12px;
     font-style: normal;
     font-weight: 400;
     line-height: 16px;
     letter-spacing: 0;
+}
+
+/* Login inputs use a border-only focus treatment. This final override
+   neutralizes older login CSS above, including its focus shadow. */
+[data-slot="input"]:focus {
+    border-width: 2px;
+    border-color: var(--ring);
+    box-shadow: none;
+}
+
+/* Validation uses a 1px destructive border at rest and 2px while focused. */
+[data-slot="input"][aria-invalid="true"],
+[data-slot="input"][data-invalid] {
+    border-width: 1px;
+    border-color: var(--color-foreground-destructive, #d2161c);
+    box-shadow: none;
+}
+
+[data-slot="input"][aria-invalid="true"]:focus,
+[data-slot="input"][data-invalid]:focus {
+    border-width: 2px;
+    border-color: var(--color-foreground-destructive, #d2161c);
+    box-shadow: none;
 }

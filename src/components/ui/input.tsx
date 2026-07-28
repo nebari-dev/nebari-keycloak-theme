@@ -16,10 +16,11 @@ type InputProps = ComponentProps<typeof InputPrimitive> & {
  * via `htmlFor` / `id`.
  *
  * States map to the design: `border-input` at rest, `border-border-strong` on
- * hover, a `ring` focus outline, `bg-muted` + dimmed when disabled, and — when
+ * hover, a border-only focus outline, `bg-muted` + dimmed when disabled, and — when
  * the field is invalid (driven by `aria-invalid` / Base UI's `data-invalid`) — a
- * 2px `destructive` outline plus a trailing `triangle-alert` icon. The icon is a
- * non-color cue so the invalid state stays compliant with WCAG 1.4.1 on its own.
+ * 1px `destructive` border that grows to 2px on focus, plus a trailing
+ * `triangle-alert` icon. The icon is a non-color cue so the invalid state stays
+ * compliant with WCAG 1.4.1 on its own.
  */
 function Input({ className, endAdornment, ...props }: InputProps) {
   return (
@@ -27,7 +28,7 @@ function Input({ className, endAdornment, ...props }: InputProps) {
       <InputPrimitive
         data-slot="input"
         className={cn(
-          'peer flex w-full rounded-md border border-input bg-background px-3 py-1.5 text-foreground text-sm outline-none placeholder:text-muted-foreground motion-safe:transition-[color,background-color,border-color,box-shadow] motion-safe:duration-[--duration-fast] motion-safe:ease-[--ease-standard] hover:border-border-strong focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 aria-invalid:border-destructive-foreground aria-invalid:pr-9 aria-invalid:ring-2 aria-invalid:ring-destructive-foreground aria-invalid:focus-visible:ring-destructive-foreground data-[invalid]:border-destructive-foreground data-[invalid]:pr-9 data-[invalid]:ring-2 data-[invalid]:ring-destructive-foreground',
+          'peer flex w-full rounded-md border border-input bg-background px-3 py-1.5 text-foreground text-sm outline-none placeholder:text-muted-foreground motion-safe:transition-[color,background-color,border-color] motion-safe:duration-[--duration-fast] motion-safe:ease-[--ease-standard] hover:border-border-strong focus-visible:border-2 focus-visible:border-ring focus-visible:ring-0 focus-visible:shadow-none disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 aria-invalid:border-destructive-foreground aria-invalid:pr-9 aria-invalid:focus-visible:border-destructive-foreground aria-invalid:focus-visible:ring-0 aria-invalid:focus-visible:shadow-none data-[invalid]:border-destructive-foreground data-[invalid]:pr-9 data-[invalid]:focus-visible:border-destructive-foreground data-[invalid]:focus-visible:ring-0 data-[invalid]:focus-visible:shadow-none',
           endAdornment && 'pr-10',
           className,
         )}
@@ -43,7 +44,7 @@ function Input({ className, endAdornment, ...props }: InputProps) {
       )}
       <TriangleAlert
         aria-hidden
-        className="pointer-events-none absolute top-1/2 right-3 hidden size-[18px] -translate-y-1/2 text-warning-foreground peer-aria-invalid:block peer-data-[invalid]:block"
+        className="pointer-events-none absolute top-1/2 right-3 hidden size-[18px] -translate-y-1/2 text-destructive-foreground peer-aria-invalid:block peer-data-[invalid]:block"
       />
     </div>
   );

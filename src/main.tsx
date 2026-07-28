@@ -48,7 +48,7 @@ if (document.documentElement.dataset.theme === undefined) {
  */
 const kcContext: KcContext =
     (window.kcContext as KcContext | undefined) ??
-    (getKcContextMock({ pageId: "error.ftl" }) as KcContext);
+    (getKcContextMock({ pageId: "login.ftl" }) as KcContext);
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
