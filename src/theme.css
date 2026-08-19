@@ -92,323 +92,20 @@
     --sidebar-ring: oklch(61.98% 0.2159 311.67);
 }
 
-/* Figma: NIC Landing Page / Login (Light), node 363:859 */
-:root,
-[data-theme="light"] {
-    --bg-primary: #ffffff;
-    --bg-secondary: #ffffff;
-    --bg-elevated: #f8f8f8;
-    --bg-hover: #f1f1f2;
-    --text-primary: #262628;
-    --text-secondary: #262628;
-    --text-muted: #70707a;
-    --border-color: #b7b7bb;
-    --border-subtle: #9d9da6;
-    --accent: #9547c0;
-    --accent-dark: #8435b0;
-    --nebari-purple: #9547c0;
-    --nebari-red: #d2161c;
-}
-
-html,
-body,
-button,
-input,
-select,
-textarea {
-    font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-.nebari-login-wrapper {
-    min-height: 100vh;
-    padding: 24px;
-    background-color: #fff;
-    background-image: url("/login-light-background.svg");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-
-.nebari-login-card {
-    width: min(384px, 100%);
-    padding: 24px;
-    background: #fff;
-    border: 1px solid #b7b7bb;
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.nebari-logo-header {
-    margin: 0 0 24px;
-}
-
-.nebari-logo {
-    width: 123px;
-    height: 32px;
-}
-
-.nebari-header {
-    margin: 0 0 24px;
-    text-align: left;
-}
-
-.nebari-title {
-    margin: 0;
-    color: #262628;
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 24px;
-    letter-spacing: 0;
-}
-
-.nebari-heading-group {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.nebari-subtitle {
-    margin: 0;
-    color: #262628;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 24px;
-}
-
-#kc-form-login,
-#kc-reset-password-form,
-#kc-passwd-update-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.nebari-form-group,
-.nebari-form-group:last-child {
-    margin: 0;
-}
-
-.nebari-label-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 20px;
-}
-
-.nebari-label {
-    margin: 0 0 4px;
-    color: #262628;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-}
-
-.nebari-label-row .nebari-label {
-    margin-bottom: 4px;
-}
-
-.nebari-forgot-link {
-    margin-bottom: 4px;
-    padding: 2px 8px;
-    color: #70707a;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 16px;
-}
-
-.nebari-input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"],
-select,
-textarea {
-    height: 32px;
-    padding: 5px 12px;
-    border: 1px solid #9d9da6;
-    border-radius: 6px;
-    background: #f8f8f8;
-    color: #262628;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20px;
-}
-
-.nebari-input::placeholder,
-input::placeholder {
-    color: #70707a;
-}
-
-.nebari-input[aria-invalid="true"],
-input[aria-invalid="true"] {
-    border-color: #d2161c;
-}
-
-.nebari-field-error,
-.nebari-input-error {
-    display: block;
-    margin-top: 0;
-    color: #d2161c;
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 16px;
-}
-
-#kc-form-login .nebari-form-group:has(#username[aria-invalid="true"]) > .nebari-label {
-    display: none;
-}
-
-.nebari-button,
-button[type="submit"],
-input[type="submit"],
-.btn {
-    min-height: 32px;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-}
-
-.nebari-button-primary,
-button[type="submit"],
-input[type="submit"] {
-    background: #9547c0;
-}
-
-.nebari-form-options {
-    margin: 0;
-}
-
-.nebari-form-actions {
-    margin: 4px 0 0;
-    gap: 12px;
-}
-
-.nebari-checkbox-label {
-    color: #262628;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-}
-
-.nebari-checkbox-label input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: #9547c0;
-}
-
-.nebari-social-section {
-    margin-top: 12px;
-}
-
-.nebari-social-providers {
-    gap: 12px;
-}
-
-.nebari-social-button {
-    min-height: 32px;
-    padding: 5px 10px;
-    border: 1px solid #9d9da6;
-    border-radius: 6px;
-    background: #fff;
-    color: #262628;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-}
-
-.nebari-info-section {
-    margin-top: 16px;
-    padding-top: 0;
-    border-top: 0;
-    font-size: 12px;
-}
-
-.nebari-alert {
-    margin-bottom: 20px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    line-height: 16px;
-}
-
-@media (max-width: 480px) {
-    .nebari-login-wrapper {
-        align-items: center;
-        padding: 16px;
-    }
-
-    .nebari-login-card {
-        padding: 24px;
-    }
-}
-
-/* OS dark preference when no manual override is set */
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --bg-primary: #0d0d14;
-        --bg-secondary: #17171f;
-        --bg-elevated: #1e1e28;
-        --bg-hover: #26262f;
-
-        --text-primary: #f0f0f8;
-        --text-secondary: #c8c8d8;
-        --text-muted: #8888a0;
-        --text-dim: #555568;
-
-        --border-color: #26262f;
-        --border-subtle: #1e1e28;
-
-        --nebari-purple: #a78bfa;
-        --nebari-purple-dark: #7c3aed;
-        --nebari-purple-light: rgba(124, 58, 237, 0.15);
-        --accent: var(--nebari-purple);
-        --accent-dark: var(--nebari-purple-dark);
-        --accent-light: var(--nebari-purple-light);
-    }
-}
-
-/* Manual overrides via data-theme attribute */
 [data-theme="light"] {
     --bg-primary: #f4f4f6;
     --bg-secondary: #ffffff;
     --bg-elevated: #efeff3;
     --bg-hover: #e3e3ea;
-
     --text-primary: #111118;
     --text-secondary: #374151;
     --text-muted: #6a6a7a;
     --text-dim: #b0b0c0;
-
     --border-color: #e3e3ea;
     --border-subtle: #efeff3;
-
     --nebari-purple: #7c3aed;
     --nebari-purple-dark: #6d28d9;
     --nebari-purple-light: #f0ebff;
-    --accent: var(--nebari-purple);
-    --accent-dark: var(--nebari-purple-dark);
-    --accent-light: var(--nebari-purple-light);
-}
-
-[data-theme="dark"] {
-    --bg-primary: #0d0d14;
-    --bg-secondary: #17171f;
-    --bg-elevated: #1e1e28;
-    --bg-hover: #26262f;
-
-    --text-primary: #f0f0f8;
-    --text-secondary: #c8c8d8;
-    --text-muted: #8888a0;
-    --text-dim: #555568;
-
-    --border-color: #26262f;
-    --border-subtle: #1e1e28;
-
-    --nebari-purple: #a78bfa;
-    --nebari-purple-dark: #7c3aed;
-    --nebari-purple-light: rgba(124, 58, 237, 0.15);
     --accent: var(--nebari-purple);
     --accent-dark: var(--nebari-purple-dark);
     --accent-light: var(--nebari-purple-light);
@@ -429,7 +126,7 @@ input[type="submit"] {
 html,
 body {
     min-height: 100vh;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-size: 16px;
@@ -446,14 +143,14 @@ button,
 input,
 select,
 textarea {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-sans);
 }
 
 code,
 pre,
 kbd,
 samp {
-    font-family: 'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--font-mono);
 }
 
 /* ========================
@@ -525,101 +222,7 @@ samp {
     margin-bottom: 1.75rem;
 }
 
-/* Footer */
-.nebari-footer {
-    margin-top: 2rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-}
-
-/* Card controls group — absolute top-right of the card */
-.nebari-card-controls {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Shared style for help + theme toggle buttons */
-.nebari-help-btn,
-.nebari-theme-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-elevated);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: var(--transition-fast);
-    padding: 0;
-    flex-shrink: 0;
-}
-
-.nebari-help-btn:hover,
-.nebari-theme-toggle:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-    border-color: var(--border-subtle);
-}
-
-/* Help tooltip popover */
-.nebari-help-wrap {
-    position: relative;
-}
-
-.nebari-help-tooltip {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 260px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 0.875rem 1rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.nebari-help-tooltip::before {
-    content: "";
-    position: absolute;
-    top: -5px;
-    right: 10px;
-    width: 8px;
-    height: 8px;
-    background: var(--bg-elevated);
-    border-top: 1px solid var(--border-color);
-    border-left: 1px solid var(--border-color);
-    transform: rotate(45deg);
-}
-
-.nebari-help-tooltip-title {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.nebari-help-tooltip p {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin: 0;
-}
-
 .nebari-logo {
-    /* Both SVGs share viewBox 0 0 128 32 (4:1 ratio), so this container
-       renders them at exactly the same size in both light and dark mode */
-    display: block;
     width: 160px;
     height: 40px;
     /* 160 / 4 = 40 */
@@ -652,130 +255,7 @@ samp {
     font-weight: 400;
 }
 
-/* ========================
-   LOCALE SELECTOR
-   ======================== */
 
-.nebari-locale-selector {
-    margin-bottom: 1.25rem;
-}
-
-.nebari-locale-dropdown {
-    width: 100%;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    transition: var(--transition-fast);
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 500;
-}
-
-.nebari-locale-dropdown:hover {
-    border-color: var(--border-subtle);
-}
-
-.nebari-locale-dropdown:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
-}
-
-/* ========================
-   ALERT MESSAGES
-   ======================== */
-
-.nebari-alert {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.25rem;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    border: 1px solid transparent;
-}
-
-.nebari-alert-icon {
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-
-.nebari-alert-content {
-    flex: 1;
-    font-weight: 400;
-}
-
-/* Alert colours — defaults for light mode (now the default theme) */
-.nebari-alert-success {
-    background: rgba(16, 185, 129, 0.10);
-    color: #059669;
-    border-color: rgba(16, 185, 129, 0.25);
-}
-
-.nebari-alert-error {
-    background: rgba(239, 68, 68, 0.08);
-    color: #dc2626;
-    border-color: rgba(239, 68, 68, 0.22);
-}
-
-.nebari-alert-warning {
-    background: rgba(245, 158, 11, 0.08);
-    color: #d97706;
-    border-color: rgba(245, 158, 11, 0.22);
-}
-
-.nebari-alert-info {
-    background: rgba(11, 112, 224, 0.08);
-    color: #2563eb;
-    border-color: rgba(11, 112, 224, 0.22);
-}
-
-/* Lighter text for dark mode where backgrounds are already dark */
-[data-theme="dark"] .nebari-alert-success,
-[data-theme="dark"] .nebari-alert-error,
-[data-theme="dark"] .nebari-alert-warning,
-[data-theme="dark"] .nebari-alert-info {
-    /* handled per-class below */
-}
-
-[data-theme="dark"] .nebari-alert-success {
-    color: #34d399;
-}
-
-[data-theme="dark"] .nebari-alert-error {
-    color: #f87171;
-}
-
-[data-theme="dark"] .nebari-alert-warning {
-    color: #fbbf24;
-}
-
-[data-theme="dark"] .nebari-alert-info {
-    color: #60a5fa;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .nebari-alert-success {
-        color: #34d399;
-    }
-
-    :root:not([data-theme="light"]) .nebari-alert-error {
-        color: #f87171;
-    }
-
-    :root:not([data-theme="light"]) .nebari-alert-warning {
-        color: #fbbf24;
-    }
-
-    :root:not([data-theme="light"]) .nebari-alert-info {
-        color: #60a5fa;
-    }
-}
 
 /* ========================
    FORM CONTAINER
@@ -1076,31 +556,6 @@ a:hover {
     font-size: 0.875rem;
 }
 
-/* ========================
-   DIVIDER
-   ======================== */
-
-.nebari-divider {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    margin: 1.5rem 0 1.25rem;
-}
-
-.nebari-divider::before,
-.nebari-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border-color);
-}
-
-.nebari-divider-text {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-    font-weight: 400;
-}
 
 /* ========================
    SOCIAL PROVIDERS
@@ -1108,14 +563,6 @@ a:hover {
 
 .nebari-social-section {
     margin-top: 1.5rem;
-}
-
-.nebari-social-header {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    margin-bottom: 0.625rem;
-    text-align: center;
 }
 
 .nebari-social-providers {
@@ -1174,36 +621,6 @@ a:hover {
     font-weight: 400;
 }
 
-/* ========================
-   FOOTER
-   ======================== */
-
-.nebari-footer-text {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    margin: 0;
-    font-weight: 400;
-}
-
-.nebari-footer-text a {
-    color: var(--accent);
-    font-weight: 500;
-}
-
-.nebari-footer-text a:hover {
-    color: var(--accent-dark);
-}
-
-/* ========================
-   TEXT UTILITIES
-   ======================== */
-
-.nebari-text-secondary {
-    color: var(--text-secondary);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    font-weight: 400;
-}
 
 /* ========================
    RESPONSIVE
@@ -1336,17 +753,13 @@ body,
 button,
 input,
 select,
-textarea { font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+textarea { font-family: var(--font-sans); }
 
 .nebari-login-wrapper {
     min-height: 100vh;
     padding: 24px;
     align-items: center;
     background-color: #fff;
-    background-image: url("/login-light-background.svg");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
 }
 
 .nebari-login-card {
@@ -1418,7 +831,6 @@ input[type="submit"] { background: #9547c0; }
 .nebari-social-providers { gap: 12px; }
 .nebari-social-button { min-height: 32px; padding: 5px 10px; border: 1px solid #9d9da6; border-radius: 6px; background: #fff; color: #262628; font-size: 14px; font-weight: 500; line-height: 20px; }
 .nebari-info-section { margin-top: 16px; padding-top: 0; border-top: 0; font-size: 12px; }
-.nebari-alert { margin-bottom: 20px; padding: 8px 10px; border-radius: 6px; font-size: 12px; line-height: 16px; }
 
 @media (max-width: 480px) {
     .nebari-login-wrapper { align-items: center; padding: 16px; }
@@ -1433,16 +845,59 @@ input[type="submit"] { background: #9547c0; }
     background-image: none;
 }
 
+/* Backdrop palette — the three glows from the Figma login background, which
+   used to ship as one SVG per theme. A url()-referenced SVG cannot read these
+   custom properties, so the shapes are drawn as gradients here and only the
+   colours change between themes.
+
+   These sit before the [data-theme="dark"] block below: custom properties on
+   :root and on [data-theme] have equal specificity, so source order decides. */
+:root {
+    --login-backdrop: #fff;
+    --login-glow-purple: rgba(210, 132, 255, .48);
+    --login-glow-purple-mid: rgba(232, 194, 255, .30);
+    --login-glow-teal: rgba(170, 244, 235, .48);
+    --login-glow-teal-mid: rgba(209, 248, 243, .30);
+    --login-glow-amber: rgba(250, 216, 144, .42);
+    --login-glow-amber-mid: rgba(252, 237, 204, .28);
+}
+
+/* Dark values are the fills from the old login-dark-background.svg:
+   #1B3C39 teal, #442655 purple, #413313 amber. */
+[data-theme="dark"] {
+    --login-backdrop: #202124;
+    --login-glow-purple: rgba(68, 38, 85, .95);
+    --login-glow-purple-mid: rgba(68, 38, 85, .55);
+    --login-glow-teal: rgba(27, 60, 57, .95);
+    --login-glow-teal-mid: rgba(27, 60, 57, .55);
+    --login-glow-amber: rgba(65, 51, 19, .95);
+    --login-glow-amber-mid: rgba(65, 51, 19, .55);
+}
+
+/* Same values for the system preference, so the backdrop is right even before
+   main.tsx stamps data-theme onto the document. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --login-backdrop: #202124;
+        --login-glow-purple: rgba(68, 38, 85, .95);
+        --login-glow-purple-mid: rgba(68, 38, 85, .55);
+        --login-glow-teal: rgba(27, 60, 57, .95);
+        --login-glow-teal-mid: rgba(27, 60, 57, .55);
+        --login-glow-amber: rgba(65, 51, 19, .95);
+        --login-glow-amber-mid: rgba(65, 51, 19, .55);
+    }
+}
+
 .nebari-login-wrapper::before {
     content: "";
     position: absolute;
     z-index: -1;
     inset: -20vmax;
-    background-color: #fff;
+    background-color: var(--login-backdrop);
     background-image:
-        radial-gradient(ellipse at 28% 48%, rgba(210, 132, 255, .48) 0%, rgba(232, 194, 255, .30) 24%, transparent 52%),
-        radial-gradient(ellipse at 76% 25%, rgba(170, 244, 235, .48) 0%, rgba(209, 248, 243, .30) 25%, transparent 52%),
-        radial-gradient(ellipse at 74% 76%, rgba(250, 216, 144, .42) 0%, rgba(252, 237, 204, .28) 25%, transparent 52%);
+        radial-gradient(ellipse at 28% 48%, var(--login-glow-purple) 0%, var(--login-glow-purple-mid) 24%, transparent 52%),
+        radial-gradient(ellipse at 76% 25%, var(--login-glow-teal) 0%, var(--login-glow-teal-mid) 25%, transparent 52%),
+        radial-gradient(ellipse at 74% 76%, var(--login-glow-amber) 0%, var(--login-glow-amber-mid) 25%, transparent 52%);
     animation: nebari-background-orbit 70s linear infinite;
     transform-origin: center;
 }
@@ -1524,12 +979,6 @@ a.nebari-button.nebari-button-primary:visited {
     background-color: #202124;
 }
 
-[data-theme="dark"] .nebari-login-wrapper::before {
-    inset: -50vmax;
-    background-color: #202124;
-    background-image: url("/login-dark-background.svg");
-}
-
 [data-theme="dark"] .nebari-login-card {
     background: #343437;
     border-color: #56565d;
@@ -1544,8 +993,7 @@ a.nebari-button.nebari-button-primary:visited {
 [data-theme="dark"] .nebari-label,
 [data-theme="dark"] .nebari-label-wrapper .nebari-label,
 [data-theme="dark"] .nebari-checkbox-label,
-[data-theme="dark"] .nebari-checkbox label,
-[data-theme="dark"] .nebari-text-secondary {
+[data-theme="dark"] .nebari-checkbox label {
     color: #f7f7f8;
 }
 
@@ -1609,10 +1057,6 @@ a.nebari-button.nebari-button-primary:visited {
     color: #fff;
 }
 
-[data-theme="dark"] .nebari-alert-info,
-[data-theme="dark"] .nebari-alert-success,
-[data-theme="dark"] .nebari-alert-warning,
-[data-theme="dark"] .nebari-alert-error { background-color: #262629; }
 
 @theme inline {
     --radius: 0.625rem;
@@ -1757,6 +1201,7 @@ a.nebari-button.nebari-button-primary:visited {
 /* Heading/H3 — authoritative login-flow page-title typography. */
 :root {
     --font-sans: "Geist Variable", "Geist", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
     --Font-Sans: var(--font-sans);
     --color-foreground-default: var(--foreground, #262628);
     --color-foreground-destructive: var(--destructive-foreground, #d2161c);

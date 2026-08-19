@@ -1,22 +1,29 @@
-name: Publish Keycloak image
+name: Publish Keycloak theme
 
 on:
   push:
     branches:
-      - nebari-design
+      - main
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+# Never cancel a publish midway — a half-pushed image or release is worse than
+# a queued one.
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Check out source
@@ -28,15 +35,41 @@ jobs:
           node-version: 20
           cache: npm
 
+      # keycloakify shells out to Maven to assemble the theme JARs.
       - name: Set up Java and Maven
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+          cache: maven
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Read theme version
+        id: version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      # The image is republished on every push to main, but a release is cut only
+      # for a version that does not have one yet. Without this, every commit to
+      # main would try to reuse the same tag and fail.
+      - name: Check whether the release already exists
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Release ${{ steps.version.outputs.tag }} already exists, so no new release will be cut. Bump \"version\" in package.json to publish one. The container image is still being updated."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Produces dist_keycloak/keycloak-theme-for-kc-22-to-25.jar and
+      # dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar
       - name: Build Keycloak theme
         run: npm run build-keycloak-theme
 
@@ -56,7 +89,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=nebari-design
+            type=raw,value=latest
+            type=raw,value=${{ steps.version.outputs.version }}
             type=sha,prefix=sha-
 
       - name: Build and publish image
@@ -69,3 +103,74 @@ jobs:
             THEME_JAR=keycloak-theme-for-kc-all-other-versions.jar
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
+
+      # The only release assets are the JARs — that is all a consumer needs. The
+      # screenshots are referenced from this commit rather than attached, so the
+      # release page shows what the theme looks like without adding weight to
+      # it. They are the images the Playwright workflow gates on every pull
+      # request.
+      #
+      # Inline images require the repository to be public: raw.githubusercontent
+      # does not accept browser session cookies, and GitHub proxies external
+      # images server-side without the viewer's credentials. The link below the
+      # table keeps the notes useful while the repository is private.
+      - name: Compose release notes
+        if: steps.release.outputs.exists == 'false'
+        env:
+          RAW: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/tests/screenshots/linux
+          TREE: https://github.com/${{ github.repository }}/tree/${{ github.sha }}/tests/screenshots/linux
+          VERSION: ${{ steps.version.outputs.version }}
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        run: |
+          {
+            echo "## Nebari Keycloak theme $VERSION"
+            echo
+            echo "| Light | Dark |"
+            echo "| --- | --- |"
+            echo "| <img src=\"$RAW/full-page-light.png\" width=\"420\"> | <img src=\"$RAW/full-page-dark.png\" width=\"420\"> |"
+            echo
+            echo "[Browse every login page screenshot for this release]($TREE)"
+            echo
+            echo "<details><summary>All login pages</summary>"
+            echo
+            for shot in tests/screenshots/linux/*.png; do
+              name="$(basename "$shot" .png)"
+              case "$name" in
+                full-page-*) continue ;;
+              esac
+              echo "<img src=\"$RAW/$name.png\" width=\"280\" alt=\"$name\">"
+            done
+            echo
+            echo "</details>"
+            echo
+            echo "### Install the theme"
+            echo
+            echo "Download the JAR matching your server, drop it into Keycloak's"
+            echo "\`providers/\` directory and run \`bin/kc.sh build\`:"
+            echo
+            echo "| Keycloak version | Asset |"
+            echo "| --- | --- |"
+            echo "| 26 and newer | \`keycloak-theme-for-kc-all-other-versions.jar\` |"
+            echo "| 22 to 25 | \`keycloak-theme-for-kc-22-to-25.jar\` |"
+            echo
+            echo "Then select **nebari** as the login theme for your realm."
+            echo
+            echo "### Or use the prebuilt image"
+            echo
+            echo '```bash'
+            echo "docker pull $IMAGE:$VERSION"
+            echo '```'
+          } > release-notes.md
+          cat release-notes.md
+
+      - name: Publish release
+        if: steps.release.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "Nebari Keycloak theme ${{ steps.version.outputs.version }}" \
+            --notes-file release-notes.md \
+            --target "${{ github.sha }}" \
+            dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar \
+            dist_keycloak/keycloak-theme-for-kc-22-to-25.jar

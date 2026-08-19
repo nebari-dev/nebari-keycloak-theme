@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import type { KcContext } from "./kc.gen";
 import { KcPage } from "./kc.gen";
-import { getKcContextMock } from "./login/KcContext";
+import { getKcContextMockForPreview } from "./login/KcContext";
 import "@fontsource-variable/geist";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
@@ -31,24 +31,11 @@ if (document.documentElement.dataset.theme === undefined) {
     document.documentElement.dataset.theme = getInitialTheme();
 }
 
-// window.kcContext is declared (with the full union type) in kc.gen.tsx.
-// In production Keycloak injects it before this script runs.
-// In dev mode (no real context) fall back to the login mock so the dev
-// preview always shows a fully-populated context — prevents HMR crashes.
-
-/**
- * "login.ftl"                  // Sign in
- * "register.ftl"               // Sign up
- * "login-reset-password.ftl"   // Request password reset
- * "login-update-password.ftl"  // Choose a new password
- * "login-verify-email.ftl"     // Verify email
- * "login-update-profile.ftl"   // Update profile
- * "info.ftl"                   // Informational result
- * "error.ftl"                  // General error
- */
+// Keycloak injects window.kcContext in production. The preview query is used
+// only when running the standalone Vite app, including visual tests.
 const kcContext: KcContext =
     (window.kcContext as KcContext | undefined) ??
-    (getKcContextMock({ pageId: "login.ftl" }) as KcContext);
+    getKcContextMockForPreview(new URLSearchParams(window.location.search).get("preview"));
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>

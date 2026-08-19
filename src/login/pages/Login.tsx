@@ -11,6 +11,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+const socialIconSrc: Record<string, string> = {
+    google: "google-g-logo.svg",
+    github: "github-mark.svg"
+};
+
 export default function Login(
     props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>
 ) {
@@ -52,9 +57,9 @@ export default function Login(
                                 className="nebari-social-button"
                                 href={p.loginUrl}
                             >
-                                {p.providerId === "google" ? (
+                                {p.providerId in socialIconSrc ? (
                                     <img
-                                        src={`${import.meta.env.BASE_URL}google-g-logo.svg`}
+                                        src={`${import.meta.env.BASE_URL}${socialIconSrc[p.providerId]}`}
                                         alt=""
                                         className="nebari-social-icon"
                                     />
