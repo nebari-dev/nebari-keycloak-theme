@@ -860,6 +860,7 @@ textarea { font-family: var(--font-sans); }
     position: relative;
     overflow: hidden;
     isolation: isolate;
+    background-color: var(--login-backdrop);
     background-image: none;
 }
 
@@ -906,16 +907,25 @@ textarea { font-family: var(--font-sans); }
     }
 }
 
+/* A rotating layer only hides its own edges inside its inscribed circle, so
+   this is a square of 150vmax: half of that (75vmax) clears the viewport's
+   half-diagonal, which can reach 70.8vmax on a square viewport. The backdrop
+   colour stays on the wrapper — an opaque fill here would spin with the layer
+   — and the glows are sized in vmax so each one fades to fully transparent
+   before the square's edge instead of being clipped mid-fade. */
 .nebari-login-wrapper::before {
     content: "";
     position: absolute;
     z-index: -1;
-    inset: -20vmax;
-    background-color: var(--login-backdrop);
+    top: 50%;
+    left: 50%;
+    width: 150vmax;
+    height: 150vmax;
+    margin: -75vmax 0 0 -75vmax;
     background-image:
-        radial-gradient(ellipse at 28% 48%, var(--login-glow-purple) 0%, var(--login-glow-purple-mid) 24%, transparent 52%),
-        radial-gradient(ellipse at 76% 25%, var(--login-glow-teal) 0%, var(--login-glow-teal-mid) 25%, transparent 52%),
-        radial-gradient(ellipse at 74% 76%, var(--login-glow-amber) 0%, var(--login-glow-amber-mid) 25%, transparent 52%);
+        radial-gradient(44vmax 26vmax at calc(50% - 30vmax) calc(50% - 2vmax), var(--login-glow-purple) 0%, var(--login-glow-purple-mid) 46%, transparent 100%),
+        radial-gradient(40vmax 34vmax at calc(50% + 34vmax) calc(50% - 22vmax), var(--login-glow-teal) 0%, var(--login-glow-teal-mid) 48%, transparent 100%),
+        radial-gradient(42vmax 34vmax at calc(50% + 32vmax) calc(50% + 23vmax), var(--login-glow-amber) 0%, var(--login-glow-amber-mid) 48%, transparent 100%);
     animation: nebari-background-orbit 70s linear infinite;
     transform-origin: center;
 }
