@@ -8,6 +8,7 @@ A custom Keycloak theme for Nebari using [Keycloakify](https://www.keycloakify.d
 - 🎨 Light and dark theme support
 - 📱 Fully responsive design
 - 🔐 Customized login, registration, and error pages
+- 🧭 Nebari-styled Keycloak Admin Console
 - 🌐 Internationalization ready
 
 ## Prerequisites
@@ -35,6 +36,29 @@ Any login page can be previewed standalone with the `preview` query parameter,
 which feeds a mock `kcContext` to the app — for example
 http://localhost:5173/?preview=register. The available names are listed in
 `getKcContextMockForPreview` in [src/login/KcContext.ts](src/login/KcContext.ts).
+
+### Working on the Admin or Account console
+
+**The dev server cannot show these.** Both consoles authenticate against a real
+Keycloak, so there is no mock `kcContext` to preview them with — and the theme is
+delivered as a JAR baked into the image at build time, so restarting the
+container is not enough either. Rebuild the JAR and the image:
+
+```bash
+npm run build-keycloak-theme
+docker compose up -d --build keycloak
+```
+
+Then open http://localhost:8080/admin/master/console/ (admin / admin, from
+`docker-compose.yml`). `start-dev` disables Keycloak's theme cache, so a fresh
+image is all that is needed. `--build` is the part that is easy to forget: without
+it the container starts from the previously baked JAR and nothing appears to
+change.
+
+The theme has to be selected per realm, under **Realm settings → Themes**
+(*Login theme*, *Admin console theme*, *Account theme*). `realm-export.json` sets
+only the login theme, so a realm imported with `--import-realm` will not pick up
+the console themes until they are set there too.
 
 ## Visual Tests
 
@@ -193,12 +217,144 @@ docker push your-registry/keycloak-nebari:latest
 
 4. Set the following:
    - **Login theme**: `nebari`
+   - **Admin console theme**: `nebari`
    - **Account theme**: `nebari` (optional)
    - **Email theme**: `nebari` (optional)
 
 5. Click **Save**
 
 ## Customization
+
+### Design system components
+
+Components come from the [Nebari Design registry](https://nebari-dev.github.io/nebari-design/),
+a shadcn registry registered as `@nebari` in `components.json`:
+
+```bash
+npx shadcn add @nebari/<name>          # list them: curl .../r/registry.json
+```
+
+Everything under `src/components/ui/` and `src/hooks/` is **upstream-managed**.
+`shadcn add` regenerates those files, so a local edit is silently lost on the
+next upgrade — which has already happened once in this repo. Change look or
+behaviour at the call site instead: pass `className`, swap the element with the
+Base UI `render` prop, or add a wrapper of your own under
+`src/components/nebari/`.
+
+### Login pages
+
+Every login page is built from the design-system components — `Field` /
+`FieldLabel` / `FieldError`, `Input`, `Button`, `Checkbox`, `Alert` — so the
+login screens, the consoles and the rest of Nebari share one visual language.
+The password-with-reveal control is
+[`src/components/nebari/PasswordField.tsx`](src/components/nebari/PasswordField.tsx),
+shared by sign-in, register and update-password rather than reimplemented per
+page as it once was.
+
+Vertical rhythm comes from one rule — `.nebari-login-wrapper form` sets the
+column gap — instead of per-group margins, which is what let the pages drift
+apart previously.
+
+Two things still go through CSS classes rather than components:
+
+- **`login-update-profile`** (and `register` when the realm has User Profile
+  enabled) renders its fields through keycloakify's `UserProfileFormFields`,
+  which takes a map of logical class names, not React components. `kcClassesMap`
+  in the page maps those onto the `.nebari-*` classes, so those classes must keep
+  matching the components.
+- The remaining `.nebari-*` classes in `src/theme.css` cover page chrome — the
+  card, header, social buttons, info section.
+
+### Admin and Account consoles
+
+Both consoles are ~520 vendored views from `@keycloakify/keycloak-admin-ui`, and
+every one of them imports PatternFly through a single re-export shim at
+[`src/shared/@patternfly/react-core/index.tsx`](src/shared/@patternfly/react-core/index.tsx).
+Nothing imports `@patternfly/react-core` directly.
+
+That shim is the seam. It re-exports PatternFly wholesale, then shadows the
+components that now render Nebari equivalents — `Button`, `TextInput`,
+`TextArea`, `Switch`, `Checkbox`, `Label` — so one export swap restyles every
+call site without editing (and thereby freezing against upstream) hundreds of
+files. The adapters live in
+[`src/components/patternfly/`](src/components/patternfly/README.md), which also
+records what deliberately stays on PatternFly and why: `Table` (KeycloakDataTable
+drives sorting, selection, expandable rows and the actions kebab through
+PatternFly props), `Radio`, `Select`/`MenuToggle`, `Modal`, toast `Alert`, and
+`variant="control"` buttons.
+
+Whatever stays on PatternFly is restyled to the same tokens by
+[`src/admin/index.css`](src/admin/index.css) and `src/admin/page-nav.css`.
+
+Refs matter in the adapters: 29 views spread `{...register(…)}` from
+react-hook-form onto these controls, and that spread carries a callback ref. The
+Nebari components are plain function components, and React 18 strips `ref` before
+it reaches the DOM node — so each adapter forwards one explicitly. Drop that and
+form fields render blank and save blank.
+
+### CSS cascade layers
+
+The single most load-bearing piece of styling setup, declared at the top of
+`src/theme.css`:
+
+```css
+@layer theme, base, patternfly, components, utilities;
+```
+
+PatternFly ships its stylesheets unlayered, and unlayered CSS outranks every
+cascade layer — so PatternFly's global reset (`* { padding: 0 }`) beat every
+Tailwind utility and stripped design-system components of their padding, font
+size and layout. The `patternflyCssLayer` plugin in `vite.config.ts` wraps each
+PatternFly stylesheet in the `patternfly` layer.
+
+That layer's **position is the whole point**, and it is the only one that works:
+
+- above `base`, so Tailwind's preflight does not strip PatternFly's own padding
+  and borders;
+- below `utilities`, so a Tailwind utility on a design-system component still
+  beats PatternFly's reset.
+
+Two consequences worth knowing before adding CSS:
+
+- **Unlayered rules beat everything, including design-system components.** Bare
+  element selectors (`a`, `input[type="text"]`, `button[type="submit"]`) written
+  for the login pages leaked into the consoles and overrode component styling —
+  white button labels turned dark, stray borders appeared inside fields. Those
+  rules are now scoped with `:where(.nebari-login-wrapper)`, which confines them
+  without adding specificity, so the login pages render identically. Prefer the
+  namespaced `.nebari-*` classes over widening them again.
+- **`display: block` on `svg`** comes from Tailwind's preflight and breaks
+  PatternFly's inline icon layout, which is why icons wrapped onto their own line
+  and inflated control heights. `src/admin/index.css` restores inline icons
+  inside PatternFly.
+
+### Header
+
+Both consoles share one account control,
+[`src/components/nebari/ProfileMenu.tsx`](src/components/nebari/ProfileMenu.tsx) —
+avatar, name and chevron in a single trigger opening one menu, with the
+Light/Dark/System picker inside it as a `menuitemradio` group. The header is
+styled only through app-defined `--header-*` tokens in `src/theme.css`; the
+registry does not ship them.
+
+Theme state comes from `useNebariTheme` (`src/hooks/use-nebari-theme.ts`), which
+mirrors one preference onto both theming systems — Nebari's `.dark` /
+`[data-theme]` and PatternFly's `.pf-v5-theme-dark`. It must be mounted **once
+per document**, so a console calls it in its header and passes `themeMode` down.
+
+### Known gaps
+
+- `src/account/nebari-account.css` is a separate, older restyling of PatternFly
+  using hardcoded hex values rather than tokens. The Account console will not be
+  fully consistent until it is converted.
+- `.nebari-*` classes and the design-system components are two ways of styling
+  the same thing. They are kept in step by hand because `UserProfileFormFields`
+  needs the class-based path; prefer the components for anything new.
+- The registry's components take `ref` as a plain prop (the React 19
+  convention) and this app is on React 18, where a function component cannot
+  receive one. `ProfileMenu` works around it for its menu trigger by rendering a
+  DOM element via `render`; the same applies to `Tooltip`, which is why the
+  PatternFly tooltip is still in use.
 
 ### Colors
 
@@ -274,7 +430,15 @@ nebari-keycloak-theme/
 │   │   ├── Template.tsx     # Main template wrapper
 │   │   ├── KcContext.ts     # Context types
 │   │   └── i18n.ts          # Internationalization
-│   ├── theme.css            # Theme styles
+│   ├── admin/               # Vendored Admin Console + token bridge (index.css)
+│   ├── account/             # Vendored Account Console
+│   ├── shared/              # Vendored shared code + the PatternFly shim
+│   ├── components/
+│   │   ├── ui/              # Nebari registry components (upstream-managed)
+│   │   ├── nebari/          # App-owned compositions (ProfileMenu)
+│   │   └── patternfly/      # PatternFly API → Nebari component adapters
+│   ├── hooks/               # Registry hooks + useNebariTheme
+│   ├── theme.css            # Tokens, cascade layers, login styles
 │   └── main.tsx             # Entry point
 ├── dist_keycloak/           # Built theme (after build)
 ├── package.json

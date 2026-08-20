@@ -73,13 +73,11 @@ function Button({
   disabled,
   children,
   ref,
-  render = <button />,
-  type,
+  render = <button type="button" />,
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
   const isIconSize = size?.startsWith('icon') ?? false;
-  const resolvedType = type ?? (isValidElement(render) && render.type === 'button' ? 'button' : undefined);
 
   // While loading the Spinner takes the place of the leading icon. Icon-only
   // buttons show just the Spinner; otherwise it sits before the remaining
@@ -119,7 +117,6 @@ function Button({
       disabled: isDisabled,
       'aria-busy': loading || undefined,
       'aria-disabled': isDisabled || undefined,
-      type: resolvedType,
       children: content,
       ...props,
     },

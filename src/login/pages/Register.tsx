@@ -1,75 +1,12 @@
 // src/login/pages/Register.tsx
-import { useState } from "react";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
+import type { ReactNode } from "react";
 import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
-
-/** Eye-open icon */
-const EyeIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle cx="12" cy="12" r="3" />
-    </svg>
-);
-
-/** Eye-off icon */
-const EyeOffIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-        <line x1="1" y1="1" x2="23" y2="23" />
-    </svg>
-);
-
-interface PasswordInputProps {
-    id: string;
-    name: string;
-    tabIndex?: number;
-    autoComplete?: string;
-    "aria-invalid"?: boolean;
-}
-
-function PasswordInput({ id, name, tabIndex, autoComplete, "aria-invalid": ariaInvalid }: PasswordInputProps) {
-    const [show, setShow] = useState(false);
-    return (
-        <div style={{ position: "relative" }}>
-            <input
-                type={show ? "text" : "password"}
-                id={id}
-                className="nebari-input"
-                name={name}
-                tabIndex={tabIndex}
-                autoComplete={autoComplete}
-                style={{ paddingRight: "2.75rem" }}
-                aria-invalid={ariaInvalid}
-            />
-            <button
-                type="button"
-                onClick={() => setShow(v => !v)}
-                aria-label={show ? "Hide password" : "Show password"}
-                style={{
-                    position: "absolute",
-                    right: "0.75rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "var(--text-muted)",
-                    display: "flex",
-                    alignItems: "center",
-                    padding: 0,
-                    width: "auto",
-                    transition: "color 0.15s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--text-secondary)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}
-            >
-                {show ? <EyeOffIcon /> : <EyeIcon />}
-            </button>
-        </div>
-    );
-}
+import { PasswordField } from "@/components/nebari/PasswordField";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export default function Register(
     props: PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n>
@@ -79,6 +16,24 @@ export default function Register(
     const { url, messagesPerField, realm, passwordRequired, recaptchaRequired, recaptchaSiteKey } = kcContext;
 
     const { msg, msgStr } = i18n;
+
+    /**
+     * Every field on this page follows the same shape, and repeating it eight
+     * times is how the markup drifted out of step with the rest of the theme in
+     * the first place.
+     */
+    const labelFor = (fieldId: string, label: ReactNode) => (
+        <FieldLabel htmlFor={fieldId}>
+            {label} <span className="nebari-required-asterisk">*</span>
+        </FieldLabel>
+    );
+
+    const errorFor = (fieldId: string, ...alsoConsider: string[]) =>
+        messagesPerField.existsError(fieldId, ...alsoConsider) && (
+            <FieldError aria-live="polite" match={true}>
+                {messagesPerField.getFirstError(fieldId, ...alsoConsider)}
+            </FieldError>
+        );
 
     return (
         <Template
@@ -99,139 +54,99 @@ export default function Register(
             }
         >
             <form id="kc-register-form" action={url.registrationAction} method="post">
-                {/* First Name */}
-                <div className="nebari-form-group">
-                    <label htmlFor="firstName" className="nebari-label">
-                        {msg("firstName")} <span className="nebari-required-asterisk">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        id="firstName"
-                        className="nebari-input"
-                        name="firstName"
-                        autoComplete="given-name"
+                <Field>
+                    {labelFor("firstName", msg("firstName"))}
+                    <Input
                         aria-invalid={messagesPerField.existsError("firstName")}
-                    />
-                    {messagesPerField.existsError("firstName") && (
-                        <span className="nebari-input-error" aria-live="polite">
-                            {messagesPerField.get("firstName")}
-                        </span>
-                    )}
-                </div>
-
-                {/* Last Name */}
-                <div className="nebari-form-group">
-                    <label htmlFor="lastName" className="nebari-label">
-                        {msg("lastName")} <span className="nebari-required-asterisk">*</span>
-                    </label>
-                    <input
+                        autoComplete="given-name"
+                        id="firstName"
+                        name="firstName"
                         type="text"
-                        id="lastName"
-                        className="nebari-input"
-                        name="lastName"
-                        autoComplete="family-name"
+                    />
+                    {errorFor("firstName")}
+                </Field>
+
+                <Field>
+                    {labelFor("lastName", msg("lastName"))}
+                    <Input
                         aria-invalid={messagesPerField.existsError("lastName")}
+                        autoComplete="family-name"
+                        id="lastName"
+                        name="lastName"
+                        type="text"
                     />
-                    {messagesPerField.existsError("lastName") && (
-                        <span className="nebari-input-error" aria-live="polite">
-                            {messagesPerField.get("lastName")}
-                        </span>
-                    )}
-                </div>
+                    {errorFor("lastName")}
+                </Field>
 
-                {/* Email */}
-                <div className="nebari-form-group">
-                    <label htmlFor="email" className="nebari-label">
-                        {msg("email")} <span className="nebari-required-asterisk">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        className="nebari-input"
-                        name="email"
-                        autoComplete="email"
+                <Field>
+                    {labelFor("email", msg("email"))}
+                    <Input
                         aria-invalid={messagesPerField.existsError("email")}
+                        autoComplete="email"
+                        id="email"
+                        name="email"
+                        type="email"
                     />
-                    {messagesPerField.existsError("email") && (
-                        <span className="nebari-input-error" aria-live="polite">
-                            {messagesPerField.get("email")}
-                        </span>
-                    )}
-                </div>
+                    {errorFor("email")}
+                </Field>
 
-                {/* Username (if not using email as username) */}
                 {!realm.registrationEmailAsUsername && (
-                    <div className="nebari-form-group">
-                        <label htmlFor="username" className="nebari-label">
-                            {msg("username")} <span className="nebari-required-asterisk">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="username"
-                            className="nebari-input"
-                            name="username"
-                            autoComplete="username"
+                    <Field>
+                        {labelFor("username", msg("username"))}
+                        <Input
                             aria-invalid={messagesPerField.existsError("username")}
+                            autoComplete="username"
+                            id="username"
+                            name="username"
+                            type="text"
                         />
-                        {messagesPerField.existsError("username") && (
-                            <span className="nebari-input-error" aria-live="polite">
-                                {messagesPerField.get("username")}
-                            </span>
-                        )}
-                    </div>
+                        {errorFor("username")}
+                    </Field>
                 )}
 
-                {/* Password */}
                 {passwordRequired && (
                     <>
-                        <div className="nebari-form-group">
-                            <label htmlFor="password" className="nebari-label">
-                                {msg("password")} <span className="nebari-required-asterisk">*</span>
-                            </label>
-                            <PasswordInput
+                        <Field>
+                            {labelFor("password", msg("password"))}
+                            <PasswordField
+                                aria-invalid={messagesPerField.existsError("password", "password-confirm")}
+                                autoComplete="new-password"
+                                hideLabel={msgStr("hidePassword")}
                                 id="password"
                                 name="password"
-                                autoComplete="new-password"
-                                aria-invalid={messagesPerField.existsError("password", "password-confirm")}
+                                showLabel={msgStr("showPassword")}
                             />
-                            {messagesPerField.existsError("password") && (
-                                <span className="nebari-input-error" aria-live="polite">
-                                    {messagesPerField.get("password")}
-                                </span>
-                            )}
-                        </div>
+                            {errorFor("password")}
+                        </Field>
 
-                        <div className="nebari-form-group">
-                            <label htmlFor="password-confirm" className="nebari-label">
-                                {msg("passwordConfirm")} <span className="nebari-required-asterisk">*</span>
-                            </label>
-                            <PasswordInput
+                        <Field>
+                            {labelFor("password-confirm", msg("passwordConfirm"))}
+                            <PasswordField
+                                aria-invalid={messagesPerField.existsError("password-confirm")}
+                                autoComplete="new-password"
+                                hideLabel={msgStr("hidePassword")}
                                 id="password-confirm"
                                 name="password-confirm"
-                                autoComplete="new-password"
-                                aria-invalid={messagesPerField.existsError("password-confirm")}
+                                showLabel={msgStr("showPassword")}
                             />
-                            {messagesPerField.existsError("password-confirm") && (
-                                <span className="nebari-input-error" aria-live="polite">
-                                    {messagesPerField.get("password-confirm")}
-                                </span>
-                            )}
-                        </div>
+                            {errorFor("password-confirm")}
+                        </Field>
                     </>
                 )}
 
-                {/* reCAPTCHA */}
                 {recaptchaRequired && (
                     <div className="nebari-form-group">
                         <div className="g-recaptcha" data-size="compact" data-sitekey={recaptchaSiteKey} />
                     </div>
                 )}
 
-                {/* Submit */}
-                <div className="nebari-form-group" style={{ marginTop: "1.5rem" }}>
-                    <button type="submit" className="nebari-button nebari-button-primary">
+                <div className="nebari-form-actions">
+                    {/* `type` is baked into the render element: Base UI merges the
+                        render element's props last, so `Button`'s default
+                        `<button type="button" />` would win over a `type` prop. */}
+                    <Button className="w-full" render={<button type="submit" />}>
                         {msgStr("doRegister")}
-                    </button>
+                    </Button>
                 </div>
             </form>
         </Template>

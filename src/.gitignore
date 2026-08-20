@@ -2,11 +2,14 @@
 
 # === Owned files start ===
 # account/KcAccountUi.tsx
+# admin/colorScheme.ts
 # admin/index.css
 # admin/page-nav.css
 # admin/PageHeader.tsx
 # account/root/header.module.css
 # account/root/Header.tsx
+# shared/@patternfly/react-core/index.tsx
+# shared/keycloak-ui-shared/masthead/Masthead.tsx
 # === Owned files end =====
 
 # === @keycloakify/keycloak-admin-ui v260502.0.0 ===
@@ -14,7 +17,6 @@
 /admin/App.tsx
 /admin/banners.module.css
 /admin/Banners.tsx
-/admin/colorScheme.ts
 /admin/environment.ts
 /admin/ForbiddenSection.tsx
 /admin/help-urls.ts
@@ -669,7 +671,6 @@
 /shared/SessionExpirationWarningOverlay.tsx
 /shared/keycloak-ui-shared/index.ts
 /shared/keycloak-ui-shared/main.ts
-/shared/@patternfly/react-core/index.tsx
 /shared/@patternfly/react-icons/index.tsx
 /shared/@patternfly/react-styles/index.tsx
 /shared/@patternfly/react-table/index.tsx
@@ -696,7 +697,6 @@
 /shared/keycloak-ui-shared/icons/IconMapper.tsx
 /shared/keycloak-ui-shared/masthead/DefaultAvatar.tsx
 /shared/keycloak-ui-shared/masthead/KeycloakDropdown.tsx
-/shared/keycloak-ui-shared/masthead/Masthead.tsx
 /shared/keycloak-ui-shared/scroll-form/form-title.module.css
 /shared/keycloak-ui-shared/scroll-form/FormPanel.tsx
 /shared/keycloak-ui-shared/scroll-form/FormTitle.tsx
