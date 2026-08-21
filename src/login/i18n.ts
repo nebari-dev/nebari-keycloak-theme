@@ -22,6 +22,9 @@ const { useI18n, ofTypeI18n } = i18nBuilder
         nebariWelcome: "Your open source data science platform, hosted",
         poweredBy: "Powered by Nebari",
 
+        // Runtime branding is stored as a realm localization override for this key.
+        nebariBrandingConfig: "base64:e30=",
+
         alreadyHaveAnAccount: "Already have an account?"
     }
     })

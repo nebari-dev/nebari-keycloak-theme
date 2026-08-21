@@ -16,6 +16,7 @@
     "bruteForceProtected": true,
     "loginTheme": "nebari",
     "accountTheme": "keycloak.v3",
+    "adminTheme": "nebari",
     "emailTheme": "keycloak",
     "internationalizationEnabled": false,
     "supportedLocales": [

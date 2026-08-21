@@ -241,6 +241,22 @@ behaviour at the call site instead: pass `className`, swap the element with the
 Base UI `render` prop, or add a wrapper of your own under
 `src/components/nebari/`.
 
+Two deviations are unavoidable, and `shadcn add` will revert both — `tsc` fails
+loudly when it does, so they are not silent:
+
+- **`children as ReactNode` casts** in `button.tsx` and `dialog.tsx`. The
+  vendored `src/admin/i18next.d.ts` sets react-i18next's
+  `allowObjectInHTMLChildren: true`, which widens every element's `children` type
+  globally, so registry code that assigns `children` to a `ReactNode` does not
+  compile here. Interface merging cannot narrow it back, and the flag's own TODO
+  says removing it produces too many errors across the ~520 vendored views.
+- **`DropdownMenuTrigger` needs `render={<button />}`** at every call site. The
+  registry's trigger renders the Nebari `Button`, which takes `ref` as a plain
+  prop (React 19); on React 18 that ref never reaches a DOM node, so Base UI's
+  anchor is null and the menu does not position itself. Pass
+  `buttonVariants({ variant })` as `className` to keep the styling, and pass
+  `variant` too so the trigger's own variant classes match.
+
 ### Login pages
 
 Every login page is built from the design-system components — `Field` /
@@ -342,6 +358,109 @@ mirrors one preference onto both theming systems — Nebari's `.dark` /
 `[data-theme]` and PatternFly's `.pf-v5-theme-dark`. It must be mounted **once
 per document**, so a console calls it in its header and passes `themeMode` down.
 
+### Runtime login branding
+
+When the Nebari Admin Console theme is active, administrators can open
+**Theme customization** to edit the login palette, company name, logo,
+background image, card radius, default color scheme, and available login
+methods. Changes are previewed before they are published.
+
+Published settings are stored in the realm's localization messages under the
+`nebariBrandingConfig` key and are applied to subsequent login page loads
+without rebuilding the theme.
+
+Unlike the vendored console views, this page is locally owned, so it is built
+from the design-system components directly — `Card`, `Field`, `Input`, `Select`,
+`Slider`, `Button`, `Alert`, `DropdownMenu`, `Dialog`. Only `PageSection` is
+still PatternFly, because it supplies the page chrome every other console page
+sits in. `branding.css` therefore only lays things out and styles the two things
+that have no component: the native colour swatch and the preview panel.
+
+#### Where a published theme lives, and how to make it survive
+
+Publishing writes the config into the realm's **localization messages**, so it
+lives in Keycloak's database. That has one consequence worth knowing before
+relying on it:
+
+| | |
+|---|---|
+| Container restart | **Survives** — the data is in the Postgres volume |
+| Fresh database / new deployment | **Lost** — falls back to `DEFAULT_BRANDING_CONFIG` |
+| In the theme JAR or the repo | **No** |
+
+`--import-realm` only seeds an empty database, and `realm-export.json` carries no
+`localizationTexts`, so a clean instance always starts unbranded.
+
+**⋮ → Export theme as JSON** is what closes that gap. Save the file into
+[`custom_themes/`](custom_themes/README.md) at the project root and commit it: it
+ships inside the theme JAR, ready to re-import into any realm. The directory is
+read with `import.meta.glob('/custom_themes/*.json')`, so there is no index to
+maintain — see its README for the file format.
+
+A page cannot write to a path of its own choosing, so where the file lands is the
+browser's decision. Chromium exposes `showSaveFilePicker`, which lets the admin
+save straight into `custom_themes/` and remembers that directory for next time;
+Firefox and Safari fall back to an ordinary download that has to be moved.
+
+**⋮ → Import theme…** lists those presets alongside a file picker, and
+previews the selected theme with the same `BrandingPreview` the editor uses
+before anything is applied. Importing replaces the *draft* only; publishing stays
+a separate step, so an import can still be discarded.
+
+Imported JSON is untrusted and always goes through `normalizeBrandingConfig`,
+which is the same validator the published config passes through.
+
+Branding reaches the page as **CSS custom properties**, set inline on the login
+wrapper by `getBrandingCssVariables` — `--card`, `--primary`, `--input`,
+`--ring` and friends, which the design-system components already read.
+
+**The whole layer is gated on `[data-branded]`**, which `Template` sets only when
+`isBrandingCustomized` finds a published config that differs from the theme's
+defaults. An unbranded realm therefore gets neither the inline variables nor the
+`[data-branded]` rules in `src/theme.css`, and renders byte-identically to a
+build without this feature — which is what the screenshot suite verifies. Keep
+that gate: without it, adding branding restyles every login page for every realm,
+whether or not anyone asked for branding.
+
+Add branded styling under `.nebari-login-wrapper[data-branded]`, never to the
+unscoped selectors. The login stylesheet's own element selectors
+(`input[type="text"]`, `button[type="submit"]`) are unlayered, so they outrank a
+component's own state rules — the `[data-branded]` block re-states the few
+declarations branding needs to win, such as taking the focus border from `--ring`
+instead of `--accent`.
+
+Three constraints on the palette are easy to break:
+
+- **The defaults must equal the design system's tokens.** They are the baseline
+  the `[data-branded]` gate compares against, and the starting point when an
+  admin edits a single colour — so an approximation would shift every untouched
+  colour the moment a realm brands anything. `DEFAULT_BRANDING_CONFIG` holds the
+  tokens rasterised to sRGB hex.
+- **Values must stay `#rrggbb`.** The wrapper's background-image gradient
+  concatenates an alpha suffix onto `pageBackground`, which only parses on
+  6-digit hex — not `oklch()`.
+- **Defaults describe an unbranded realm**, so they have to reproduce existing
+  behaviour: `colorScheme: "system"` (the stylesheet's own
+  `prefers-color-scheme` rules assume it, and the inline variables would
+  otherwise pin the page to one mode) and `loginMode: "password-and-providers"`
+  (anything else hides the password form on realms that have social providers).
+
+`--primary-foreground` is derived from the chosen primary by WCAG contrast
+rather than stored, so an admin picking a light brand colour still gets a
+readable button label.
+
+`--accent` is **overloaded**, and it will bite anyone touching hover states: the
+older login CSS treats it as the brand purple and defines it on `[data-theme]`,
+which `main.tsx` always stamps, so it outranks the `:root` token that the design
+system means by it (a muted hover surface). Every design-system hover state in
+both consoles therefore renders brand purple — plain and control button hovers,
+the current vertical tab, selected table rows, selected menu items, and this
+page's own `⋮` trigger while its menu is open. Fixing it means moving the legacy
+consumers onto `--primary` and dropping `--accent` from the `[data-theme]`
+blocks, which changes login-page pixels — so it belongs with the login/admin
+theme work, not here. Inside `[data-branded]`, use `--ring` for focus and
+`--primary` for brand colour and the ambiguity does not arise.
+
 ### Known gaps
 
 - `src/account/nebari-account.css` is a separate, older restyling of PatternFly
@@ -350,6 +469,9 @@ per document**, so a console calls it in its header and passes `themeMode` down.
 - `.nebari-*` classes and the design-system components are two ways of styling
   the same thing. They are kept in step by hand because `UserProfileFormFields`
   needs the class-based path; prefer the components for anything new.
+- Uploaded branding images are compressed and stored inline in the realm's
+  localization messages, which is why the editor labels image storage
+  experimental. Move them to object storage before relying on it in production.
 - The registry's components take `ref` as a plain prop (the React 19
   convention) and this app is on React 18, where a function component cannot
   receive one. `ProfileMenu` works around it for its menu trigger by rendering a

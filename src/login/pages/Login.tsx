@@ -10,6 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordField } from "@/components/nebari/PasswordField";
+import {
+    getThemeDefinition,
+    parseThemeBrandingConfig
+} from "../../themes/themeCatalog";
 
 const socialIconSrc: Record<string, string> = {
     google: "google-g-logo.svg",
@@ -29,6 +33,11 @@ export default function Login(
 
     const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
     const hasLoginError = messagesPerField.existsError("username", "password");
+    const themeDefinition = getThemeDefinition(kcContext.themeName);
+    const branding = parseThemeBrandingConfig(
+        themeDefinition,
+        msgStr(themeDefinition.brandingMessageKey)
+    );
 
     const onSubmit: FormEventHandler<HTMLFormElement> = () => {
         setIsLoginButtonDisabled(true);
@@ -36,7 +45,10 @@ export default function Login(
     };
 
     const hasSocialProviders =
-        realm.password && social?.providers !== undefined && social.providers.length !== 0;
+        social?.providers !== undefined && social.providers.length !== 0;
+    const showPasswordForm =
+        realm.password &&
+        (branding.loginMode === "password-and-providers" || !hasSocialProviders);
 
     return (
         <Template
@@ -75,7 +87,7 @@ export default function Login(
                 )
             }
         >
-            {realm.password && (
+            {showPasswordForm && (
                 <form
                     id="kc-form-login"
                     onSubmit={onSubmit}

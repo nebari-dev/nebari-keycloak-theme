@@ -1,0 +1,36 @@
+{
+    "nebariThemeExport": 1,
+    "name": "Nebari default",
+    "description": "The Nebari design system palette. Import this to return a realm to the unbranded look.",
+    "exportedAt": "2026-08-20",
+    "themeName": "nebari",
+    "config": {
+        "version": 1,
+        "companyName": "Nebari",
+        "logo": "",
+        "backgroundImage": "",
+        "cardRadius": 12,
+        "colorScheme": "system",
+        "loginMode": "password-and-providers",
+        "light": {
+            "primary": "#9547c0",
+            "primaryHover": "#77399a",
+            "pageBackground": "#f8f8f8",
+            "cardBackground": "#ffffff",
+            "inputBackground": "#eeeeef",
+            "text": "#262628",
+            "mutedText": "#70707a",
+            "border": "#b7b7bb"
+        },
+        "dark": {
+            "primary": "#b053e2",
+            "primaryHover": "#c575f4",
+            "pageBackground": "#262628",
+            "cardBackground": "#353538",
+            "inputBackground": "#353538",
+            "text": "#f8f8f8",
+            "mutedText": "#9d9da6",
+            "border": "#5a5a61"
+        }
+    }
+}

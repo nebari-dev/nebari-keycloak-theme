@@ -1352,3 +1352,96 @@ a.nebari-button.nebari-button-primary:visited {
     --sidebar-border: oklch(47.01% 0.0112 285.96);
     --sidebar-ring: oklch(69.98% 0.1926 311.48);
 }
+/* ==========================================================================
+   Runtime login branding
+
+   Everything here is gated on [data-branded], which Template only sets when the
+   realm has published a config that differs from the theme's defaults. That gate
+   is the point: an unbranded realm gets neither these rules nor the inline
+   custom properties, so it renders exactly as it did before branding existed and
+   the feature cannot silently restyle every login page.
+
+   Branding reaches the page through the design system's tokens, set inline on
+   the wrapper by `getBrandingCssVariables`. Rules below only cover chrome that
+   is class-driven rather than a component.
+   ========================================================================== */
+
+.nebari-login-wrapper[data-branded] {
+    background-color: var(--background);
+    color: var(--foreground);
+}
+
+.nebari-login-wrapper[data-branded]::before {
+    background-color: var(--background);
+}
+
+.nebari-login-wrapper[data-branded][data-has-custom-background] {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* The page-wide glows would sit on top of an admin's background image. */
+.nebari-login-wrapper[data-branded][data-has-custom-background]::before {
+    display: none;
+}
+
+.nebari-login-wrapper[data-branded] .nebari-login-card {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--card-foreground);
+}
+
+.nebari-login-wrapper[data-branded] :is(.nebari-title, .nebari-subtitle, .nebari-label) {
+    color: var(--foreground);
+}
+
+.nebari-login-wrapper[data-branded]
+    :is(.nebari-forgot-link, .nebari-link, .nebari-info-section, .nebari-required-notice) {
+    color: var(--muted-foreground);
+}
+
+/* The class-driven controls, which `UserProfileFormFields` and the login
+   stylesheet style by class rather than through a component. */
+.nebari-login-wrapper[data-branded] :is(.nebari-input, input, select, textarea) {
+    background-color: var(--muted);
+    border-color: var(--input);
+    color: var(--foreground);
+}
+
+.nebari-login-wrapper[data-branded] :is(.nebari-input, input)::placeholder {
+    color: var(--muted-foreground);
+}
+
+/* The login stylesheet draws the focus border from `--accent`, which the design
+   system uses for muted hover surfaces — so branding sets it to a surface colour
+   and the focus border would vanish. `--ring` is the token that means "focus"
+   in both vocabularies. */
+.nebari-login-wrapper[data-branded] :is(.nebari-input, input, select, textarea):focus {
+    border-color: var(--ring);
+}
+
+.nebari-login-wrapper[data-branded]
+    :is(.nebari-button-primary, button[type="submit"], input[type="submit"]) {
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.nebari-login-wrapper[data-branded]
+    :is(.nebari-button-primary, button[type="submit"], input[type="submit"]):hover {
+    background: var(--primary-hover);
+    color: var(--primary-foreground);
+}
+
+.nebari-login-wrapper[data-branded]
+    :is(.nebari-button-secondary, .nebari-social-button) {
+    background: var(--card);
+    border-color: var(--input);
+    color: var(--foreground);
+}
+
+.nebari-login-wrapper[data-branded]
+    :is(.nebari-button-secondary, .nebari-social-button):hover {
+    background: var(--muted);
+    color: var(--foreground);
+}

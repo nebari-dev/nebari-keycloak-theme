@@ -11,6 +11,11 @@
  * locally-owned controls use the Nebari React components directly.
  */
 
+/* Repeat the layer order. A `@layer` block orders itself at first use, so
+   without this statement the `patternfly` layer below would sort after
+   `utilities` in any bundle that does not already carry theme.css's ordering. */
+@layer theme, base, patternfly, components, utilities;
+
 :root,
 .pf-v5-theme-dark {
   --pf-v5-global--FontFamily--sans-serif: var(--font-sans);
@@ -258,10 +263,20 @@ a:not([data-slot]):hover {
  * Icons inside PatternFly therefore go back to being inline boxes. This is safe
  * for the design system: its components are flex containers, which blockify
  * their children whatever `display` says. The spinner is excluded — it is a
- * block-level svg by design. */
-:where([class*="pf-v5-c-"]) svg:not(.pf-v5-c-spinner) {
-  display: inline-block;
-  vertical-align: middle;
+ * block-level svg by design.
+ *
+ * This lives in the `patternfly` layer rather than unlayered, and the position
+ * is load-bearing: above `base` so it still beats preflight, but below
+ * `utilities` so a Tailwind display utility on an icon keeps working. Unlayered,
+ * it outranked `.hidden` and force-showed every design-system component's
+ * conditional icon — the invalid-state `triangle-alert` inside `Input` appeared
+ * on every admin text field, which made valid forms look like they had failed
+ * validation. */
+@layer patternfly {
+  :where([class*="pf-v5-c-"]) svg:not(.pf-v5-c-spinner) {
+    display: inline-block;
+    vertical-align: middle;
+  }
 }
 
 /* --------------------------------------------------------------------------

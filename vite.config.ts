@@ -59,6 +59,7 @@ export default defineConfig({
             accountThemeImplementation: "Single-Page",
             themeName: "nebari",
             themeVersion: "1.0.0",
+            kcContextExclusionsFtl: "src/login/kcContextExclusions.ftl",
             extraThemeProperties: [
                 "parentTheme=keycloak.v2"
             ]
