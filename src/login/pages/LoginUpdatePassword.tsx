@@ -62,7 +62,12 @@ export default function LoginUpdatePassword(props: PageProps<Extract<KcContext, 
             doUseDefaultCss={false}
             classes={undefined}
             displayMessage={!messagesPerField.existsError("password", "password-confirm")}
-            headerNode={msg("updatePasswordTitle")}
+            headerNode={
+                <div className="nebari-heading-group">
+                    <h1 className="nebari-title">{msg("updatePasswordTitle")}</h1>
+                    <p className="nebari-subtitle">Change your password to activate your account.</p>
+                </div>
+            }
         >
             <form id="kc-passwd-update-form" action={url.loginAction} method="post">
                 {/* Hidden username for password managers */}
@@ -97,7 +102,7 @@ export default function LoginUpdatePassword(props: PageProps<Extract<KcContext, 
                     </label>
                 </div>
 
-                <div className="nebari-form-actions" style={{ marginTop: "1.25rem" }}>
+                <div className="nebari-form-actions">
                     {isAppInitiatedAction && (
                         <button type="submit" name="cancel-aia" value="true" className="nebari-button nebari-button-secondary">
                             {msgStr("doCancel")}

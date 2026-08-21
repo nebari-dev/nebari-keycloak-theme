@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -36,6 +35,8 @@ lerna-debug.log*
 # Testing
 coverage/
 .nyc_output/
+playwright-report/
+test-results/
 
 # Temporary
 tmp/

@@ -9,7 +9,7 @@ import type { I18n } from "../i18n";
 const kcClassesMap = {
     kcFormGroupClass: "nebari-form-group",
     kcLabelClass: "nebari-label",
-    kcLabelWrapperClass: "",
+    kcLabelWrapperClass: "nebari-label-wrapper",
     kcInputClass: "nebari-input",
     kcInputWrapperClass: "",
     kcInputErrorMessageClass: "nebari-field-error",

@@ -7,6 +7,7 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
     const { kcContext, i18n, Template } = props;
     const { url, realm, auth, messagesPerField } = kcContext;
     const { msg, msgStr } = i18n;
+    const backToLoginLabel = msgStr("backToLogin").replace(/^(?:«|&laquo;)\s*/i, "");
 
     const labelKey = !realm.loginWithEmailAllowed
         ? "username"
@@ -54,7 +55,7 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
 
                 <div className="nebari-form-actions">
                     <a href={url.loginUrl} className="nebari-link">
-                        ← {msgStr("backToLogin")}
+                        {backToLoginLabel}
                     </a>
                     <button type="submit" className="nebari-button nebari-button-primary nebari-button-full">
                         {msgStr("doSubmit")}

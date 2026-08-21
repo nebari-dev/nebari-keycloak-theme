@@ -31,6 +31,39 @@ npm run dev
 
 Open http://localhost:5173 to see the theme in your browser.
 
+Any login page can be previewed standalone with the `preview` query parameter,
+which feeds a mock `kcContext` to the app — for example
+http://localhost:5173/?preview=register. The available names are listed in
+`getKcContextMockForPreview` in [src/login/KcContext.ts](src/login/KcContext.ts).
+
+## Visual Tests
+
+The login pages are captured as screenshots and compared on every pull request.
+
+```bash
+# Compare the theme against the committed baselines
+npm run test:screenshots
+
+# Accept the current rendering as the new baselines
+npm run test:screenshots:update
+```
+
+Baselines live in `tests/screenshots/<platform>/` because each OS rasterises
+fonts slightly differently. CI runs on Linux, so **regenerate baselines on Linux**
+— snapshots updated on macOS or Windows are written to a different directory and
+will not satisfy the check. If you are not on Linux, run the update inside the
+matching Playwright container:
+
+```bash
+docker run --rm -v "$PWD":/work -w /work --ipc=host \
+  mcr.microsoft.com/playwright:v1.62.1-noble \
+  npm run test:screenshots:update
+```
+
+Every CI run also uploads a `theme-screenshots` artifact with the screenshots
+that branch actually produced, so reviewers can see the theme without checking
+it out.
+
 ## Building the Theme
 
 ```bash
@@ -38,7 +71,36 @@ Open http://localhost:5173 to see the theme in your browser.
 npm run build-keycloak-theme
 ```
 
-This will create a `.jar` file in the `dist_keycloak/` directory.
+This produces two JARs in `dist_keycloak/`:
+
+| File | Target |
+| --- | --- |
+| `keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
+| `keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
+
+## Releasing
+
+Pushing to `main` runs
+[publish-keycloak-image.yml](.github/workflows/publish-keycloak-image.yml), which
+builds both JARs and republishes the container image to
+`ghcr.io/<owner>/<repo>` tagged `latest`, `sha-<commit>` and the `version` from
+`package.json`.
+
+It also cuts a GitHub release for `v<version>`. The only assets are the two
+JARs — that is all a consumer needs to install the theme. The screenshots are
+embedded in the release notes as links to this repository rather than attached,
+so the release page shows what the theme looks like without carrying the weight.
+A release is only created when `v<version>` does not already exist, so **bump
+`version` in `package.json` to publish a new one**; otherwise the run just
+refreshes the image and logs a notice.
+
+The embedded screenshots only render once the repository is public —
+`raw.githubusercontent.com` does not accept browser session cookies, and GitHub
+fetches external images server-side without the viewer's credentials. Until then
+the notes fall back to a link to the screenshot directory at the release commit.
+
+Note that GitHub always attaches its own auto-generated `Source code` archives to
+every release; those cannot be turned off.
 
 ## Deployment
 

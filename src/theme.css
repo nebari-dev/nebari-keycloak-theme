@@ -1,7 +1,8 @@
-/* NIC/Nebari Keycloak Theme — Matches NIC Landing Page Design System */
+@import "tailwindcss";
 
-/* DM Sans + DM Mono — NIC dashboard font stack */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+/* NIC/Nebari Keycloak Theme — Matches NIC Landing Page Design System */
 
 /* ========================
    DESIGN TOKENS
@@ -44,79 +45,67 @@
     --radius-sm: 8px;
 
     /* Active accent */
-    --accent: var(--nebari-purple);
+    --accent: oklch(95.04% 0.0042 236.50);
     --accent-dark: var(--nebari-purple-dark);
     --accent-light: var(--nebari-purple-light);
 
     /* Transition */
     --transition-fast: all 0.15s ease;
+    --background: oklch(97.91% 0 0);
+    --foreground: oklch(26.94% 0.0037 286.15);
+    --scrim: rgba(0, 0, 0, 0.5);
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(26.94% 0.0037 286.15);
+    --popover: oklch(100% 0 0);
+    --popover-foreground: oklch(26.94% 0.0037 286.15);
+    --primary: oklch(55.06% 0.1886 311.45);
+    --primary-foreground: oklch(100% 0 0);
+    --primary-hover: oklch(47.01% 0.1577 311.26);
+    --secondary: oklch(95.04% 0.0042 236.50);
+    --secondary-foreground: oklch(32.95% 0.0209 254.12);
+    --muted: oklch(94.94% 0.0013 286.37);
+    --muted-foreground: oklch(54.86% 0.0154 285.88);
+    --muted-foreground-strong: oklch(47.01% 0.0112 285.96);
+    --accent-foreground: oklch(32.95% 0.0209 254.12);
+    --destructive: oklch(95.06% 0.0247 29.93);
+    --destructive-foreground: oklch(54.97% 0.2151 27.33);
+    --warning: oklch(95.02% 0.0692 92.11);
+    --warning-foreground: oklch(46.91% 0.0960 91.90);
+    --success: oklch(94.94% 0.0433 149.41);
+    --success-foreground: oklch(47.01% 0.1313 149.41);
+    --border: oklch(78.06% 0.0056 286.27);
+    --input: oklch(69.88% 0.0130 286.06);
+    --border-strong: oklch(61.96% 0.0134 286.00);
+    --ring: oklch(61.98% 0.2159 311.67);
+    --chart-1: oklch(61.98% 0.2159 311.67);
+    --chart-2: oklch(61.96% 0.0932 187.62);
+    --chart-3: oklch(70.05% 0.1417 86.43);
+    --chart-4: oklch(62.1% 0.1880 264.30);
+    --chart-5: oklch(61.95% 0.1718 149.70);
+    --sidebar: oklch(97.91% 0 0);
+    --sidebar-foreground: oklch(26.94% 0.0037 286.15);
+    --sidebar-primary: oklch(55.06% 0.1886 311.45);
+    --sidebar-primary-foreground: oklch(100% 0 0);
+    --sidebar-accent: oklch(95.04% 0.0042 236.50);
+    --sidebar-accent-foreground: oklch(32.95% 0.0209 254.12);
+    --sidebar-border: oklch(78.06% 0.0056 286.27);
+    --sidebar-ring: oklch(61.98% 0.2159 311.67);
 }
 
-/* OS dark preference when no manual override is set */
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --bg-primary: #0d0d14;
-        --bg-secondary: #17171f;
-        --bg-elevated: #1e1e28;
-        --bg-hover: #26262f;
-
-        --text-primary: #f0f0f8;
-        --text-secondary: #c8c8d8;
-        --text-muted: #8888a0;
-        --text-dim: #555568;
-
-        --border-color: #26262f;
-        --border-subtle: #1e1e28;
-
-        --nebari-purple: #a78bfa;
-        --nebari-purple-dark: #7c3aed;
-        --nebari-purple-light: rgba(124, 58, 237, 0.15);
-        --accent: var(--nebari-purple);
-        --accent-dark: var(--nebari-purple-dark);
-        --accent-light: var(--nebari-purple-light);
-    }
-}
-
-/* Manual overrides via data-theme attribute */
 [data-theme="light"] {
     --bg-primary: #f4f4f6;
     --bg-secondary: #ffffff;
     --bg-elevated: #efeff3;
     --bg-hover: #e3e3ea;
-
     --text-primary: #111118;
     --text-secondary: #374151;
     --text-muted: #6a6a7a;
     --text-dim: #b0b0c0;
-
     --border-color: #e3e3ea;
     --border-subtle: #efeff3;
-
     --nebari-purple: #7c3aed;
     --nebari-purple-dark: #6d28d9;
     --nebari-purple-light: #f0ebff;
-    --accent: var(--nebari-purple);
-    --accent-dark: var(--nebari-purple-dark);
-    --accent-light: var(--nebari-purple-light);
-}
-
-[data-theme="dark"] {
-    --bg-primary: #0d0d14;
-    --bg-secondary: #17171f;
-    --bg-elevated: #1e1e28;
-    --bg-hover: #26262f;
-
-    --text-primary: #f0f0f8;
-    --text-secondary: #c8c8d8;
-    --text-muted: #8888a0;
-    --text-dim: #555568;
-
-    --border-color: #26262f;
-    --border-subtle: #1e1e28;
-
-    --nebari-purple: #a78bfa;
-    --nebari-purple-dark: #7c3aed;
-    --nebari-purple-light: rgba(124, 58, 237, 0.15);
     --accent: var(--nebari-purple);
     --accent-dark: var(--nebari-purple-dark);
     --accent-light: var(--nebari-purple-light);
@@ -137,7 +126,7 @@
 html,
 body {
     min-height: 100vh;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-size: 16px;
@@ -154,14 +143,14 @@ button,
 input,
 select,
 textarea {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-sans);
 }
 
 code,
 pre,
 kbd,
 samp {
-    font-family: 'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--font-mono);
 }
 
 /* ========================
@@ -181,7 +170,12 @@ samp {
         radial-gradient(ellipse at 80% 15%, rgba(11, 112, 224, 0.07) 0%, transparent 55%);
 }
 
-[data-theme="dark"] .nebari-login-wrapper,
+[data-theme="dark"] .nebari-login-wrapper {
+    background-image:
+        radial-gradient(ellipse at 25% 45%, rgba(155, 61, 204, 0.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 20%, rgba(11, 112, 224, 0.04) 0%, transparent 55%);
+}
+
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .nebari-login-wrapper {
         background-image:
@@ -228,101 +222,7 @@ samp {
     margin-bottom: 1.75rem;
 }
 
-/* Footer */
-.nebari-footer {
-    margin-top: 2rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-}
-
-/* Card controls group — absolute top-right of the card */
-.nebari-card-controls {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Shared style for help + theme toggle buttons */
-.nebari-help-btn,
-.nebari-theme-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-elevated);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: var(--transition-fast);
-    padding: 0;
-    flex-shrink: 0;
-}
-
-.nebari-help-btn:hover,
-.nebari-theme-toggle:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-    border-color: var(--border-subtle);
-}
-
-/* Help tooltip popover */
-.nebari-help-wrap {
-    position: relative;
-}
-
-.nebari-help-tooltip {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 260px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 0.875rem 1rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.nebari-help-tooltip::before {
-    content: "";
-    position: absolute;
-    top: -5px;
-    right: 10px;
-    width: 8px;
-    height: 8px;
-    background: var(--bg-elevated);
-    border-top: 1px solid var(--border-color);
-    border-left: 1px solid var(--border-color);
-    transform: rotate(45deg);
-}
-
-.nebari-help-tooltip-title {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.nebari-help-tooltip p {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin: 0;
-}
-
 .nebari-logo {
-    /* Both SVGs share viewBox 0 0 128 32 (4:1 ratio), so this container
-       renders them at exactly the same size in both light and dark mode */
-    display: block;
     width: 160px;
     height: 40px;
     /* 160 / 4 = 40 */
@@ -355,130 +255,7 @@ samp {
     font-weight: 400;
 }
 
-/* ========================
-   LOCALE SELECTOR
-   ======================== */
 
-.nebari-locale-selector {
-    margin-bottom: 1.25rem;
-}
-
-.nebari-locale-dropdown {
-    width: 100%;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    transition: var(--transition-fast);
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 500;
-}
-
-.nebari-locale-dropdown:hover {
-    border-color: var(--border-subtle);
-}
-
-.nebari-locale-dropdown:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
-}
-
-/* ========================
-   ALERT MESSAGES
-   ======================== */
-
-.nebari-alert {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.25rem;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    border: 1px solid transparent;
-}
-
-.nebari-alert-icon {
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-
-.nebari-alert-content {
-    flex: 1;
-    font-weight: 400;
-}
-
-/* Alert colours — defaults for light mode (now the default theme) */
-.nebari-alert-success {
-    background: rgba(16, 185, 129, 0.10);
-    color: #059669;
-    border-color: rgba(16, 185, 129, 0.25);
-}
-
-.nebari-alert-error {
-    background: rgba(239, 68, 68, 0.08);
-    color: #dc2626;
-    border-color: rgba(239, 68, 68, 0.22);
-}
-
-.nebari-alert-warning {
-    background: rgba(245, 158, 11, 0.08);
-    color: #d97706;
-    border-color: rgba(245, 158, 11, 0.22);
-}
-
-.nebari-alert-info {
-    background: rgba(11, 112, 224, 0.08);
-    color: #2563eb;
-    border-color: rgba(11, 112, 224, 0.22);
-}
-
-/* Lighter text for dark mode where backgrounds are already dark */
-[data-theme="dark"] .nebari-alert-success,
-[data-theme="dark"] .nebari-alert-error,
-[data-theme="dark"] .nebari-alert-warning,
-[data-theme="dark"] .nebari-alert-info {
-    /* handled per-class below */
-}
-
-[data-theme="dark"] .nebari-alert-success {
-    color: #34d399;
-}
-
-[data-theme="dark"] .nebari-alert-error {
-    color: #f87171;
-}
-
-[data-theme="dark"] .nebari-alert-warning {
-    color: #fbbf24;
-}
-
-[data-theme="dark"] .nebari-alert-info {
-    color: #60a5fa;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .nebari-alert-success {
-        color: #34d399;
-    }
-
-    :root:not([data-theme="light"]) .nebari-alert-error {
-        color: #f87171;
-    }
-
-    :root:not([data-theme="light"]) .nebari-alert-warning {
-        color: #fbbf24;
-    }
-
-    :root:not([data-theme="light"]) .nebari-alert-info {
-        color: #60a5fa;
-    }
-}
 
 /* ========================
    FORM CONTAINER
@@ -779,31 +556,6 @@ a:hover {
     font-size: 0.875rem;
 }
 
-/* ========================
-   DIVIDER
-   ======================== */
-
-.nebari-divider {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    margin: 1.5rem 0 1.25rem;
-}
-
-.nebari-divider::before,
-.nebari-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border-color);
-}
-
-.nebari-divider-text {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-    font-weight: 400;
-}
 
 /* ========================
    SOCIAL PROVIDERS
@@ -811,14 +563,6 @@ a:hover {
 
 .nebari-social-section {
     margin-top: 1.5rem;
-}
-
-.nebari-social-header {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    margin-bottom: 0.625rem;
-    text-align: center;
 }
 
 .nebari-social-providers {
@@ -877,36 +621,6 @@ a:hover {
     font-weight: 400;
 }
 
-/* ========================
-   FOOTER
-   ======================== */
-
-.nebari-footer-text {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    margin: 0;
-    font-weight: 400;
-}
-
-.nebari-footer-text a {
-    color: var(--accent);
-    font-weight: 500;
-}
-
-.nebari-footer-text a:hover {
-    color: var(--accent-dark);
-}
-
-/* ========================
-   TEXT UTILITIES
-   ======================== */
-
-.nebari-text-secondary {
-    color: var(--text-secondary);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    font-weight: 400;
-}
 
 /* ========================
    RESPONSIVE
@@ -1031,4 +745,545 @@ a:hover {
     border-color: var(--accent);
     background: var(--bg-hover);
     text-decoration: none;
+}
+
+/* Keep the Figma login specification last in the cascade. */
+html,
+body,
+button,
+input,
+select,
+textarea { font-family: var(--font-sans); }
+
+.nebari-login-wrapper {
+    min-height: 100vh;
+    padding: 24px;
+    align-items: center;
+    background-color: #fff;
+}
+
+.nebari-login-card {
+    width: min(384px, 100%);
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #b7b7bb;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+}
+
+.nebari-logo-header { margin: 0 0 24px; }
+.nebari-logo { width: 123px; height: 32px; }
+.nebari-header { margin: 0 0 24px; text-align: left; }
+.nebari-title { margin: 0; color: #262628; font-size: 18px; font-weight: 600; line-height: 24px; letter-spacing: 0; }
+.nebari-heading-group { display: flex; flex-direction: column; gap: 2px; }
+.nebari-subtitle { margin: 0; color: #262628; font-size: 16px; font-weight: 400; line-height: 24px; }
+
+#kc-form-login,
+#kc-reset-password-form,
+#kc-passwd-update-form { display: flex; flex-direction: column; gap: 20px; }
+
+.nebari-form-group,
+.nebari-form-group:last-child { margin: 0; }
+.nebari-label-row { display: flex; align-items: center; justify-content: space-between; min-height: 20px; }
+.nebari-label { margin: 0 0 4px; color: #262628; font-size: 14px; font-weight: 500; line-height: 20px; }
+.nebari-label-row .nebari-label { margin-bottom: 4px; }
+.nebari-forgot-link { margin-bottom: 4px; padding: 2px 8px; color: #70707a; font-size: 12px; font-weight: 500; line-height: 16px; }
+
+.nebari-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+select,
+textarea {
+    height: 32px;
+    padding: 5px 12px;
+    border: 1px solid #9d9da6;
+    border-radius: 6px;
+    background: #f8f8f8;
+    color: #262628;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+}
+
+.nebari-input::placeholder,
+input::placeholder { color: #70707a; font-weight: 400; }
+.nebari-input[aria-invalid="true"],
+input[aria-invalid="true"] { border-color: #d2161c; }
+.nebari-field-error,
+.nebari-input-error { display: block; margin-top: 0; color: #d2161c; font-size: 12px; font-weight: 400; line-height: 16px; }
+#kc-form-login .nebari-form-group:has(#username[aria-invalid="true"]) > .nebari-label { display: none; }
+
+.nebari-button,
+button[type="submit"],
+input[type="submit"],
+.btn { min-height: 32px; padding: 5px 10px; border-radius: 6px; font-size: 14px; font-weight: 500; line-height: 20px; }
+.nebari-button-primary,
+button[type="submit"],
+input[type="submit"] { background: #9547c0; }
+.nebari-form-options { margin: 0; }
+.nebari-form-actions { margin: 4px 0 0; gap: 12px; }
+.nebari-checkbox-label { color: #262628; font-size: 14px; font-weight: 500; line-height: 20px; }
+.nebari-checkbox-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: #9547c0; }
+
+.nebari-social-section { margin-top: 12px; }
+.nebari-social-providers { gap: 12px; }
+.nebari-social-button { min-height: 32px; padding: 5px 10px; border: 1px solid #9d9da6; border-radius: 6px; background: #fff; color: #262628; font-size: 14px; font-weight: 500; line-height: 20px; }
+.nebari-info-section { margin-top: 16px; padding-top: 0; border-top: 0; font-size: 12px; }
+
+@media (max-width: 480px) {
+    .nebari-login-wrapper { align-items: center; padding: 16px; }
+    .nebari-login-card { padding: 24px; }
+}
+
+/* Slowly orbit the three Figma color blobs as one lightweight layer. */
+.nebari-login-wrapper {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background-color: var(--login-backdrop);
+    background-image: none;
+}
+
+/* Backdrop palette — the three glows from the Figma login background, which
+   used to ship as one SVG per theme. A url()-referenced SVG cannot read these
+   custom properties, so the shapes are drawn as gradients here and only the
+   colours change between themes.
+
+   These sit before the [data-theme="dark"] block below: custom properties on
+   :root and on [data-theme] have equal specificity, so source order decides. */
+:root {
+    --login-backdrop: #fff;
+    --login-glow-purple: rgba(210, 132, 255, .48);
+    --login-glow-purple-mid: rgba(232, 194, 255, .30);
+    --login-glow-teal: rgba(170, 244, 235, .48);
+    --login-glow-teal-mid: rgba(209, 248, 243, .30);
+    --login-glow-amber: rgba(250, 216, 144, .42);
+    --login-glow-amber-mid: rgba(252, 237, 204, .28);
+}
+
+/* Dark values are the fills from the old login-dark-background.svg:
+   #1B3C39 teal, #442655 purple, #413313 amber. */
+[data-theme="dark"] {
+    --login-backdrop: #202124;
+    --login-glow-purple: rgba(68, 38, 85, .95);
+    --login-glow-purple-mid: rgba(68, 38, 85, .55);
+    --login-glow-teal: rgba(27, 60, 57, .95);
+    --login-glow-teal-mid: rgba(27, 60, 57, .55);
+    --login-glow-amber: rgba(65, 51, 19, .95);
+    --login-glow-amber-mid: rgba(65, 51, 19, .55);
+}
+
+/* Same values for the system preference, so the backdrop is right even before
+   main.tsx stamps data-theme onto the document. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --login-backdrop: #202124;
+        --login-glow-purple: rgba(68, 38, 85, .95);
+        --login-glow-purple-mid: rgba(68, 38, 85, .55);
+        --login-glow-teal: rgba(27, 60, 57, .95);
+        --login-glow-teal-mid: rgba(27, 60, 57, .55);
+        --login-glow-amber: rgba(65, 51, 19, .95);
+        --login-glow-amber-mid: rgba(65, 51, 19, .55);
+    }
+}
+
+/* A rotating layer only hides its own edges inside its inscribed circle, so
+   this is a square of 150vmax: half of that (75vmax) clears the viewport's
+   half-diagonal, which can reach 70.8vmax on a square viewport. The backdrop
+   colour stays on the wrapper — an opaque fill here would spin with the layer
+   — and the glows are sized in vmax so each one fades to fully transparent
+   before the square's edge instead of being clipped mid-fade. */
+.nebari-login-wrapper::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    width: 150vmax;
+    height: 150vmax;
+    margin: -75vmax 0 0 -75vmax;
+    background-image:
+        radial-gradient(44vmax 26vmax at calc(50% - 30vmax) calc(50% - 2vmax), var(--login-glow-purple) 0%, var(--login-glow-purple-mid) 46%, transparent 100%),
+        radial-gradient(40vmax 34vmax at calc(50% + 34vmax) calc(50% - 22vmax), var(--login-glow-teal) 0%, var(--login-glow-teal-mid) 48%, transparent 100%),
+        radial-gradient(42vmax 34vmax at calc(50% + 32vmax) calc(50% + 23vmax), var(--login-glow-amber) 0%, var(--login-glow-amber-mid) 48%, transparent 100%);
+    animation: nebari-background-orbit 70s linear infinite;
+    transform-origin: center;
+}
+
+.nebari-login-card {
+    position: relative;
+    z-index: 1;
+}
+
+.nebari-social-icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    object-fit: contain;
+}
+
+[data-theme="dark"] .nebari-social-icon {
+    filter: invert(1);
+}
+
+@keyframes nebari-background-orbit {
+    to { transform: rotate(-360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nebari-login-wrapper::before { animation: none; }
+}
+
+/* Keycloak renders the required marker beside (not inside) its label. */
+.nebari-label-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 4px;
+    color: #d2161c;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+.nebari-label-wrapper .nebari-label {
+    margin: 0;
+    color: #262628;
+}
+
+/* Keep link-style primary buttons legible in every interaction state. */
+a.nebari-button.nebari-button-primary,
+a.nebari-button.nebari-button-primary:hover,
+a.nebari-button.nebari-button-primary:focus,
+a.nebari-button.nebari-button-primary:active,
+a.nebari-button.nebari-button-primary:visited {
+    color: #fff !important;
+}
+
+/* Figma: NIC Landing Page / Login (Dark), node 366:1291.
+   These rules intentionally come last so data-theme is authoritative. */
+.nebari-logo-dark { display: none; }
+
+[data-theme="dark"] {
+    color-scheme: dark;
+    --bg-primary: #202124;
+    --bg-secondary: #343437;
+    --bg-elevated: #262629;
+    --bg-hover: #3d3d41;
+    --text-primary: #f7f7f8;
+    --text-secondary: #f0f0f2;
+    --text-muted: #a7a7b0;
+    --border-color: #56565d;
+    --border-subtle: #62626b;
+    --accent: #b34ee4;
+    --accent-dark: #c268ec;
+    --nebari-purple: #b34ee4;
+    --nebari-red: #eb8a83;
+}
+
+[data-theme="dark"] body { background: #202124; color: var(--text-primary); }
+
+[data-theme="dark"] .nebari-login-wrapper {
+    background-color: #202124;
+}
+
+[data-theme="dark"] .nebari-login-card {
+    background: #343437;
+    border-color: #56565d;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .24);
+}
+
+[data-theme="dark"] .nebari-logo-light { display: none; }
+[data-theme="dark"] .nebari-logo-dark { display: block; }
+
+[data-theme="dark"] .nebari-title,
+[data-theme="dark"] .nebari-subtitle,
+[data-theme="dark"] .nebari-label,
+[data-theme="dark"] .nebari-label-wrapper .nebari-label,
+[data-theme="dark"] .nebari-checkbox-label,
+[data-theme="dark"] .nebari-checkbox label {
+    color: #f7f7f8;
+}
+
+[data-theme="dark"] .nebari-forgot-link,
+[data-theme="dark"] .nebari-link,
+[data-theme="dark"] .nebari-info-section,
+[data-theme="dark"] .nebari-required-notice {
+    color: #a7a7b0;
+}
+
+[data-theme="dark"] .nebari-input,
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background-color: #262629;
+    border-color: #62626b;
+    color: #f7f7f8;
+}
+
+[data-theme="dark"] .nebari-input::placeholder,
+[data-theme="dark"] input::placeholder { color: #a7a7b0; }
+
+[data-theme="dark"] .nebari-input[aria-invalid="true"],
+[data-theme="dark"] input[aria-invalid="true"] { border-color: #d96c64; }
+
+[data-theme="dark"] .nebari-field-error,
+[data-theme="dark"] .nebari-input-error,
+[data-theme="dark"] .nebari-label-wrapper { color: #eb8a83; }
+
+[data-theme="dark"] .nebari-button-primary,
+[data-theme="dark"] button[type="submit"],
+[data-theme="dark"] input[type="submit"] {
+    background: #b34ee4;
+    color: #111114;
+}
+
+[data-theme="dark"] .nebari-button-primary:hover,
+[data-theme="dark"] button[type="submit"]:hover,
+[data-theme="dark"] input[type="submit"]:hover { background: #c268ec; color: #111114; }
+
+[data-theme="dark"] a.nebari-button.nebari-button-primary,
+[data-theme="dark"] a.nebari-button.nebari-button-primary:hover,
+[data-theme="dark"] a.nebari-button.nebari-button-primary:focus,
+[data-theme="dark"] a.nebari-button.nebari-button-primary:active,
+[data-theme="dark"] a.nebari-button.nebari-button-primary:visited { color: #111114 !important; }
+
+[data-theme="dark"] .nebari-button-secondary,
+[data-theme="dark"] .nebari-social-button {
+    background: transparent;
+    border-color: #62626b;
+    color: #f7f7f8;
+}
+
+[data-theme="dark"] .nebari-button-secondary:hover,
+[data-theme="dark"] .nebari-social-button:hover {
+    background: #3d3d41;
+    border-color: #777780;
+    color: #fff;
+}
+
+
+@theme inline {
+    --radius: 0.625rem;
+    --duration-fast: 100ms;
+    --duration-base: 200ms;
+    --duration-slow: 350ms;
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --animate-fade-in: nebari-fade-in var(--duration-base) var(--ease-standard) both;
+    --animate-fade-out: nebari-fade-out var(--duration-base) var(--ease-standard) both;
+    --animate-slide-up-fade: nebari-slide-up-fade var(--duration-base) var(--ease-emphasized) both;
+    --animate-slide-down-fade: nebari-slide-down-fade var(--duration-base) var(--ease-emphasized) both;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-border-strong: var(--border-strong);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-success-foreground: var(--success-foreground);
+    --color-success: var(--success);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-warning: var(--warning);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground-strong: var(--muted-foreground-strong);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-hover: var(--primary-hover);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-scrim: var(--scrim);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+  @keyframes nebari-fade-in {
+  from {
+    opacity: 0;
+        }
+  to {
+    opacity: 1;
+        }
+    }
+  @keyframes nebari-fade-out {
+  from {
+    opacity: 1;
+        }
+  to {
+    opacity: 0;
+        }
+    }
+  @keyframes nebari-slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+        }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+        }
+    }
+  @keyframes nebari-slide-down-fade {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+        }
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+        }
+    }
+}
+
+.dark,
+[data-theme="dark"] {
+    --background: oklch(26.94% 0.0037 286.15);
+    --foreground: oklch(97.91% 0 0);
+    --scrim: rgba(0, 0, 0, 0.6);
+    --card: oklch(33.01% 0.0052 286.11);
+    --card-foreground: oklch(97.91% 0 0);
+    --popover: oklch(26.94% 0.0037 286.15);
+    --popover-foreground: oklch(97.91% 0 0);
+    --primary: oklch(61.98% 0.2159 311.67);
+    --primary-foreground: oklch(0% 0 0);
+    --primary-hover: oklch(69.98% 0.1926 311.48);
+    --secondary: oklch(40% 0.0269 250.57);
+    --secondary-foreground: oklch(95.04% 0.0042 236.50);
+    --muted: oklch(33.01% 0.0052 286.11);
+    --muted-foreground: oklch(69.88% 0.0130 286.06);
+    --muted-foreground-strong: oklch(78.06% 0.0056 286.27);
+    --accent: oklch(40% 0.0269 250.57);
+    --accent-foreground: oklch(95.04% 0.0042 236.50);
+    --destructive: oklch(33.1% 0.1332 27.42);
+    --destructive-foreground: #F29E93;
+    --warning: oklch(33.09% 0.0677 92.20);
+    --warning-foreground: oklch(87.09% 0.1248 91.93);
+    --success: oklch(32.88% 0.0887 149.73);
+    --success-foreground: oklch(87.04% 0.0814 149.55);
+    --border: oklch(47.01% 0.0112 285.96);
+    --input: oklch(54.86% 0.0154 285.88);
+    --border-strong: oklch(61.96% 0.0134 286.00);
+    --ring: oklch(69.98% 0.1926 311.48);
+    --chart-1: oklch(69.98% 0.1926 311.48);
+    --chart-2: oklch(69.9% 0.0995 187.56);
+    --chart-3: oklch(77.95% 0.1259 85.96);
+    --chart-4: oklch(69.95% 0.1433 264.44);
+    --chart-5: oklch(69.96% 0.1814 149.67);
+    --sidebar: oklch(26.94% 0.0037 286.15);
+    --sidebar-foreground: oklch(97.91% 0 0);
+    --sidebar-primary: oklch(61.98% 0.2159 311.67);
+    --sidebar-primary-foreground: oklch(0% 0 0);
+    --sidebar-accent: oklch(40% 0.0269 250.57);
+    --sidebar-accent-foreground: oklch(95.04% 0.0042 236.50);
+    --sidebar-border: oklch(47.01% 0.0112 285.96);
+    --sidebar-ring: oklch(69.98% 0.1926 311.48);
+}
+
+/* Heading/H3 — authoritative login-flow page-title typography. */
+:root {
+    --font-sans: "Geist Variable", "Geist", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --Font-Sans: var(--font-sans);
+    --color-foreground-default: var(--foreground, #262628);
+    --color-foreground-destructive: var(--destructive-foreground, #d2161c);
+}
+
+.nebari-header .nebari-title {
+    margin: 0;
+    color: var(--color-foreground-default, #262628);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+    letter-spacing: normal;
+}
+
+/* Label/LG — shared input-label typography across all login-flow forms. */
+.nebari-label,
+[data-slot="field-label"],
+.kcLabelClass,
+.nebari-label-wrapper .nebari-label {
+    color: var(--color-foreground-default, #262628);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: normal;
+}
+
+.nebari-label-row .nebari-forgot-link {
+    margin: 0;
+    padding: 0;
+    color: var(--color-foreground-default, #262628);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0;
+}
+
+[data-slot="field-error"].nebari-login-error {
+    margin-top: 0;
+    color: var(--color-foreground-destructive, #F29E93);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: 0;
+}
+
+/* Login inputs use a border-only focus treatment. This final override
+   neutralizes older login CSS above, including its focus shadow. */
+[data-slot="input"]:focus {
+    border-width: 2px;
+    border-color: var(--ring);
+    box-shadow: none;
+}
+
+/* Validation uses a 1px destructive border at rest and 2px while focused. */
+[data-slot="input"][aria-invalid="true"],
+[data-slot="input"][data-invalid] {
+    border-width: 1px;
+    border-color: var(--color-foreground-destructive, #d2161c);
+    box-shadow: none;
+}
+
+[data-slot="input"][aria-invalid="true"]:focus,
+[data-slot="input"][data-invalid]:focus {
+    border-width: 2px;
+    border-color: var(--color-foreground-destructive, #d2161c);
+    box-shadow: none;
 }
