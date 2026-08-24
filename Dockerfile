@@ -1,5 +1,5 @@
 ARG KEYCLOAK_VERSION=26.0
-ARG THEME_JAR=keycloak-theme-for-kc-all-other-versions.jar
+ARG THEME_JAR=nebari-keycloak-theme-for-kc-all-other-versions.jar
 
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} AS builder
 ARG THEME_JAR

@@ -1,10 +1,14 @@
-# Nebari Keycloak Theme
+# Nebari and OpenTeams Collab Keycloak Themes
 
-A custom Keycloak theme for Nebari using [Keycloakify](https://www.keycloakify.dev/).
+Custom Keycloak themes for Nebari and OpenTeams Collab using
+[Keycloakify](https://www.keycloakify.dev/). Both variants share the same page
+and Nebari design-system components while keeping their branding isolated.
 
 ## Features
 
 - ✨ Custom Nebari branding with color scheme
+- 🌐 OpenTeams Collab variant with its navy, blue, coral, and amber palette
+- 🔤 Self-hosted Geist and Inter Tight variable fonts
 - 🎨 Light and dark theme support
 - 📱 Fully responsive design
 - 🔐 Customized login, registration, and error pages
@@ -29,12 +33,20 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 to see the theme in your browser.
+Open http://localhost:5173 to see the OpenTeams Collab theme in your browser.
+The standalone development preview defaults to `openteams-collab`; add
+`theme=nebari` to preview the original Nebari variant.
 
 Any login page can be previewed standalone with the `preview` query parameter,
 which feeds a mock `kcContext` to the app — for example
 http://localhost:5173/?preview=register. The available names are listed in
 `getKcContextMockForPreview` in [src/login/KcContext.ts](src/login/KcContext.ts).
+
+Preview the Collab variant by adding `theme=openteams-collab`:
+
+```text
+http://localhost:5173/?preview=login-providers&theme=openteams-collab
+```
 
 ## Visual Tests
 
@@ -71,23 +83,31 @@ it out.
 npm run build-keycloak-theme
 ```
 
-This produces two JARs in `dist_keycloak/`:
+This produces four JARs in `dist_keycloak/`. Each file contains only the named
+theme, so consumers do not need to install both variants:
 
-| File | Target |
-| --- | --- |
-| `keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
-| `keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
+| Theme | File | Target |
+| --- | --- | --- |
+| Nebari | `nebari-keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
+| Nebari | `nebari-keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
+| OpenTeams Collab | `openteams-collab-keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
+| OpenTeams Collab | `openteams-collab-keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
 
 ## Releasing
 
 Pushing to `main` runs
 [publish-keycloak-image.yml](.github/workflows/publish-keycloak-image.yml), which
-builds both JARs and republishes the container image to
+builds all four theme-specific JARs and republishes the Nebari container image to
 `ghcr.io/<owner>/<repo>` tagged `latest`, `sha-<commit>` and the `version` from
 `package.json`.
 
-It also cuts a GitHub release for `v<version>`. The only assets are the two
-JARs — that is all a consumer needs to install the theme. The screenshots are
+Every run also uploads two separate workflow artifacts — one for Nebari and one
+for OpenTeams Collab — each containing its two Keycloak-compatible JARs. This
+makes both themes independently downloadable from every successful push to
+`main`, even when the package version has not changed.
+
+It also cuts a GitHub release for `v<version>`. The only assets are the four
+theme-specific JARs. The screenshots are
 embedded in the release notes as links to this repository rather than attached,
 so the release page shows what the theme looks like without carrying the weight.
 A release is only created when `v<version>` does not already exist, so **bump
@@ -111,18 +131,18 @@ every release; those cannot be turned off.
    npm run build-keycloak-theme
    ```
 
-2. Locate the generated JAR file:
+2. Locate the generated JARs and choose the theme and Keycloak version you need:
    ```bash
-   ls dist_keycloak/keycloak-theme-*.jar
+   ls dist_keycloak/*.jar
    ```
 
 3. Copy the JAR to your Keycloak deployment:
    ```bash
    # For standalone Keycloak
-   cp dist_keycloak/keycloak-theme-*.jar /path/to/keycloak/providers/
+   cp dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar /path/to/keycloak/providers/
 
    # For containerized Keycloak (Docker/Kubernetes)
-   kubectl cp dist_keycloak/keycloak-theme-*.jar <keycloak-pod>:/opt/keycloak/providers/
+   kubectl cp dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar <keycloak-pod>:/opt/keycloak/providers/
    ```
 
 4. Restart Keycloak to load the theme:
@@ -140,7 +160,7 @@ every release; those cannot be turned off.
    ```bash
    npm run build-keycloak-theme
    mkdir -p theme-extracted
-   unzip dist_keycloak/keycloak-theme-*.jar -d theme-extracted/
+   unzip dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar -d theme-extracted/
    ```
 
 2. Create a ConfigMap:
@@ -171,7 +191,7 @@ Create a `Dockerfile`:
 FROM quay.io/keycloak/keycloak:latest
 
 # Copy the theme JAR
-COPY dist_keycloak/keycloak-theme-*.jar /opt/keycloak/providers/
+COPY dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/
 
 # Build the Keycloak image with the provider
 RUN /opt/keycloak/bin/kc.sh build
@@ -196,13 +216,16 @@ docker push your-registry/keycloak-nebari:latest
    - **Account theme**: `nebari` (optional)
    - **Email theme**: `nebari` (optional)
 
+   For the Collab-styled login, set **Login theme** to `openteams-collab`.
+
 5. Click **Save**
 
 ## Customization
 
 ### Colors
 
-Edit the CSS variables in `src/theme.css`:
+Edit the CSS variables in `src/theme.css`. The Collab variant is scoped under
+`html[data-kc-theme="openteams-collab"]`, so its changes do not affect Nebari.
 
 ```css
 :root {

@@ -4,6 +4,16 @@ import tailwindcss from "@tailwindcss/vite";
 import { keycloakify } from "keycloakify/vite-plugin";
 import path from "node:path";
 
+const themeNames = ["nebari", "openteams-collab"];
+
+const packagedThemeName = process.env.KEYCLOAKIFY_THEME_NAME;
+
+if (packagedThemeName !== undefined && !themeNames.includes(packagedThemeName)) {
+    throw new Error(
+        `Unknown KEYCLOAKIFY_THEME_NAME "${packagedThemeName}". Expected one of: ${themeNames.join(", ")}`
+    );
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
@@ -11,8 +21,9 @@ export default defineConfig({
         tailwindcss(),
         keycloakify({
             accountThemeImplementation: "Single-Page",
-            themeName: "nebari",
-            themeVersion: "1.0.0",
+            // Development exposes every variant. The packaging script sets the
+            // environment variable so each published JAR contains one theme.
+            themeName: packagedThemeName ?? themeNames,
             extraThemeProperties: [
                 "parentTheme=keycloak.v2"
             ]

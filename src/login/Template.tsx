@@ -40,21 +40,38 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
         (headerNode.props.className?.includes("nebari-title") ||
             headerNode.props.className?.includes("nebari-heading-group"));
     const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+    const isCollabTheme = kcContext.themeName === "openteams-collab";
 
     return (
         <main className="nebari-login-wrapper">
             <Card className="nebari-login-card gap-0 py-0">
                 <div className="nebari-logo-header">
-                    <img
-                        src={publicAssetUrl("logo/nebari-logo-light.svg")}
-                        alt="Nebari"
-                        className="nebari-logo nebari-logo-light"
-                    />
-                    <img
-                        src={publicAssetUrl("logo/nebari-logo-dark.svg")}
-                        alt="Nebari"
-                        className="nebari-logo nebari-logo-dark"
-                    />
+                    {isCollabTheme ? (
+                        <div className="collab-brand">
+                            <img
+                                src={publicAssetUrl("logo/openteams-collab-mark.svg")}
+                                alt="OpenTeams Collab"
+                                className="collab-brand-mark"
+                            />
+                            <div className="collab-brand-name" aria-hidden="true">
+                                <span>OpenTeams</span>
+                                <strong>Collab</strong>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <img
+                                src={publicAssetUrl("logo/nebari-logo-light.svg")}
+                                alt="Nebari"
+                                className="nebari-logo nebari-logo-light"
+                            />
+                            <img
+                                src={publicAssetUrl("logo/nebari-logo-dark.svg")}
+                                alt="Nebari"
+                                className="nebari-logo nebari-logo-dark"
+                            />
+                        </>
+                    )}
                 </div>
 
                 <CardHeader className="nebari-header px-0">

@@ -1287,3 +1287,346 @@ a.nebari-button.nebari-button-primary:visited {
     border-color: var(--color-foreground-destructive, #d2161c);
     box-shadow: none;
 }
+
+/* ==========================================================================
+   OPENTEAMS COLLAB THEME VARIANT
+
+   Palette and typography sampled from https://openteams.com/collab/:
+   Inter Tight, midnight #000f3a, deep blue #022791, electric blue #4d75fe,
+   coral #ff8a69, and amber #faa944. The selectors are deliberately scoped to
+   the Keycloak theme name so the original Nebari variant remains unchanged.
+   ========================================================================== */
+
+html[data-kc-theme="openteams-collab"] {
+    color-scheme: dark;
+    --font-sans: "Inter Tight Variable", "Inter Tight", sans-serif;
+    --Font-Sans: var(--font-sans);
+    --background: #000f3a;
+    --foreground: #ffffff;
+    --card: rgba(2, 39, 145, .42);
+    --card-foreground: #ffffff;
+    --popover: #00184f;
+    --popover-foreground: #ffffff;
+    --primary: #4d75fe;
+    --primary-foreground: #ffffff;
+    --primary-hover: #6487ff;
+    --secondary: rgba(77, 117, 254, .15);
+    --secondary-foreground: #ffffff;
+    --muted: rgba(255, 255, 255, .08);
+    --muted-foreground: #b9c7f6;
+    --muted-foreground-strong: #dce4ff;
+    --accent: rgba(77, 117, 254, .18);
+    --accent-foreground: #ffffff;
+    --destructive: rgba(255, 138, 105, .15);
+    --destructive-foreground: #ffad96;
+    --border: rgba(255, 255, 255, .24);
+    --input: rgba(255, 255, 255, .34);
+    --border-strong: rgba(255, 255, 255, .55);
+    --ring: #4d75fe;
+    --bg-primary: #000f3a;
+    --bg-secondary: #00184f;
+    --bg-elevated: rgba(2, 39, 145, .55);
+    --bg-hover: rgba(77, 117, 254, .18);
+    --text-primary: #ffffff;
+    --text-secondary: #dce4ff;
+    --text-muted: #b9c7f6;
+    --border-color: rgba(255, 255, 255, .24);
+    --border-subtle: rgba(255, 255, 255, .14);
+    --color-foreground-default: #ffffff;
+    --color-foreground-destructive: #ffad96;
+    --nebari-purple: #4d75fe;
+    --nebari-purple-dark: #6487ff;
+    --nebari-purple-light: rgba(77, 117, 254, .15);
+    --nebari-red: #ff8a69;
+    --login-backdrop: #000f3a;
+}
+
+html[data-kc-theme="openteams-collab"] body,
+html[data-kc-theme="openteams-collab"] button,
+html[data-kc-theme="openteams-collab"] input,
+html[data-kc-theme="openteams-collab"] select,
+html[data-kc-theme="openteams-collab"] textarea {
+    font-family: var(--font-sans);
+}
+
+html[data-kc-theme="openteams-collab"] body {
+    background: #000f3a;
+    color: #ffffff;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-login-wrapper {
+    padding: 32px;
+    background-color: #000f3a;
+    background-image: radial-gradient(circle at bottom center, #000f3a 0%, #000f3a 42%, #022791 100%);
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-login-wrapper::before {
+    top: 50%;
+    left: 50%;
+    width: 140vmax;
+    height: 140vmax;
+    margin: -70vmax 0 0 -70vmax;
+    background-image:
+        radial-gradient(36vmax 28vmax at 72% 24%, rgba(77, 117, 254, .34) 0%, rgba(77, 117, 254, .08) 55%, transparent 100%),
+        radial-gradient(30vmax 24vmax at 24% 72%, rgba(255, 138, 105, .15) 0%, transparent 100%),
+        radial-gradient(22vmax 18vmax at 73% 76%, rgba(250, 169, 68, .10) 0%, transparent 100%);
+    animation: collab-background-drift 28s ease-in-out infinite alternate;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-login-wrapper::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    opacity: .16;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, transparent, #000 24%, #000 76%, transparent);
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-login-card {
+    width: min(440px, 100%);
+    padding: 38px;
+    overflow: visible;
+    background:
+        linear-gradient(145deg, rgba(2, 39, 145, .76), rgba(0, 15, 58, .94)) padding-box,
+        linear-gradient(135deg, rgba(77, 117, 254, .9), rgba(255, 138, 105, .45)) border-box;
+    border: 1px solid transparent;
+    border-radius: 24px;
+    box-shadow: 0 45px 71px rgba(0, 10, 24, .23), 0 12px 32px rgba(0, 5, 20, .3);
+    backdrop-filter: blur(20px);
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-logo-header {
+    margin-bottom: 28px;
+}
+
+.collab-brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    color: #ffffff;
+}
+
+.collab-brand-mark {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+}
+
+.collab-brand-name {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    letter-spacing: .2px;
+}
+
+.collab-brand-name span {
+    font-size: 13px;
+    font-weight: 400;
+    color: #b9c7f6;
+}
+
+.collab-brand-name strong {
+    margin-top: 4px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-header {
+    margin-bottom: 26px;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-header .nebari-title {
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -.2px;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-header .nebari-title::after {
+    content: "";
+    display: block;
+    width: 72px;
+    height: 3px;
+    margin-top: 14px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #4d75fe 0%, #ff8a69 70%, #faa944 100%);
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-subtitle,
+html[data-kc-theme="openteams-collab"] .nebari-label,
+html[data-kc-theme="openteams-collab"] [data-slot="field-label"],
+html[data-kc-theme="openteams-collab"] .nebari-label-wrapper .nebari-label,
+html[data-kc-theme="openteams-collab"] [data-slot="checkbox"] {
+    color: #ffffff;
+    font-family: var(--font-sans);
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-label,
+html[data-kc-theme="openteams-collab"] [data-slot="field-label"],
+html[data-kc-theme="openteams-collab"] .nebari-label-wrapper .nebari-label {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .2px;
+}
+
+html[data-kc-theme="openteams-collab"] #kc-form-login,
+html[data-kc-theme="openteams-collab"] #kc-reset-password-form,
+html[data-kc-theme="openteams-collab"] #kc-passwd-update-form {
+    gap: 22px;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-input,
+html[data-kc-theme="openteams-collab"] [data-slot="input"],
+html[data-kc-theme="openteams-collab"] input[type="text"],
+html[data-kc-theme="openteams-collab"] input[type="email"],
+html[data-kc-theme="openteams-collab"] input[type="password"],
+html[data-kc-theme="openteams-collab"] input[type="tel"],
+html[data-kc-theme="openteams-collab"] select,
+html[data-kc-theme="openteams-collab"] textarea {
+    height: 46px;
+    padding: 11px 17px;
+    border: 1px solid rgba(255, 255, 255, .34);
+    border-radius: 10px;
+    background: rgba(0, 15, 58, .58);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 22px;
+}
+
+html[data-kc-theme="openteams-collab"] [data-slot="input"]::placeholder,
+html[data-kc-theme="openteams-collab"] input::placeholder {
+    color: #9eaddd;
+}
+
+html[data-kc-theme="openteams-collab"] [data-slot="input"]:hover,
+html[data-kc-theme="openteams-collab"] .nebari-input:hover {
+    border-color: rgba(255, 255, 255, .58);
+}
+
+html[data-kc-theme="openteams-collab"] [data-slot="input"]:focus,
+html[data-kc-theme="openteams-collab"] .nebari-input:focus {
+    border-width: 1px;
+    border-color: #4d75fe;
+    box-shadow: 0 0 0 3px rgba(77, 117, 254, .22);
+}
+
+html[data-kc-theme="openteams-collab"] [data-slot="input-end-adornment"] [data-slot="button"] {
+    color: #b9c7f6;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-label-row .nebari-forgot-link,
+html[data-kc-theme="openteams-collab"] .nebari-link,
+html[data-kc-theme="openteams-collab"] .nebari-info-section,
+html[data-kc-theme="openteams-collab"] .nebari-required-notice {
+    color: #b9c7f6;
+    font-family: var(--font-sans);
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-label-row .nebari-forgot-link:hover,
+html[data-kc-theme="openteams-collab"] .nebari-link:hover {
+    color: #ffffff;
+}
+
+html[data-kc-theme="openteams-collab"] #kc-login,
+html[data-kc-theme="openteams-collab"] .nebari-button-primary,
+html[data-kc-theme="openteams-collab"] button[type="submit"],
+html[data-kc-theme="openteams-collab"] input[type="submit"] {
+    min-height: 46px;
+    padding: 11px 24px;
+    border: 1px solid #4d75fe;
+    border-radius: 999px;
+    background: #4d75fe;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    box-shadow: 0 10px 28px rgba(77, 117, 254, .24);
+}
+
+html[data-kc-theme="openteams-collab"] #kc-login:hover,
+html[data-kc-theme="openteams-collab"] .nebari-button-primary:hover,
+html[data-kc-theme="openteams-collab"] button[type="submit"]:hover,
+html[data-kc-theme="openteams-collab"] input[type="submit"]:hover {
+    border-color: #6c8cff;
+    background: #6c8cff;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-button-secondary,
+html[data-kc-theme="openteams-collab"] .nebari-social-button {
+    min-height: 44px;
+    padding: 10px 20px;
+    border: 1px solid rgba(77, 117, 254, .9);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .025);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-button-secondary:hover,
+html[data-kc-theme="openteams-collab"] .nebari-social-button:hover {
+    border-color: #4d75fe;
+    background: #4d75fe;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-social-section {
+    margin-top: 16px;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-social-providers {
+    gap: 12px;
+}
+
+html[data-kc-theme="openteams-collab"] .nebari-social-icon {
+    filter: invert(1);
+}
+
+html[data-kc-theme="openteams-collab"] [data-slot="checkbox-control"] {
+    border-color: rgba(255, 255, 255, .58);
+}
+
+html[data-kc-theme="openteams-collab"] [data-slot="alert"] {
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+}
+
+@keyframes collab-background-drift {
+    from { transform: translate3d(-2%, -1%, 0) scale(1); }
+    to { transform: translate3d(2%, 1%, 0) scale(1.04); }
+}
+
+@media (max-width: 480px) {
+    html[data-kc-theme="openteams-collab"] .nebari-login-wrapper {
+        padding: 18px;
+    }
+
+    html[data-kc-theme="openteams-collab"] .nebari-login-card {
+        padding: 28px 24px;
+        border-radius: 20px;
+    }
+
+    .collab-brand-mark {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-kc-theme="openteams-collab"] .nebari-login-wrapper::before {
+        animation: none;
+    }
+}

@@ -68,10 +68,26 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Produces dist_keycloak/keycloak-theme-for-kc-22-to-25.jar and
-      # dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar
-      - name: Build Keycloak theme
+      # Produces separate Nebari and OpenTeams Collab JARs for each supported
+      # Keycloak version range.
+      - name: Build Keycloak themes
         run: npm run build-keycloak-theme
+
+      # Keep the variants independently downloadable on every main-branch run,
+      # including commits that intentionally reuse the current release version.
+      - name: Publish Nebari JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nebari-keycloak-theme-${{ steps.version.outputs.version }}
+          path: dist_keycloak/nebari-keycloak-theme-*.jar
+          if-no-files-found: error
+
+      - name: Publish OpenTeams Collab JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openteams-collab-keycloak-theme-${{ steps.version.outputs.version }}
+          path: dist_keycloak/openteams-collab-keycloak-theme-*.jar
+          if-no-files-found: error
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -100,7 +116,7 @@ jobs:
           push: true
           build-args: |
             KEYCLOAK_VERSION=26.0
-            THEME_JAR=keycloak-theme-for-kc-all-other-versions.jar
+            THEME_JAR=nebari-keycloak-theme-for-kc-all-other-versions.jar
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
 
@@ -123,11 +139,11 @@ jobs:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
           {
-            echo "## Nebari Keycloak theme $VERSION"
+            echo "## Nebari and OpenTeams Collab Keycloak themes $VERSION"
             echo
-            echo "| Light | Dark |"
-            echo "| --- | --- |"
-            echo "| <img src=\"$RAW/full-page-light.png\" width=\"420\"> | <img src=\"$RAW/full-page-dark.png\" width=\"420\"> |"
+            echo "| Nebari light | Nebari dark | OpenTeams Collab |"
+            echo "| --- | --- | --- |"
+            echo "| <img src=\"$RAW/full-page-light.png\" width=\"320\"> | <img src=\"$RAW/full-page-dark.png\" width=\"320\"> | <img src=\"$RAW/openteams-collab-full-page.png\" width=\"320\"> |"
             echo
             echo "[Browse every login page screenshot for this release]($TREE)"
             echo
@@ -145,15 +161,17 @@ jobs:
             echo
             echo "### Install the theme"
             echo
-            echo "Download the JAR matching your server, drop it into Keycloak's"
+            echo "Download the JAR matching your theme and server, drop it into Keycloak's"
             echo "\`providers/\` directory and run \`bin/kc.sh build\`:"
             echo
-            echo "| Keycloak version | Asset |"
-            echo "| --- | --- |"
-            echo "| 26 and newer | \`keycloak-theme-for-kc-all-other-versions.jar\` |"
-            echo "| 22 to 25 | \`keycloak-theme-for-kc-22-to-25.jar\` |"
+            echo "| Theme | Keycloak version | Asset |"
+            echo "| --- | --- | --- |"
+            echo "| Nebari | 26 and newer | \`nebari-keycloak-theme-for-kc-all-other-versions.jar\` |"
+            echo "| Nebari | 22 to 25 | \`nebari-keycloak-theme-for-kc-22-to-25.jar\` |"
+            echo "| OpenTeams Collab | 26 and newer | \`openteams-collab-keycloak-theme-for-kc-all-other-versions.jar\` |"
+            echo "| OpenTeams Collab | 22 to 25 | \`openteams-collab-keycloak-theme-for-kc-22-to-25.jar\` |"
             echo
-            echo "Then select **nebari** as the login theme for your realm."
+            echo "Then select **nebari** or **openteams-collab** as the login theme for your realm."
             echo
             echo "### Or use the prebuilt image"
             echo
@@ -169,8 +187,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
-            --title "Nebari Keycloak theme ${{ steps.version.outputs.version }}" \
+            --title "Nebari and OpenTeams Keycloak themes ${{ steps.version.outputs.version }}" \
             --notes-file release-notes.md \
             --target "${{ github.sha }}" \
-            dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar \
-            dist_keycloak/keycloak-theme-for-kc-22-to-25.jar
+            dist_keycloak/*.jar
