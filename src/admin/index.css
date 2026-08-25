@@ -366,10 +366,14 @@ a:not([data-slot]):hover {
 .pf-v5-c-menu-toggle.pf-m-expanded,
 .pf-v5-c-select__toggle:not(.pf-m-plain):focus-within,
 .pf-v5-c-select.pf-m-expanded .pf-v5-c-select__toggle {
-  border-width: 2px;
+  /* Keep the 1px resting border in the box model. Increasing it on focus
+   * pulled compact table-cell dropdown content inward and shifted the row by
+   * one pixel; the ring supplies the same two-pixel Nebari focus emphasis
+   * without changing the control's measurements. */
+  border-width: 1px;
   border-color: var(--ring);
   outline: 0;
-  box-shadow: none;
+  box-shadow: 0 0 0 2px var(--ring);
 }
 
 /* The inner control already sits inside a focused box; a second ring on it

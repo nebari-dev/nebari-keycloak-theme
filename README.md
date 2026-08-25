@@ -241,6 +241,60 @@ behaviour at the call site instead: pass `className`, swap the element with the
 Base UI `render` prop, or add a wrapper of your own under
 `src/components/nebari/`.
 
+The Admin Console sidebar is installed from that registry as
+[`src/components/ui/sidebar.tsx`](src/components/ui/sidebar.tsx). Its composition
+lives in [`src/admin/PageNav.tsx`](src/admin/PageNav.tsx): access checks still
+decide which Keycloak routes appear, while Nebari's `SidebarHeader`, groups,
+menus, menu buttons, active states and tokens provide the presentation. The
+menu-button composition removes the component's surface-coloured focus offset
+so every item has one purple `radius-md` focus ring in both colour themes. The
+outer PatternFly `PageSidebar` is intentionally only a responsive layout shell;
+it keeps Keycloak's existing desktop/mobile open state and contains no visible
+navigation controls. When that shell is closed, the composition mirrors its
+state to the navigation's `inert` attribute so off-canvas links cannot receive
+keyboard focus or appear in the accessibility tree.
+[`src/admin/page-nav.css`](src/admin/page-nav.css) documents that narrow bridge
+and should not grow into a second sidebar theme.
+
+The Admin Console's standard resource lists use the registry's
+[`src/components/ui/data-table.tsx`](src/components/ui/data-table.tsx) through
+the owned Keycloak compatibility layer at
+[`src/shared/keycloak-ui-shared/controls/table/KeycloakDataTable.tsx`](src/shared/keycloak-ui-shared/controls/table/KeycloakDataTable.tsx).
+That single boundary covers the existing server loaders, page selection, radio
+selection, expandable event details and row-action definitions used by 48
+screens. Search now commits 300 ms after typing, and its clear action restores
+focus to the input. The shared composition also restores the responsive content
+inset previously supplied by PatternFly's toolbar, keeping search, table and
+pagination aligned with the page heading and separated from tab dividers. The
+pager only renders a row-selection summary when the table exposes selection
+controls, and reports it as `selected of visible rows` for the current page.
+Rows with a primary destination use the full row as their pointer target. The
+name is no longer a separate pointer target, keyboard stop or visually styled
+link. Instead, the row has one labelled keyboard stop with the standard rounded
+purple focus ring, and Enter follows the underlying semantic link. Checkboxes
+and inline controls retain independent behaviour. Search precedes the filter
+field selector, so changing that selector cannot shift the search input. The
+Users screen explicitly assigns that search/filter group to the leading toolbar
+slot while its create and bulk-action controls remain right-aligned. The Users
+toolbar/table files and Client scopes list are explicitly claimed from
+Keycloakify, so `sync-extensions` and subsequent theme builds preserve these
+compositions rather than restoring the upstream toolbar order.
+Per-row kebab menus are hidden by default; exceptional screens can explicitly
+opt back in when an operation cannot be represented elsewhere.
+The compatibility loader can return `{ rows, total }` when a Keycloak endpoint
+provides a count. The Users and Client scopes lists do so, allowing the
+Nebari-styled pager to show `Page X of N` and working first, previous, next and
+last-page controls. For endpoints without a count, next-page availability still
+comes from Keycloak's existing `page size + 1` request, the total is inferred on
+the terminal page, and the last-page control stays disabled until it is known.
+
+Ten specialized views own their row markup but share
+[`PaginatingTableToolbar.tsx`](src/shared/keycloak-ui-shared/controls/table/PaginatingTableToolbar.tsx).
+That toolbar now uses the same Nebari search, page-size and pager controls.
+Small form-layout, tree, drag-and-drop and nested detail tables that need
+PatternFly-specific row semantics remain PatternFly table bodies and use the
+token bridge in `src/admin/index.css`.
+
 ### Login pages
 
 Every login page is built from the design-system components — `Field` /
@@ -278,13 +332,18 @@ components that now render Nebari equivalents — `Button`, `TextInput`,
 call site without editing (and thereby freezing against upstream) hundreds of
 files. The adapters live in
 [`src/components/patternfly/`](src/components/patternfly/README.md), which also
-records what deliberately stays on PatternFly and why: `Table` (KeycloakDataTable
-drives sorting, selection, expandable rows and the actions kebab through
-PatternFly props), `Radio`, `Select`/`MenuToggle`, `Modal`, toast `Alert`, and
-`variant="control"` buttons.
+records what deliberately stays on PatternFly and why: specialized table
+bodies, `Radio`, `Select`/`MenuToggle`, `Modal`, toast `Alert`, and
+`variant="control"` buttons. Standard pageable and filterable lists use the
+Nebari Data Table compatibility layer described above.
 
 Whatever stays on PatternFly is restyled to the same tokens by
-[`src/admin/index.css`](src/admin/index.css) and `src/admin/page-nav.css`.
+[`src/admin/index.css`](src/admin/index.css). The Admin Console's visible sidebar
+is the Nebari component described above, rather than a CSS skin over PatternFly
+navigation. The bridge is intentionally small: shared token rules cover legacy
+controls that Keycloak still owns. For example, select focus now retains its
+one-pixel resting border and draws a non-layout-changing purple ring, preventing
+compact table rows from shifting without adding a screen-specific override.
 
 Refs matter in the adapters: 29 views spread `{...register(…)}` from
 react-hook-form onto these controls, and that spread carries a callback ref. The

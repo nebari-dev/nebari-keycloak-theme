@@ -66,6 +66,9 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
+            // Keep the Nebari registry's own "@/ui/*" specifiers resolvable so
+            // components can be installed and updated without local edits.
+            "@/ui": path.resolve(__dirname, "./src/components/ui"),
             "@": path.resolve(__dirname, "./src")
         }
     },
