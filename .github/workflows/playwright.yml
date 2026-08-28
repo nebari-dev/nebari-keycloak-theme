@@ -1,0 +1,86 @@
+name: Playwright screenshots
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push supersedes an in-flight run for the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      # Playwright transpiles without type checking, so the visual tests alone
+      # would not catch a broken build.
+      - name: Type check
+        run: npm run typecheck
+
+      - run: npx playwright install --with-deps chromium
+
+      # Gate: compares against the committed baselines in tests/screenshots.
+      # A failure here means the theme's rendering changed.
+      - name: Compare against baselines
+        run: npm run test:screenshots
+
+      - name: Upload diff report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # Always re-render so reviewers get the screenshots this branch actually
+      # produces, whether or not they match the baselines.
+      - name: Render current screenshots
+        if: always()
+        run: npm run test:screenshots:update
+
+      - name: Summarise changed screenshots
+        if: always()
+        run: |
+          {
+            echo "### Theme screenshots"
+            echo
+            if git diff --quiet -- tests/screenshots; then
+              echo "Rendered output matches the committed baselines."
+            else
+              echo "Rendered output differs from the committed baselines:"
+              echo
+              echo '```'
+              git diff --stat -- tests/screenshots
+              echo '```'
+              echo
+              echo "Run \`npm run test:screenshots:update\` on Linux and commit the result."
+            fi
+            echo
+            echo "Download the **theme-screenshots** artifact to view them."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme-screenshots
+          path: tests/screenshots
+          if-no-files-found: error
+          retention-days: 14
