@@ -1,10 +1,10 @@
 /* Theme customization page chrome.
  *
  * The controls are Nebari design-system components, so this file only lays them
- * out and styles the few things that are not components: the page header, the
- * colour swatches, and the preview panel. Colours come from the design system's
- * semantic tokens rather than PatternFly's, which is what keeps the page looking
- * like the rest of the console. */
+ * out and styles the few things that are not components: the page header,
+ * colour swatches, image crop canvas, and preview panel. Colours come from the
+ * design system's semantic tokens rather than PatternFly's, which is what keeps
+ * the page looking like the rest of the console. */
 
 .branding-loading {
     display: grid;
@@ -88,6 +88,32 @@
 .branding-image-control > [data-slot="input-wrapper"] {
     flex: 1;
     min-width: 0;
+}
+
+.branding-image-set {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 0.25rem;
+}
+
+.branding-image-set + .branding-image-set {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.branding-image-set__header h3 {
+    margin: 0;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.branding-image-set__header p {
+    margin: 0.25rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
 }
 
 .branding-mode-switch {
@@ -191,6 +217,107 @@
     /* Taller than the design system's default dialog so a whole login card fits
        beside the list on a normal screen; it still shrinks with the viewport. */
     max-height: min(calc(100vh - 2rem), 52rem);
+}
+
+/* ------------------------------------------------------------------
+ * Image crop dialog
+ * ------------------------------------------------------------------ */
+
+.branding-crop-dialog {
+    max-width: min(44rem, calc(100vw - 2rem));
+    overflow-y: auto;
+}
+
+.branding-crop-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+/* Width shrinks for portrait source ratios so the frame never exceeds the
+   bounded 20rem editing height. Landscape frames take the available width. */
+.branding-crop-viewport {
+    position: relative;
+    width: min(100%, var(--branding-crop-width));
+    max-width: 100%;
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.5rem;
+    background-color: var(--card);
+    background-image:
+        linear-gradient(45deg, var(--muted) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--muted) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--muted) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--muted) 75%);
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    background-size: 16px 16px;
+    cursor: grab;
+    outline: none;
+    touch-action: none;
+    user-select: none;
+}
+
+.branding-crop-viewport[data-dragging] {
+    cursor: grabbing;
+}
+
+.branding-crop-viewport:focus-visible {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+.branding-crop-viewport > img {
+    position: absolute;
+    max-width: none;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.branding-crop-grid {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgb(255 255 255 / 65%);
+    background-image:
+        linear-gradient(to right, transparent 33.333%, rgb(255 255 255 / 45%) 33.333%, rgb(255 255 255 / 45%) calc(33.333% + 1px), transparent calc(33.333% + 1px), transparent 66.666%, rgb(255 255 255 / 45%) 66.666%, rgb(255 255 255 / 45%) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
+        linear-gradient(to bottom, transparent 33.333%, rgb(255 255 255 / 45%) 33.333%, rgb(255 255 255 / 45%) calc(33.333% + 1px), transparent calc(33.333% + 1px), transparent 66.666%, rgb(255 255 255 / 45%) 66.666%, rgb(255 255 255 / 45%) calc(66.666% + 1px), transparent calc(66.666% + 1px));
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 30%);
+    pointer-events: none;
+}
+
+.branding-crop-move-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 70%);
+    color: white;
+    font-size: 0.75rem;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.branding-crop-move-hint svg {
+    width: 0.875rem;
+    height: 0.875rem;
+}
+
+.branding-crop-instructions {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    text-align: center;
+}
+
+.branding-crop-controls {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .branding-import {
@@ -447,6 +574,10 @@
     }
 
     .branding-color-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .branding-crop-controls {
         grid-template-columns: 1fr;
     }
 

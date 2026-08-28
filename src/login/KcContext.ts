@@ -27,11 +27,23 @@ const previewPageIds = {
 
 type PreviewName = keyof typeof previewPageIds | "login-providers" | "login-error";
 
-export function getKcContextMockForPreview(previewName: string | null): KcContext {
+/**
+ * The mock's own `themeName` is a placeholder that matches no theme in the
+ * catalog, so previews would always fall back to the default theme. Accepting an
+ * explicit name lets every theme in the build be previewed and screenshotted.
+ */
+function withThemeName(kcContext: KcContext, themeName: string | null): KcContext {
+    return themeName === null ? kcContext : { ...kcContext, themeName };
+}
+
+export function getKcContextMockForPreview(
+    previewName: string | null,
+    themeName: string | null = null
+): KcContext {
     const name = (previewName ?? "login") as PreviewName;
 
     if (name === "login-providers") {
-        return getKcContextMock({
+        return withThemeName(getKcContextMock({
             pageId: "login.ftl",
             overrides: {
                 social: {
@@ -53,11 +65,11 @@ export function getKcContextMockForPreview(previewName: string | null): KcContex
                     ]
                 }
             }
-        });
+        }), themeName);
     }
 
     if (name === "login-error") {
-        return getKcContextMock({
+        return withThemeName(getKcContextMock({
             pageId: "login.ftl",
             overrides: {
                 login: { username: "user@example.com" },
@@ -70,8 +82,11 @@ export function getKcContextMockForPreview(previewName: string | null): KcContex
                             : ""
                 }
             }
-        });
+        }), themeName);
     }
 
-    return getKcContextMock({ pageId: previewPageIds[name] ?? "login.ftl" });
+    return withThemeName(
+        getKcContextMock({ pageId: previewPageIds[name] ?? "login.ftl" }),
+        themeName
+    );
 }

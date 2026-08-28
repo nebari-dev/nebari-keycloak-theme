@@ -1,0 +1,42 @@
+{
+    "nebariThemeExport": 1,
+    "name": "Template default",
+    "description": "Unbranded shadcn/ui neutral palette. Import this to reset a realm to the template starting point.",
+    "exportedAt": "2026-08-25",
+    "themeName": "template",
+    "config": {
+        "version": 2,
+        "companyName": "",
+        "logo": {
+            "light": "",
+            "dark": ""
+        },
+        "backgroundImage": {
+            "light": "",
+            "dark": ""
+        },
+        "cardRadius": 10,
+        "colorScheme": "system",
+        "loginMode": "password-and-providers",
+        "light": {
+            "primary": "#171717",
+            "primaryHover": "#262626",
+            "pageBackground": "#f5f5f5",
+            "cardBackground": "#ffffff",
+            "inputBackground": "#f5f5f5",
+            "text": "#0a0a0a",
+            "mutedText": "#737373",
+            "border": "#737373"
+        },
+        "dark": {
+            "primary": "#e5e5e5",
+            "primaryHover": "#d4d4d4",
+            "pageBackground": "#0a0a0a",
+            "cardBackground": "#171717",
+            "inputBackground": "#262626",
+            "text": "#fafafa",
+            "mutedText": "#a1a1a1",
+            "border": "#737373"
+        }
+    }
+}

@@ -35,7 +35,10 @@ if (document.documentElement.dataset.theme === undefined) {
 // only when running the standalone Vite app, including visual tests.
 const kcContext: KcContext =
     (window.kcContext as KcContext | undefined) ??
-    getKcContextMockForPreview(new URLSearchParams(window.location.search).get("preview"));
+    (() => {
+        const query = new URLSearchParams(window.location.search);
+        return getKcContextMockForPreview(query.get("preview"), query.get("theme"));
+    })();
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>

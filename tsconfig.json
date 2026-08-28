@@ -12,6 +12,9 @@
         /* Bundler mode */
         "moduleResolution": "bundler",
         "paths": {
+            "@/ui/*": [
+                "./src/components/ui/*"
+            ],
             "@/*": [
                 "./src/*"
             ]

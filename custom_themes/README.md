@@ -51,5 +51,30 @@ bounds `cardRadius`, and restricts images to `data:` images or `http(s)` URLs.
 A file that fails to parse is skipped with an error in the dialog rather than
 breaking the page.
 
-`nebari-default.json` is generated from `DEFAULT_BRANDING_CONFIG`; regenerate it
-rather than hand-editing if those defaults change.
+Current configs use version 2 image sets:
+
+```json
+{
+  "version": 2,
+  "logo": { "light": "https://…/logo-dark-text.png", "dark": "https://…/logo-white-text.png" },
+  "backgroundImage": { "light": "", "dark": "" }
+}
+```
+
+Either appearance may be empty and will fall back to the other. Version 1 files
+with a single `logo` or `backgroundImage` string remain valid; normalization
+copies that image to both appearances, and the next export writes version 2.
+
+`nebari-default.json` is generated from `DEFAULT_BRANDING_CONFIG` and
+`template-default.json` from `TEMPLATE_BRANDING_CONFIG`; regenerate them rather
+than hand-editing if those defaults change.
+
+The template preset is an unbranded but complete starting point. Its input
+surface differs from its card, its neutral border maintains at least 3:1
+non-text contrast in both appearances, and its text colours meet the normal-text
+contrast target. Preserve those relationships when updating the preset; the
+browser assertions in `tests/visual.spec.ts` guard the shipped defaults.
+
+The `themeName` field records which theme a preset was built for. It is
+descriptive — presets are not filtered by it, so a palette exported from one
+theme can be imported into another.

@@ -1,5 +1,8 @@
 import type { BrandingConfig } from "../../branding/brandingConfig";
-import { getBrandingCssVariables } from "../../branding/brandingConfig";
+import {
+    getBrandingCssVariables,
+    getBrandingImage
+} from "../../branding/brandingConfig";
 import {
     getThemeDefinition,
     getThemeLogo,
@@ -20,9 +23,11 @@ export function BrandingPreview({ branding, mode, themeName }: BrandingPreviewPr
         mode,
         import.meta.env.BASE_URL
     );
-    const backgroundStyle = branding.backgroundImage
+    const logo = getBrandingImage(branding.logo, mode);
+    const background = getBrandingImage(branding.backgroundImage, mode);
+    const backgroundStyle = background
         ? {
-              backgroundImage: `linear-gradient(${palette.pageBackground}bf, ${palette.pageBackground}bf), url(${JSON.stringify(branding.backgroundImage)})`
+              backgroundImage: `linear-gradient(${palette.pageBackground}bf, ${palette.pageBackground}bf), url(${JSON.stringify(background)})`
           }
         : undefined;
     const showPasswordForm = branding.loginMode === "password-and-providers";
@@ -38,16 +43,23 @@ export function BrandingPreview({ branding, mode, themeName }: BrandingPreviewPr
             }}
         >
             <div className="branding-preview__card">
-                <div className="branding-preview__logo-wrap">
-                    <img
-                        className="branding-preview__logo"
-                        src={
-                            branding.logo || defaultLogo.src
-                        }
-                        alt={`${branding.companyName} logo`}
-                        style={branding.logo ? undefined : defaultLogo.style}
-                    />
-                </div>
+                {/* A theme may ship no artwork at all (the `template` theme
+                    is deliberately unbranded), in which case the header is
+                    omitted entirely until a logo is uploaded. */}
+                {(logo || defaultLogo) && (
+                    <div className="branding-preview__logo-wrap">
+                        <img
+                            className="branding-preview__logo"
+                            src={logo || defaultLogo?.src}
+                            alt={
+                                branding.companyName
+                                    ? `${branding.companyName} logo`
+                                    : "Company logo"
+                            }
+                            style={logo ? undefined : defaultLogo?.style}
+                        />
+                    </div>
+                )}
                 <h2>Sign in to your account</h2>
 
                 {showPasswordForm && (

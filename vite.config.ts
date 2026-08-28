@@ -57,7 +57,11 @@ export default defineConfig({
         tailwindcss(),
         keycloakify({
             accountThemeImplementation: "Single-Page",
-            themeName: "nebari",
+            /* `template` is first, so it is the theme keycloakify treats as
+               primary: an unconfigured realm gets the unbranded starting point
+               rather than Nebari's branding. Both ship in the same JAR and are
+               selected per realm by `loginTheme`. */
+            themeName: ["template", "nebari"],
             themeVersion: "1.0.0",
             kcContextExclusionsFtl: "src/login/kcContextExclusions.ftl",
             extraThemeProperties: [
@@ -67,6 +71,9 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
+            // Keep the Nebari registry's own "@/ui/*" specifiers resolvable so
+            // components can be installed and updated without local edits.
+            "@/ui": path.resolve(__dirname, "./src/components/ui"),
             "@": path.resolve(__dirname, "./src")
         }
     },

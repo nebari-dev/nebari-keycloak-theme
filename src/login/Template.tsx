@@ -8,6 +8,7 @@ import type { I18n } from "./i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
+    getBrandingImage,
     getBrandingCssVariables,
     isBrandingCustomized,
     type BrandingColorScheme
@@ -72,21 +73,23 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
         (headerNode.props.className?.includes("nebari-title") ||
             headerNode.props.className?.includes("nebari-heading-group"));
     const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+    const logo = getBrandingImage(branding.logo, paletteMode);
+    const background = getBrandingImage(branding.backgroundImage, paletteMode);
 
     return (
         <main
             className="nebari-login-wrapper"
             data-branded={isBranded ? "" : undefined}
             data-has-custom-background={
-                isBranded && branding.backgroundImage !== "" ? "" : undefined
+                isBranded && background !== "" ? "" : undefined
             }
             style={
                 isBranded
                     ? {
                           ...getBrandingCssVariables(branding, paletteMode),
-                          ...(branding.backgroundImage !== ""
+                          ...(background !== ""
                               ? {
-                                    backgroundImage: `linear-gradient(${branding[paletteMode].pageBackground}d9, ${branding[paletteMode].pageBackground}d9), url(${JSON.stringify(branding.backgroundImage)})`
+                                    backgroundImage: `linear-gradient(${branding[paletteMode].pageBackground}d9, ${branding[paletteMode].pageBackground}d9), url(${JSON.stringify(background)})`
                                 }
                               : {})
                       }
@@ -102,9 +105,9 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                         realm has one logo for both, so it replaces the pair rather
                         than being sized by JS — which keeps an unbranded realm
                         rendering exactly as it did before branding existed. */}
-                    {isBranded && branding.logo !== "" ? (
+                    {isBranded && logo !== "" ? (
                         <img
-                            src={branding.logo}
+                            src={logo}
                             alt={`${branding.companyName} logo`}
                             className="nebari-logo"
                         />

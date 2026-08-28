@@ -25,7 +25,13 @@ const { useI18n, ofTypeI18n } = i18nBuilder
         // Runtime branding is stored as a realm localization override for this key.
         nebariBrandingConfig: "base64:e30=",
 
-        alreadyHaveAnAccount: "Already have an account?"
+        alreadyHaveAnAccount: "Already have an account?",
+
+        /* The `template` theme is deliberately unbranded, so it cannot reuse the
+           Nebari-branded overrides above. Custom translations replace a message
+           for every theme in the build, so the neutral wording needs its own key
+           rather than a second override of `registerTitle`. */
+        templateRegisterTitle: "Create your account"
     }
     })
     .build();

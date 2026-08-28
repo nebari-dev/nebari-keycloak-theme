@@ -37,6 +37,11 @@ which feeds a mock `kcContext` to the app — for example
 http://localhost:5173/?preview=register. The available names are listed in
 `getKcContextMockForPreview` in [src/login/KcContext.ts](src/login/KcContext.ts).
 
+Add `theme` to choose which theme renders it —
+`?preview=login&theme=template` or `?preview=login&theme=nebari`. The mock
+reports a theme name that matches nothing in the catalog, so an unpinned preview
+shows whichever theme is currently the default.
+
 ### Working on the Admin or Account console
 
 **The dev server cannot show these.** Both consoles authenticate against a real
@@ -257,9 +262,123 @@ loudly when it does, so they are not silent:
   `buttonVariants({ variant })` as `className` to keep the styling, and pass
   `variant` too so the trigger's own variant classes match.
 
+The Admin Console sidebar is installed from that registry as
+[`src/components/ui/sidebar.tsx`](src/components/ui/sidebar.tsx). Its composition
+lives in [`src/admin/PageNav.tsx`](src/admin/PageNav.tsx): access checks still
+decide which Keycloak routes appear, while Nebari's `SidebarHeader`, groups,
+menus, menu buttons, active states and tokens provide the presentation. The
+menu-button composition removes the component's surface-coloured focus offset
+so every item has one purple `radius-md` focus ring in both colour themes. The
+outer PatternFly `PageSidebar` is intentionally only a responsive layout shell;
+it keeps Keycloak's existing desktop/mobile open state and contains no visible
+navigation controls. When that shell is closed, the composition mirrors its
+state to the navigation's `inert` attribute so off-canvas links cannot receive
+keyboard focus or appear in the accessibility tree.
+[`src/admin/page-nav.css`](src/admin/page-nav.css) documents that narrow bridge
+and should not grow into a second sidebar theme.
+
+The Admin Console's standard resource lists use the registry's
+[`src/components/ui/data-table.tsx`](src/components/ui/data-table.tsx) through
+the owned Keycloak compatibility layer at
+[`src/shared/keycloak-ui-shared/controls/table/KeycloakDataTable.tsx`](src/shared/keycloak-ui-shared/controls/table/KeycloakDataTable.tsx).
+That single boundary covers the existing server loaders, page selection, radio
+selection, expandable event details and row-action definitions used by 48
+screens. Search now commits 300 ms after typing, and its clear action restores
+focus to the input. The shared composition also restores the responsive content
+inset previously supplied by PatternFly's toolbar, keeping search, table and
+pagination aligned with the page heading and separated from tab dividers. The
+pager only renders a row-selection summary when the table exposes selection
+controls, and reports it as `selected of visible rows` for the current page.
+Rows with a primary destination use the full row as their pointer target. The
+name is no longer a separate pointer target, keyboard stop or visually styled
+link. Instead, the row has one labelled keyboard stop with the standard rounded
+purple focus ring, and Enter follows the underlying semantic link. Checkboxes
+and inline controls retain independent behaviour. Search precedes the filter
+field selector, so changing that selector cannot shift the search input. The
+Users screen explicitly assigns that search/filter group to the leading toolbar
+slot while its create and bulk-action controls remain right-aligned. The Users
+toolbar/table files and Client scopes list are explicitly claimed from
+Keycloakify, so `sync-extensions` and subsequent theme builds preserve these
+compositions rather than restoring the upstream toolbar order.
+Per-row kebab menus are hidden by default; exceptional screens can explicitly
+opt back in when an operation cannot be represented elsewhere.
+The compatibility loader can return `{ rows, total }` when a Keycloak endpoint
+provides a count. The Users and Client scopes lists do so, allowing the
+Nebari-styled pager to show `Page X of N` and working first, previous, next and
+last-page controls. For endpoints without a count, next-page availability still
+comes from Keycloak's existing `page size + 1` request, the total is inferred on
+the terminal page, and the last-page control stays disabled until it is known.
+
+Ten specialized views own their row markup but share
+[`PaginatingTableToolbar.tsx`](src/shared/keycloak-ui-shared/controls/table/PaginatingTableToolbar.tsx).
+That toolbar now uses the same Nebari search, page-size and pager controls.
+Small form-layout, tree, drag-and-drop and nested detail tables that need
+PatternFly-specific row semantics remain PatternFly table bodies and use the
+token bridge in `src/admin/index.css`.
+
+### Themes
+
+The build ships two login themes in one JAR, listed in
+[`src/themes/themeCatalog.ts`](src/themes/themeCatalog.ts) and selected per realm
+by Keycloak's **Login theme** setting:
+
+| Theme | Components | Branding | For |
+| --- | --- | --- | --- |
+| `template` | stock shadcn/ui (Radix) | none | the default — a starting point to customize |
+| `nebari` | Nebari registry (Base UI) | Nebari logo and palette | Nebari's own deployments |
+
+`template` is the default: `resolveThemeName` and the console's
+`getConfiguredThemeName` both fall back to `DEFAULT_THEME_NAME`, and it is first
+in keycloakify's `themeName` array, so a realm that has not chosen a theme gets
+the unbranded one rather than someone else's branding.
+
+The two are not interchangeable at the component level — Base UI's
+`<FieldError match={…}>` has no Radix equivalent — so each owns its own pages.
+[`src/login/uiSets.ts`](src/login/uiSets.ts) picks the whole set once from the
+theme name and `KcPage` renders it. Every member is `lazy`, so a realm only
+downloads the theme it uses.
+
+#### The `template` theme
+
+Deliberately unbranded: no logo, no wordmark, no accent hue. Its palette is
+stock shadcn's `neutral` base (Tailwind's `neutral` scale), so the primary is a
+near-black in light mode and near-white in dark. A logo appears only once a
+deployment uploads one in **Theme customization**, so nothing has to be removed
+first.
+
+The neutral starting point is still production-ready rather than a bare
+component demo. Page, card and input surfaces are separate; every visible form
+control paints `inputBackground`; and the neutral-500 border gives unfocused
+controls at least 3:1 non-text contrast against both card and input surfaces in
+light and dark mode. Error text uses a mode-specific neutral-theme red with at
+least 4.5:1 text contrast. These defaults are browser-tested as well as captured
+in the screenshot suite. An admin can deliberately replace any colour in
+**Theme customization**, so imported or hand-edited palettes should preserve
+the same contrast relationships.
+
+- Shell and pages: [`src/login/template/`](src/login/template/) — start with
+  `Template.tsx`, which owns the background, the card and the logo slot.
+- Components: [`src/components/shadcn/`](src/components/shadcn/), kept separate
+  from the Nebari registry in `src/components/ui/` so
+  `npx shadcn@latest add <component>` yields matching components.
+- Defaults: `TEMPLATE_BRANDING_CONFIG` in
+  [`src/branding/brandingConfig.ts`](src/branding/brandingConfig.ts), mirrored
+  for import as `custom_themes/template-default.json`.
+
+Because it is unbranded it cannot reuse the Nebari-branded message overrides in
+`src/login/i18n.ts` — custom translations replace a message for every theme in
+the build, so neutral wording needs its own key (`templateRegisterTitle`).
+Stock shadcn components also assume their initializer's global
+`border-border` base rule. This project supplies the equivalent under
+`[data-login-theme="template"]` only, so generated Card, Alert and outline
+Button borders receive the configured token without leaking into the Nebari
+theme or Keycloak consoles. Keep that rule scoped when adding more shadcn
+components. The shared shell also supplies the page's `<main>` landmark and
+semantic `<h1>`; individual flow pages provide the localized heading text.
+
 ### Login pages
 
-Every login page is built from the design-system components — `Field` /
+The `nebari` theme's login pages are built from the design-system components — `Field` /
 `FieldLabel` / `FieldError`, `Input`, `Button`, `Checkbox`, `Alert` — so the
 login screens, the consoles and the rest of Nebari share one visual language.
 The password-with-reveal control is
@@ -294,13 +413,18 @@ components that now render Nebari equivalents — `Button`, `TextInput`,
 call site without editing (and thereby freezing against upstream) hundreds of
 files. The adapters live in
 [`src/components/patternfly/`](src/components/patternfly/README.md), which also
-records what deliberately stays on PatternFly and why: `Table` (KeycloakDataTable
-drives sorting, selection, expandable rows and the actions kebab through
-PatternFly props), `Radio`, `Select`/`MenuToggle`, `Modal`, toast `Alert`, and
-`variant="control"` buttons.
+records what deliberately stays on PatternFly and why: specialized table
+bodies, `Radio`, `Select`/`MenuToggle`, `Modal`, toast `Alert`, and
+`variant="control"` buttons. Standard pageable and filterable lists use the
+Nebari Data Table compatibility layer described above.
 
 Whatever stays on PatternFly is restyled to the same tokens by
-[`src/admin/index.css`](src/admin/index.css) and `src/admin/page-nav.css`.
+[`src/admin/index.css`](src/admin/index.css). The Admin Console's visible sidebar
+is the Nebari component described above, rather than a CSS skin over PatternFly
+navigation. The bridge is intentionally small: shared token rules cover legacy
+controls that Keycloak still owns. For example, select focus now retains its
+one-pixel resting border and draws a non-layout-changing purple ring, preventing
+compact table rows from shifting without adding a screen-specific override.
 
 Refs matter in the adapters: 29 views spread `{...register(…)}` from
 react-hook-form onto these controls, and that spread carries a callback ref. The
@@ -363,7 +487,22 @@ per document**, so a console calls it in its header and passes `themeMode` down.
 When the Nebari Admin Console theme is active, administrators can open
 **Theme customization** to edit the login palette, company name, logo,
 background image, card radius, default color scheme, and available login
-methods. Changes are previewed before they are published.
+methods. Logos and backgrounds can differ between light and dark appearances.
+Changes are previewed before they are published.
+
+Uploaded PNG, JPEG and WebP files open in a crop editor before they enter the
+draft. It supports original, wordmark, square and common landscape frames,
+pointer dragging, keyboard positioning, and 100–300% zoom. Applying the crop
+converts the source-pixel selection to WebP and bounds it to 640×240 for logos or
+1600×1000 for backgrounds. Logos use a smaller storage budget because two may
+be stored alongside the backgrounds. Hosted image URLs bypass local cropping
+and are used as supplied.
+
+Each asset has **Light appearance** and **Dark appearance** values. An empty
+variant falls back to its sibling, so a deployment can upload one universal
+asset or a contrast-safe pair. The editor preview and both login component sets
+resolve the same fallback, preventing a white wordmark from disappearing on a
+light card without requiring every realm to upload two files.
 
 Published settings are stored in the realm's localization messages under the
 `nebariBrandingConfig` key and are applied to subsequent login page loads
@@ -373,8 +512,9 @@ Unlike the vendored console views, this page is locally owned, so it is built
 from the design-system components directly — `Card`, `Field`, `Input`, `Select`,
 `Slider`, `Button`, `Alert`, `DropdownMenu`, `Dialog`. Only `PageSection` is
 still PatternFly, because it supplies the page chrome every other console page
-sits in. `branding.css` therefore only lays things out and styles the two things
-that have no component: the native colour swatch and the preview panel.
+sits in. `branding.css` owns page layout plus the surfaces that have no matching
+component: the native colour swatch, preview panel, and crop viewport. Dialog,
+form-control, button, select, and slider states remain design-system owned.
 
 #### Where a published theme lives, and how to make it survive
 
@@ -410,17 +550,29 @@ a separate step, so an import can still be discarded.
 Imported JSON is untrusted and always goes through `normalizeBrandingConfig`,
 which is the same validator the published config passes through.
 
+`BrandingConfig` version 2 stores `logo` and `backgroundImage` as
+`{ light, dark }` image sets. Version 1 imports and already-published realm values
+remain supported: their single string is expanded to both appearances during
+normalization, so upgrading does not change what users see. The next publish or
+export writes the normalized version 2 shape.
+
 Branding reaches the page as **CSS custom properties**, set inline on the login
 wrapper by `getBrandingCssVariables` — `--card`, `--primary`, `--input`,
 `--ring` and friends, which the design-system components already read.
 
-**The whole layer is gated on `[data-branded]`**, which `Template` sets only when
-`isBrandingCustomized` finds a published config that differs from the theme's
-defaults. An unbranded realm therefore gets neither the inline variables nor the
-`[data-branded]` rules in `src/theme.css`, and renders byte-identically to a
-build without this feature — which is what the screenshot suite verifies. Keep
-that gate: without it, adding branding restyles every login page for every realm,
-whether or not anyone asked for branding.
+For the **Nebari theme**, the branding layer is gated on `[data-branded]`, which
+its `Template` sets only when `isBrandingCustomized` finds a published config
+that differs from the theme's defaults. An unbranded Nebari realm therefore gets
+neither the inline variables nor the `[data-branded]` rules in `src/theme.css`
+and renders byte-identically to a build without runtime branding. Keep that gate:
+without it, the editor would restyle every existing Nebari login page whether or
+not anyone asked for branding.
+
+The **template theme** always applies its selected palette as shadcn tokens on
+its own `<main>`. That is intentional: the shared `:root` tokens are Nebari's,
+so an unconfigured template realm must actively establish its neutral defaults
+instead of inheriting purple. Its variables remain local to the login shell and
+do not need the Nebari-specific `[data-branded]` CSS bridge.
 
 Add branded styling under `.nebari-login-wrapper[data-branded]`, never to the
 unscoped selectors. The login stylesheet's own element selectors
@@ -431,11 +583,13 @@ instead of `--accent`.
 
 Three constraints on the palette are easy to break:
 
-- **The defaults must equal the design system's tokens.** They are the baseline
+- **Each theme's defaults must equal its intended component tokens.** They are the baseline
   the `[data-branded]` gate compares against, and the starting point when an
   admin edits a single colour — so an approximation would shift every untouched
   colour the moment a realm brands anything. `DEFAULT_BRANDING_CONFIG` holds the
-  tokens rasterised to sRGB hex.
+  Nebari tokens rasterised to sRGB hex; `TEMPLATE_BRANDING_CONFIG` holds the
+  neutral template palette, with stronger neutral borders for accessible control
+  boundaries.
 - **Values must stay `#rrggbb`.** The wrapper's background-image gradient
   concatenates an alpha suffix onto `pageBackground`, which only parses on
   6-digit hex — not `oklch()`.
@@ -469,9 +623,10 @@ theme work, not here. Inside `[data-branded]`, use `--ring` for focus and
 - `.nebari-*` classes and the design-system components are two ways of styling
   the same thing. They are kept in step by hand because `UserProfileFormFields`
   needs the class-based path; prefer the components for anything new.
-- Uploaded branding images are compressed and stored inline in the realm's
-  localization messages, which is why the editor labels image storage
-  experimental. Move them to object storage before relying on it in production.
+- Uploaded branding images are cropped, compressed and stored inline in the
+  realm's localization messages. Per-kind storage limits keep paired artwork
+  bounded, but object storage remains preferable for large production asset
+  libraries.
 - The registry's components take `ref` as a plain prop (the React 19
   convention) and this app is on React 18, where a function component cannot
   receive one. `ProfileMenu` works around it for its menu trigger by rendering a

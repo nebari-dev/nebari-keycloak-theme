@@ -19,11 +19,17 @@ export type BrandingPalette = {
 export type BrandingColorScheme = "light" | "dark" | "system";
 export type BrandingLoginMode = "password-and-providers" | "providers-only";
 
+/** Appearance-specific artwork. An empty variant falls back to the other one. */
+export type BrandingImageSet = {
+    light: string;
+    dark: string;
+};
+
 export type BrandingConfig = {
     version: 1 | 2;
     companyName: string;
-    logo: string;
-    backgroundImage: string;
+    logo: BrandingImageSet;
+    backgroundImage: BrandingImageSet;
     cardRadius: number;
     colorScheme: BrandingColorScheme;
     loginMode: BrandingLoginMode;
@@ -32,10 +38,10 @@ export type BrandingConfig = {
 };
 
 export const DEFAULT_BRANDING_CONFIG: BrandingConfig = {
-    version: 1,
+    version: 2,
     companyName: "Nebari",
-    logo: "",
-    backgroundImage: "",
+    logo: { light: "", dark: "" },
+    backgroundImage: { light: "", dark: "" },
     cardRadius: 12,
     /* Defaults describe an unbranded realm, so they have to reproduce the
        behaviour the theme already had: follow the OS colour preference (the
@@ -71,6 +77,50 @@ export const DEFAULT_BRANDING_CONFIG: BrandingConfig = {
     }
 };
 
+/**
+ * Defaults for the `template` theme: stock shadcn/ui's `neutral` base, which is
+ * Tailwind's `neutral` scale rasterised to sRGB hex (the palette has to stay in
+ * `#rrggbb` — see the note on `DEFAULT_BRANDING_CONFIG`).
+ *
+ * Deliberately unbranded. There is no logo and no accent hue: the primary is a
+ * near-black in light mode and a near-white in dark mode, as an un-themed
+ * shadcn install renders. The form surfaces add a stronger neutral border so
+ * this is a usable login template rather than only a component-library demo. A
+ * customer picks their own colours from here instead of removing someone else's.
+ */
+export const TEMPLATE_BRANDING_CONFIG: BrandingConfig = {
+    version: 2,
+    companyName: "",
+    logo: { light: "", dark: "" },
+    backgroundImage: { light: "", dark: "" },
+    /* shadcn's own `--radius` is 0.625rem = 10px. */
+    cardRadius: 10,
+    colorScheme: "system",
+    loginMode: "password-and-providers",
+    light: {
+        primary: "#171717",
+        primaryHover: "#262626",
+        pageBackground: "#f5f5f5",
+        cardBackground: "#ffffff",
+        inputBackground: "#f5f5f5",
+        text: "#0a0a0a",
+        mutedText: "#737373",
+        /* neutral-500 keeps unfocused controls and cards distinguishable from
+           their neighbouring surfaces without introducing a brand colour. */
+        border: "#737373"
+    },
+    dark: {
+        primary: "#e5e5e5",
+        primaryHover: "#d4d4d4",
+        pageBackground: "#0a0a0a",
+        cardBackground: "#171717",
+        inputBackground: "#262626",
+        text: "#fafafa",
+        mutedText: "#a1a1a1",
+        border: "#737373"
+    }
+};
+
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 const SAFE_DATA_IMAGE = /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=]+$/i;
 
@@ -96,6 +146,41 @@ function safeImage(value: unknown): string {
     }
 }
 
+/**
+ * Version 1 stored one image string. Treating it as both variants preserves its
+ * exact rendering after the version 2 migration. Version 2 may leave either
+ * variant empty; `getBrandingImage` supplies the runtime fallback.
+ */
+function normalizeImageSet(
+    value: unknown,
+    fallback: BrandingImageSet
+): BrandingImageSet {
+    if (typeof value === "string") {
+        const image = safeImage(value);
+
+        return { light: image, dark: image };
+    }
+
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+        return structuredClone(fallback);
+    }
+
+    const images = value as Partial<BrandingImageSet>;
+
+    return {
+        light: images.light === undefined ? fallback.light : safeImage(images.light),
+        dark: images.dark === undefined ? fallback.dark : safeImage(images.dark)
+    };
+}
+
+/** Resolve an appearance-specific image, falling back to its sibling variant. */
+export function getBrandingImage(
+    images: BrandingImageSet,
+    mode: "light" | "dark"
+): string {
+    return images[mode] || images[mode === "light" ? "dark" : "light"];
+}
+
 function normalizePalette(value: unknown, fallback: BrandingPalette): BrandingPalette {
     const palette = typeof value === "object" && value !== null ? value as Partial<BrandingPalette> : {};
 
@@ -118,12 +203,15 @@ export function normalizeBrandingConfig(
     const config = typeof value === "object" && value !== null ? value as Partial<BrandingConfig> : {};
 
     return {
-        version: config.version === 1 || config.version === 2
-            ? config.version
-            : defaults.version,
+        /* Normalization is also the v1 → v2 migration boundary. Published
+           legacy strings are expanded above before being serialized again. */
+        version: 2,
         companyName: safeText(config.companyName, defaults.companyName, 80),
-        logo: safeImage(config.logo),
-        backgroundImage: safeImage(config.backgroundImage),
+        logo: normalizeImageSet(config.logo, defaults.logo),
+        backgroundImage: normalizeImageSet(
+            config.backgroundImage,
+            defaults.backgroundImage
+        ),
         cardRadius:
             typeof config.cardRadius === "number" && Number.isFinite(config.cardRadius)
                 ? Math.min(32, Math.max(0, Math.round(config.cardRadius)))

@@ -9,17 +9,25 @@
 
 // @ts-nocheck
 
-import { label, useEnvironment } from "../shared/keycloak-ui-shared";
+import { Badge } from "@/components/ui/badge";
 import {
-  Label,
-  Nav,
-  NavGroup,
-  PageSidebar,
-  PageSidebarBody,
-} from "../shared/@patternfly/react-core";
-import { FormEvent } from "react";
+    Sidebar,
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarMenuLabel,
+    SidebarProvider,
+    SidebarSeparator
+} from "@/components/ui/sidebar";
+import { label, useEnvironment } from "../shared/keycloak-ui-shared";
+import { PageSidebar, PageSidebarContext } from "../shared/@patternfly/react-core";
+import { type ComponentProps, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useMatch } from "react-router-dom";
 import { useAccess } from "./context/access/Access";
 import { useRealm } from "./context/realm-context/RealmContext";
 import { useServerInfo } from "./context/server-info/ServerInfoProvider";
@@ -31,149 +39,187 @@ import useIsFeatureEnabled, { Feature } from "./utils/useIsFeatureEnabled";
 import "./page-nav.css";
 
 type LeftNavProps = {
-  title: string;
-  path: string;
-  id?: string;
+    title: string;
+    path: string;
+    id?: string;
 };
 
+/**
+ * The registry Sidebar separates its focus ring from each menu item with a
+ * sidebar-coloured offset. That layer reads as a second white ring on active
+ * items, so the Admin navigation uses the standard Nebari purple ring directly
+ * against a `radius-md` target instead.
+ */
+const menuItemFocus = "rounded-md focus-visible:ring-ring focus-visible:ring-offset-0";
+
+/**
+ * PatternFly visually moves a closed mobile sidebar off-canvas and marks its
+ * shell `aria-hidden`, but does not remove descendant links from sequential
+ * keyboard navigation. Mirroring the PageSidebar state to `inert` keeps hidden
+ * navigation out of both the focus order and accessibility tree.
+ */
+const ResponsiveSidebar = (props: ComponentProps<typeof Sidebar>) => {
+    const { isSidebarOpen = true } = useContext(PageSidebarContext);
+
+    return <Sidebar {...props} inert={isSidebarOpen ? undefined : ""} />;
+};
+
+/**
+ * Access-aware router link rendered through Nebari's menu-button primitive.
+ * Keeping route lookup here ensures hidden Keycloak sections never leave an
+ * empty menu item behind, while `useMatch` drives the design system's active
+ * state for both section roots and their nested detail pages.
+ */
 const LeftNav = ({ title, path, id }: LeftNavProps) => {
-  const { t } = useTranslation();
-  const { hasAccess } = useAccess();
-  const { realm } = useRealm();
-  const encodedRealm = encodeURIComponent(realm);
-  const route = routes.find(
-    (route) =>
-      route.path.replace(/\/:.+?(\?|(?:(?!\/).)*|$)/g, "") === (id || path),
-  );
+    const { t } = useTranslation();
+    const { hasAccess } = useAccess();
+    const { realm } = useRealm();
+    const encodedRealm = encodeURIComponent(realm);
+    const destination = `/${encodedRealm}${path}`;
+    const isActive = useMatch({ path: `${destination}/*`, end: false }) !== null;
+    const route = routes.find(
+        route => route.path.replace(/\/:.+?(\?|(?:(?!\/).)*|$)/g, "") === (id || path)
+    );
+    const accessAllowed =
+        route &&
+        (route.handle.access instanceof Array
+            ? hasAccess(...route.handle.access)
+            : hasAccess(route.handle.access));
 
-  const accessAllowed =
-    route &&
-    (route.handle.access instanceof Array
-      ? hasAccess(...route.handle.access)
-      : hasAccess(route.handle.access));
+    if (!accessAllowed) {
+        return undefined;
+    }
 
-  if (!accessAllowed) {
-    return undefined;
-  }
+    const name = `nav-item${path.replace("/", "-")}`;
+    const translatedTitle = t(title);
 
-  const name = "nav-item" + path.replace("/", "-");
-  return (
-    <li>
-      <NavLink
-        id={name}
-        data-testid={name}
-        to={`/${encodedRealm}${path}`}
-        className={({ isActive }) =>
-          `pf-v5-c-nav__link${isActive ? " pf-m-current" : ""}`
-        }
-      >
-        {t(title, { defaultValue: title })}
-      </NavLink>
-    </li>
-  );
+    return (
+        <SidebarMenuItem>
+            <SidebarMenuButton
+                active={isActive}
+                className={menuItemFocus}
+                render={
+                    <NavLink
+                        id={name}
+                        data-testid={name}
+                        to={destination}
+                    />
+                }
+                tooltip={translatedTitle}
+                variant="ghost"
+            >
+                <SidebarMenuLabel>{translatedTitle}</SidebarMenuLabel>
+            </SidebarMenuButton>
+        </SidebarMenuItem>
+    );
 };
 
 export const PageNav = () => {
-  const { t } = useTranslation();
-  const { environment } = useEnvironment<Environment>();
-  const { hasAccess, hasSomeAccess } = useAccess();
-  const { componentTypes } = useServerInfo();
-  const isFeatureEnabled = useIsFeatureEnabled();
-  const pages =
-    componentTypes?.["org.keycloak.services.ui.extend.UiPageProvider"];
-  const navigate = useNavigate();
-  const { realm, realmRepresentation } = useRealm();
+    const { t } = useTranslation();
+    const { environment } = useEnvironment<Environment>();
+    const { hasAccess, hasSomeAccess } = useAccess();
+    const { componentTypes } = useServerInfo();
+    const isFeatureEnabled = useIsFeatureEnabled();
+    const pages = componentTypes?.["org.keycloak.services.ui.extend.UiPageProvider"];
+    const { realm, realmRepresentation } = useRealm();
+    const showManage = hasSomeAccess(
+        "view-realm",
+        "query-groups",
+        "query-users",
+        "query-clients",
+        "view-events"
+    );
+    const showConfigure = hasSomeAccess(
+        "view-realm",
+        "query-clients",
+        "view-identity-providers"
+    );
+    const showWorkflows = hasAccess("manage-realm") && isFeatureEnabled(Feature.Workflows);
+    const showManageRealm = environment.masterRealm === environment.realm;
 
-  type SelectedItem = {
-    groupId: number | string;
-    itemId: number | string;
-    to: string;
-    event: FormEvent<HTMLInputElement>;
-  };
+    return (
+        /* PatternFly's shell remains only for Keycloak's responsive Page state.
+         * The visible navigation and all interactive items are Nebari Sidebar
+         * components; see page-nav.css for the small layout bridge. */
+        <PageSidebar className="keycloak__page_nav__shell" theme="light">
+            <SidebarProvider>
+                <ResponsiveSidebar aria-label={t("navigation")} className="w-full rounded-none">
+                    <SidebarHeader className="border-sidebar-border border-b px-4 py-3">
+                        <h2 className="flex min-w-0 flex-1 items-center gap-2 text-sm">
+                            <span
+                                className="min-w-0 flex-1 truncate font-semibold"
+                                data-testid="currentRealm"
+                            >
+                                {label(t, realmRepresentation?.displayName, realm)}
+                            </span>
+                            <Badge className="shrink-0" variant="secondary">
+                                {t("currentRealm")}
+                            </Badge>
+                        </h2>
+                    </SidebarHeader>
 
-  const onSelect = (item: SelectedItem) => {
-    navigate(item.to);
-    item.event.preventDefault();
-  };
+                    <SidebarContent className="gap-2 py-3">
+                        {showManageRealm && (
+                            <>
+                                <SidebarGroup aria-label={t("manageRealms")} role="group">
+                                    <SidebarMenu>
+                                        <LeftNav title="manageRealms" path="/realms" />
+                                    </SidebarMenu>
+                                </SidebarGroup>
+                                {(showManage || showConfigure) && <SidebarSeparator />}
+                            </>
+                        )}
 
-  const showManage = hasSomeAccess(
-    "view-realm",
-    "query-groups",
-    "query-users",
-    "query-clients",
-    "view-events",
-  );
+                        {showManage && (
+                            <SidebarGroup aria-label={t("manage")} role="group">
+                                <SidebarGroupLabel>{t("manage")}</SidebarGroupLabel>
+                                <SidebarMenu>
+                                    {isFeatureEnabled(Feature.Organizations) &&
+                                        realmRepresentation?.organizationsEnabled && (
+                                            <LeftNav title="organizations" path="/organizations" />
+                                        )}
+                                    <LeftNav title="clients" path="/clients" />
+                                    <LeftNav title="clientScopes" path="/client-scopes" />
+                                    <LeftNav title="realmRoles" path="/roles" />
+                                    <LeftNav title="users" path="/users" />
+                                    <LeftNav title="groups" path="/groups" />
+                                    <LeftNav title="sessions" path="/sessions" />
+                                    <LeftNav title="events" path="/events" />
+                                </SidebarMenu>
+                            </SidebarGroup>
+                        )}
 
-  const showConfigure = hasSomeAccess(
-    "view-realm",
-    "query-clients",
-    "view-identity-providers",
-  );
+                        {showManage && showConfigure && <SidebarSeparator />}
 
-  const showWorkflows =
-    hasAccess("manage-realm") && isFeatureEnabled(Feature.Workflows);
-
-  const showManageRealm = environment.masterRealm === environment.realm;
-
-  return (
-    <PageSidebar className="keycloak__page_nav__nav">
-      <PageSidebarBody>
-        <Nav onSelect={(_event, item) => onSelect(item as SelectedItem)}>
-          <h2
-            className="pf-v5-c-nav__section-title"
-            style={{ wordWrap: "break-word" }}
-          >
-            <span data-testid="currentRealm">
-              {label(t, realmRepresentation?.displayName, realm)}
-            </span>{" "}
-            <Label color="blue">{t("currentRealm")}</Label>
-          </h2>
-          {showManageRealm && (
-            <NavGroup>
-              <LeftNav title={t("manageRealms")} path="/realms" />
-            </NavGroup>
-          )}
-          {showManage && (
-            <NavGroup aria-label={t("manage")} title={t("manage")}>
-              {isFeatureEnabled(Feature.Organizations) &&
-                realmRepresentation?.organizationsEnabled && (
-                  <LeftNav title="organizations" path="/organizations" />
-                )}
-              <LeftNav title="clients" path="/clients" />
-              <LeftNav title="clientScopes" path="/client-scopes" />
-              <LeftNav title="realmRoles" path="/roles" />
-              <LeftNav title="users" path="/users" />
-              <LeftNav title="groups" path="/groups" />
-              <LeftNav title="sessions" path="/sessions" />
-              <LeftNav title="events" path="/events" />
-            </NavGroup>
-          )}
-
-          {showConfigure && (
-            <NavGroup aria-label={t("configure")} title={t("configure")}>
-              <LeftNav title="Theme customization" path="/branding" />
-              <LeftNav title="realmSettings" path="/realm-settings" />
-              <LeftNav title="authentication" path="/authentication" />
-              {isFeatureEnabled(Feature.AdminFineGrainedAuthzV2) &&
-                realmRepresentation?.adminPermissionsEnabled && (
-                  <LeftNav title="permissions" path="/permissions" />
-                )}
-              <LeftNav title="identityProviders" path="/identity-providers" />
-              <LeftNav title="userFederation" path="/user-federation" />
-              {showWorkflows && <LeftNav title="workflows" path="/workflows" />}
-              {isFeatureEnabled(Feature.DeclarativeUI) &&
-                pages?.map((p) => (
-                  <LeftNav
-                    key={p.id}
-                    title={p.id}
-                    path={toPage({ providerId: p.id }).pathname!}
-                    id="/page-section"
-                  />
-                ))}
-            </NavGroup>
-          )}
-        </Nav>
-      </PageSidebarBody>
-    </PageSidebar>
-  );
+                        {showConfigure && (
+                            <SidebarGroup aria-label={t("configure")} role="group">
+                                <SidebarGroupLabel>{t("configure")}</SidebarGroupLabel>
+                                <SidebarMenu>
+                                    <LeftNav title="Theme customization" path="/branding" />
+                                    <LeftNav title="realmSettings" path="/realm-settings" />
+                                    <LeftNav title="authentication" path="/authentication" />
+                                    {isFeatureEnabled(Feature.AdminFineGrainedAuthzV2) &&
+                                        realmRepresentation?.adminPermissionsEnabled && (
+                                            <LeftNav title="permissions" path="/permissions" />
+                                        )}
+                                    <LeftNav title="identityProviders" path="/identity-providers" />
+                                    <LeftNav title="userFederation" path="/user-federation" />
+                                    {showWorkflows && <LeftNav title="workflows" path="/workflows" />}
+                                    {isFeatureEnabled(Feature.DeclarativeUI) &&
+                                        pages?.map(page => (
+                                            <LeftNav
+                                                key={page.id}
+                                                title={page.id}
+                                                path={toPage({ providerId: page.id }).pathname!}
+                                                id="/page-section"
+                                            />
+                                        ))}
+                                </SidebarMenu>
+                            </SidebarGroup>
+                        )}
+                    </SidebarContent>
+                </ResponsiveSidebar>
+            </SidebarProvider>
+        </PageSidebar>
+    );
 };

@@ -177,6 +177,21 @@
         margin: 0;
         padding: 0;
     }
+
+    /* Stock shadcn's initializer assigns `border-border` to every element, and
+     * its generated Card, Alert and outline Button rely on that default instead
+     * of repeating a colour utility. Scope the same foundation to the template
+     * login shell so those components render correctly without recolouring the
+     * Nebari theme or either Keycloak console. Explicit component utilities
+     * such as `border-input` remain later in the cascade and still win. */
+    :where(
+        [data-login-theme="template"],
+        [data-login-theme="template"] *,
+        [data-login-theme="template"] *::before,
+        [data-login-theme="template"] *::after
+    ) {
+        border-color: var(--border);
+    }
 }
 
 html,
@@ -662,9 +677,19 @@ a.nebari-button-secondary:hover {
 
 /* ========================
    KEYCLOAK BUILT-IN CLASS OVERRIDES
-   ======================== */
+   ========================
+   Scoped with :where(.nebari-login-wrapper): `kcClsx` always prepends these
+   logical names, so an unscoped rule here styles every theme that renders
+   Keycloak's built-in form markup — including the unbranded `template` theme,
+   whose Tailwind utilities sit in @layer utilities and therefore lose to an
+   unlayered class rule.
 
-.kcLabelClass {
+   :where() rather than a plain descendant selector because it adds no
+   specificity. These rules are (0,1,0) and several .nebari-* rules depend on
+   beating them at that weight; prefixing the class directly would raise them to
+   (0,2,0) and silently invert those pairs. */
+
+:where(.nebari-login-wrapper) .kcLabelClass {
     display: block;
     margin-bottom: 0.375rem;
     font-size: 0.875rem;
@@ -672,7 +697,7 @@ a.nebari-button-secondary:hover {
     color: var(--text-secondary);
 }
 
-.kcInputClass {
+:where(.nebari-login-wrapper) .kcInputClass {
     width: 100%;
     padding: 0.625rem 0.875rem;
     font-size: 0.9375rem;
@@ -685,13 +710,13 @@ a.nebari-button-secondary:hover {
     font-weight: 500;
 }
 
-.kcInputClass:focus {
+:where(.nebari-login-wrapper) .kcInputClass:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
 }
 
-.kcInputErrorMessageClass {
+:where(.nebari-login-wrapper) .kcInputErrorMessageClass {
     display: block;
     margin-top: 0.375rem;
     font-size: 0.8125rem;
@@ -699,7 +724,7 @@ a.nebari-button-secondary:hover {
     font-weight: 400;
 }
 
-.kcButtonClass {
+:where(.nebari-login-wrapper) .kcButtonClass {
     width: 100%;
     padding: 0.625rem 1.25rem;
     font-size: 0.9375rem;
@@ -711,16 +736,16 @@ a.nebari-button-secondary:hover {
     font-family: inherit;
 }
 
-.kcButtonPrimaryClass {
+:where(.nebari-login-wrapper) .kcButtonPrimaryClass {
     background: var(--accent);
     color: white;
 }
 
-.kcButtonPrimaryClass:hover {
+:where(.nebari-login-wrapper) .kcButtonPrimaryClass:hover {
     background: var(--accent-dark);
 }
 
-.kcFormOptionsClass {
+:where(.nebari-login-wrapper) .kcFormOptionsClass {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -728,13 +753,13 @@ a.nebari-button-secondary:hover {
     font-size: 0.875rem;
 }
 
-.kcFormSocialAccountSectionClass hr {
+:where(.nebari-login-wrapper) .kcFormSocialAccountSectionClass hr {
     border: none;
     border-top: 1px solid var(--border-color);
     margin: 1.5rem 0;
 }
 
-.kcFormSocialAccountListClass {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListClass {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -743,7 +768,7 @@ a.nebari-button-secondary:hover {
     gap: 0.5rem;
 }
 
-.kcFormSocialAccountListButtonClass {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListButtonClass {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -759,7 +784,7 @@ a.nebari-button-secondary:hover {
     transition: var(--transition-fast);
 }
 
-.kcFormSocialAccountListButtonClass:hover {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListButtonClass:hover {
     border-color: var(--accent);
     background: var(--bg-hover);
     text-decoration: none;
@@ -1253,7 +1278,7 @@ a.nebari-button.nebari-button-primary:visited {
 /* Label/LG — shared input-label typography across all login-flow forms. */
 .nebari-label,
 [data-slot="field-label"],
-.kcLabelClass,
+:where(.nebari-login-wrapper) .kcLabelClass,
 .nebari-label-wrapper .nebari-label {
     color: var(--color-foreground-default, #262628);
     font-family: var(--Font-Sans, Geist);

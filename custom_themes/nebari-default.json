@@ -2,13 +2,19 @@
     "nebariThemeExport": 1,
     "name": "Nebari default",
     "description": "The Nebari design system palette. Import this to return a realm to the unbranded look.",
-    "exportedAt": "2026-08-20",
+    "exportedAt": "2026-08-25",
     "themeName": "nebari",
     "config": {
-        "version": 1,
+        "version": 2,
         "companyName": "Nebari",
-        "logo": "",
-        "backgroundImage": "",
+        "logo": {
+            "light": "",
+            "dark": ""
+        },
+        "backgroundImage": {
+            "light": "",
+            "dark": ""
+        },
         "cardRadius": 12,
         "colorScheme": "system",
         "loginMode": "password-and-providers",

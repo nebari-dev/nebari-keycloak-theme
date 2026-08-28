@@ -50,9 +50,13 @@ import {
     type DerivedPaletteKey
 } from "../../branding/derivePalette";
 import { isHexColor } from "../../branding/color";
-import { prepareBrandingImage } from "../../branding/imageUpload";
+import {
+    getBrandingImageDimensions,
+    type ImageDimensions
+} from "../../branding/imageUpload";
 import {
     CUSTOM_THEME_NAMES,
+    DEFAULT_THEME_NAME,
     cloneThemeDefaults,
     getThemeDefinition,
     parseThemeBrandingConfig,
@@ -63,10 +67,56 @@ import { useAdminClient } from "../admin-client";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { BrandingPreview } from "./BrandingPreview";
 import { ImportThemeDialog } from "./ImportThemeDialog";
+import { ImageCropDialog } from "./ImageCropDialog";
 
 import "./branding.css";
 
 type PaletteKey = keyof BrandingPalette;
+
+/**
+ * A hex field that commits only complete colours.
+ *
+ * Palette linkage is recomputed by comparing each colour against the one the
+ * current primary would derive, so an invalid primary erases it. Writing every
+ * keystroke straight to the draft walked it through "#", "#9", "#95"… and the
+ * keystroke that finally completed the colour was read against that invalid
+ * predecessor: `getLinkedKeys` returned nothing and no field followed the new
+ * primary. Typing a colour therefore silently broke the cascade, while the
+ * badges still read "Auto" because the untouched fields still matched the
+ * theme defaults.
+ *
+ * Holding the partial text here keeps the draft on the last valid colour, so
+ * linkage survives typing and only real colours ever reach the config.
+ */
+function HexColorInput({
+    id,
+    label,
+    onCommit,
+    value
+}: {
+    id: string;
+    label: string;
+    onCommit: (value: string) => void;
+    value: string;
+}) {
+    const [text, setText] = useState<string | null>(null);
+
+    return (
+        <Input
+            aria-label={label}
+            id={id}
+            onBlur={() => setText(null)}
+            onChange={event => {
+                const next = event.target.value;
+
+                setText(next);
+
+                if (isHexColor(next)) onCommit(next);
+            }}
+            value={text ?? value}
+        />
+    );
+}
 
 const PALETTE_FIELDS: { key: PaletteKey; label: string }[] = [
     { key: "primary", label: "Primary action" },
@@ -101,7 +151,7 @@ function getConfiguredThemeName(
         if (themeName) return themeName;
     }
 
-    return "nebari";
+    return DEFAULT_THEME_NAME;
 }
 
 /**
@@ -202,7 +252,10 @@ function ImageControl({
     onChange,
     onError
 }: ImageControlProps) {
-    const [processing, setProcessing] = useState(false);
+    const [pendingImage, setPendingImage] = useState<{
+        file: File;
+        dimensions: ImageDimensions;
+    }>();
     const isEmbedded = value.startsWith("data:");
 
     const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -210,59 +263,70 @@ function ImageControl({
         event.target.value = "";
         if (!file) return;
 
-        setProcessing(true);
         try {
-            onChange(await prepareBrandingImage(file, kind));
+            setPendingImage({
+                file,
+                dimensions: await getBrandingImageDimensions(file)
+            });
         } catch (error) {
             onError(
                 error instanceof Error
                     ? error.message
                     : "The image could not be processed."
             );
-        } finally {
-            setProcessing(false);
         }
     };
 
     return (
-        <Field>
-            <FieldLabel htmlFor={id}>{label}</FieldLabel>
-            <FieldDescription>{help}</FieldDescription>
-            <div className="branding-image-control">
-                <Input
-                    aria-label={`${label} URL`}
-                    disabled={isEmbedded}
-                    id={id}
-                    onChange={event => onChange(event.target.value)}
-                    placeholder="https://assets.example.com/image.png"
-                    value={isEmbedded ? "Uploaded image stored in this realm" : value}
-                />
-                {/* A label wrapping a hidden file input, rather than a Button
-                    with a click handler: it keeps the native picker's keyboard
-                    and screen-reader behaviour without a ref. */}
-                <Button
-                    disabled={processing}
-                    render={<label htmlFor={`${id}-file`} />}
-                    variant="outline"
-                >
-                    {processing ? <Spinner /> : <UploadIcon aria-hidden />}
-                    {processing ? "Optimizing…" : "Upload"}
-                </Button>
-                <input
-                    accept="image/png,image/jpeg,image/webp"
-                    className="sr-only"
-                    disabled={processing}
-                    id={`${id}-file`}
-                    onChange={handleFile}
-                    type="file"
-                />
-                {value !== "" && (
-                    <Button onClick={() => onChange("")} variant="ghost">
-                        Remove
+        <>
+            <Field>
+                <FieldLabel htmlFor={id}>{label}</FieldLabel>
+                <FieldDescription>{help}</FieldDescription>
+                <div className="branding-image-control">
+                    <Input
+                        aria-label={`${label} URL`}
+                        disabled={isEmbedded}
+                        id={id}
+                        onChange={event => onChange(event.target.value)}
+                        placeholder="https://assets.example.com/image.png"
+                        value={isEmbedded ? "Uploaded image stored in this realm" : value}
+                    />
+                    {/* A label wrapping a hidden file input, rather than a Button
+                        with a click handler: it keeps the native picker's keyboard
+                        and screen-reader behaviour without a ref. */}
+                    <Button
+                        render={<label htmlFor={`${id}-file`} />}
+                        variant="outline"
+                    >
+                        <UploadIcon aria-hidden />
+                        Upload
                     </Button>
-                )}
-            </div>
-        </Field>
+                    <input
+                        accept="image/png,image/jpeg,image/webp"
+                        className="sr-only"
+                        id={`${id}-file`}
+                        onChange={handleFile}
+                        type="file"
+                    />
+                    {value !== "" && (
+                        <Button onClick={() => onChange("")} variant="ghost">
+                            Remove
+                        </Button>
+                    )}
+                </div>
+            </Field>
+            <ImageCropDialog
+                file={pendingImage?.file}
+                imageSize={pendingImage?.dimensions}
+                kind={kind}
+                label={label}
+                onCancel={() => setPendingImage(undefined)}
+                onComplete={next => {
+                    onChange(next);
+                    setPendingImage(undefined);
+                }}
+            />
+        </>
     );
 }
 
@@ -337,6 +401,17 @@ export default function BrandingSection() {
         value: BrandingConfig[Key]
     ) => {
         setDraft(current => ({ ...current, [key]: value }));
+    };
+
+    const updateImage = (
+        key: "logo" | "backgroundImage",
+        mode: "light" | "dark",
+        value: string
+    ) => {
+        setDraft(current => ({
+            ...current,
+            [key]: { ...current[key], [mode]: value }
+        }));
     };
 
     /**
@@ -572,24 +647,69 @@ export default function BrandingSection() {
                                         value={draft.companyName}
                                     />
                                 </Field>
-                                <ImageControl
-                                    id="branding-logo"
-                                    kind="logo"
-                                    label="Logo"
-                                    help="Upload a compact logo or provide a hosted image URL. PNG, JPEG, and WebP are accepted."
-                                    onChange={value => update("logo", value)}
-                                    onError={setImageError}
-                                    value={draft.logo}
-                                />
-                                <ImageControl
-                                    id="branding-background"
-                                    kind="background"
-                                    label="Background image"
-                                    help="An optional full-page image shown behind the login card."
-                                    onChange={value => update("backgroundImage", value)}
-                                    onError={setImageError}
-                                    value={draft.backgroundImage}
-                                />
+                                <div className="branding-image-set">
+                                    <div className="branding-image-set__header">
+                                        <h3>Logos</h3>
+                                        <p>
+                                            Provide artwork for each card appearance so
+                                            light and dark wordmarks remain visible.
+                                        </p>
+                                    </div>
+                                    <ImageControl
+                                        id="branding-logo-light"
+                                        kind="logo"
+                                        label="Light appearance logo"
+                                        help="Shown on light cards. Use artwork with enough dark contrast."
+                                        onChange={value =>
+                                            updateImage("logo", "light", value)
+                                        }
+                                        onError={setImageError}
+                                        value={draft.logo.light}
+                                    />
+                                    <ImageControl
+                                        id="branding-logo-dark"
+                                        kind="logo"
+                                        label="Dark appearance logo"
+                                        help="Shown on dark cards. Leave empty to reuse the light appearance logo."
+                                        onChange={value =>
+                                            updateImage("logo", "dark", value)
+                                        }
+                                        onError={setImageError}
+                                        value={draft.logo.dark}
+                                    />
+                                </div>
+
+                                <div className="branding-image-set">
+                                    <div className="branding-image-set__header">
+                                        <h3>Background images</h3>
+                                        <p>
+                                            Optional full-page artwork can also change
+                                            with the visitor's appearance.
+                                        </p>
+                                    </div>
+                                    <ImageControl
+                                        id="branding-background-light"
+                                        kind="background"
+                                        label="Light appearance background"
+                                        help="Shown behind the login card in light mode."
+                                        onChange={value =>
+                                            updateImage("backgroundImage", "light", value)
+                                        }
+                                        onError={setImageError}
+                                        value={draft.backgroundImage.light}
+                                    />
+                                    <ImageControl
+                                        id="branding-background-dark"
+                                        kind="background"
+                                        label="Dark appearance background"
+                                        help="Shown in dark mode. Leave empty to reuse the light appearance background."
+                                        onChange={value =>
+                                            updateImage("backgroundImage", "dark", value)
+                                        }
+                                        onError={setImageError}
+                                        value={draft.backgroundImage.dark}
+                                    />
+                                </div>
                             </CardContent>
                         </Card>
 
@@ -664,14 +784,11 @@ export default function BrandingSection() {
                                                     type="color"
                                                     value={draft[previewMode][field.key]}
                                                 />
-                                                <Input
-                                                    aria-label={`${field.label} hex value`}
+                                                <HexColorInput
                                                     id={`branding-color-${field.key}`}
-                                                    onChange={event =>
-                                                        updatePalette(
-                                                            field.key,
-                                                            event.target.value
-                                                        )
+                                                    label={`${field.label} hex value`}
+                                                    onCommit={next =>
+                                                        updatePalette(field.key, next)
                                                     }
                                                     value={draft[previewMode][field.key]}
                                                 />
