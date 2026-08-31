@@ -2,6 +2,9 @@ import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { kcSanitize } from "keycloakify/lib/kcSanitize";
 import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export default function LoginResetPassword(props: PageProps<Extract<KcContext, { pageId: "login-reset-password.ftl" }>, I18n>) {
     const { kcContext, i18n, Template } = props;
@@ -15,6 +18,8 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
             ? "usernameOrEmail"
             : "email";
 
+    const hasError = messagesPerField.existsError("username");
+
     return (
         <Template
             kcContext={kcContext}
@@ -22,7 +27,7 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
             doUseDefaultCss={false}
             classes={undefined}
             displayInfo
-            displayMessage={!messagesPerField.existsError("username")}
+            displayMessage={!hasError}
             headerNode={msg("emailForgotTitle")}
             infoNode={
                 realm.duplicateEmailsAllowed
@@ -31,35 +36,35 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
             }
         >
             <form id="kc-reset-password-form" action={url.loginAction} method="post">
-                <div className="nebari-form-group">
-                    <label className="nebari-label" htmlFor="username">
-                        {msg(labelKey)}
-                    </label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        className={`nebari-input${messagesPerField.existsError("username") ? " nebari-input-error" : ""}`}
+                <Field>
+                    <FieldLabel htmlFor="username">{msg(labelKey)}</FieldLabel>
+                    <Input
+                        aria-invalid={hasError}
                         autoFocus
                         defaultValue={auth.attemptedUsername ?? ""}
-                        aria-invalid={messagesPerField.existsError("username")}
+                        id="username"
+                        name="username"
+                        type="text"
                     />
-                    {messagesPerField.existsError("username") && (
-                        <span
-                            className="nebari-field-error"
+                    {hasError && (
+                        <FieldError
                             aria-live="polite"
                             dangerouslySetInnerHTML={{ __html: kcSanitize(messagesPerField.get("username")) }}
+                            match={true}
                         />
                     )}
-                </div>
+                </Field>
 
                 <div className="nebari-form-actions">
-                    <a href={url.loginUrl} className="nebari-link">
+                    <a className="nebari-link" href={url.loginUrl}>
                         {backToLoginLabel}
                     </a>
-                    <button type="submit" className="nebari-button nebari-button-primary nebari-button-full">
+                    {/* `type` is baked into the render element: Base UI merges the
+                        render element's props last, so `Button`'s default
+                        `<button type="button" />` would win over a `type` prop. */}
+                    <Button className="w-full" render={<button type="submit" />}>
                         {msgStr("doSubmit")}
-                    </button>
+                    </Button>
                 </div>
             </form>
         </Template>

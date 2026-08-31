@@ -3,13 +3,13 @@ import { useState, type FormEventHandler } from "react";
 import { clsx } from "keycloakify/tools/clsx";
 import { getKcClsx } from "keycloakify/login/lib/kcClsx";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
-import { Eye, EyeOff } from "lucide-react";
 import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordField } from "@/components/nebari/PasswordField";
 
 const socialIconSrc: Record<string, string> = {
     google: "google-g-logo.svg",
@@ -28,7 +28,6 @@ export default function Login(
     const { msg, msgStr } = i18n;
 
     const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const hasLoginError = messagesPerField.existsError("username", "password");
 
     const onSubmit: FormEventHandler<HTMLFormElement> = () => {
@@ -118,25 +117,15 @@ export default function Login(
                                 </a>
                             )}
                         </div>
-                        <Input
-                            tabIndex={3}
+                        <PasswordField
+                            aria-invalid={hasLoginError}
+                            autoComplete="current-password"
+                            hideLabel={msgStr("hidePassword")}
                             id="password"
                             name="password"
-                            type={showPassword ? "text" : "password"}
                             placeholder={msgStr("password")}
-                            autoComplete="current-password"
-                            aria-invalid={hasLoginError}
-                            endAdornment={!hasLoginError ? (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    onClick={() => setShowPassword(v => !v)}
-                                    aria-label={showPassword ? "Hide password" : "Show password"}
-                                >
-                                    {showPassword ? <EyeOff /> : <Eye />}
-                                </Button>
-                            ) : undefined}
+                            showLabel={msgStr("showPassword")}
+                            tabIndex={3}
                         />
                         {hasLoginError && (
                             <FieldError match={true} className="nebari-login-error" aria-live="polite">
@@ -166,12 +155,16 @@ export default function Login(
                             name="credentialId"
                             value={auth.selectedCredential}
                         />
+                        {/* `type` has to be baked into the render element rather than
+                            passed as a prop. Base UI merges the render element's own
+                            props last, so `Button`'s default `<button type="button" />`
+                            wins over a `type` prop and the form never submits. */}
                         <Button
                             tabIndex={5}
                             className="w-full"
                             name="login"
                             id="kc-login"
-                            type="submit"
+                            render={<button type="submit" />}
                             loading={isLoginButtonDisabled}
                             loadingText={msgStr("doLogIn")}
                         >
