@@ -8,6 +8,13 @@ updates:
       time: "08:00"
       timezone: "US/Eastern"
     groups:
+      # The parser and plugin peer-depend on each other, so a lone major bump
+      # of either fails npm ci. Listed before patch-and-minor so it wins the
+      # first-match group assignment.
+      typescript-eslint:
+        applies-to: version-updates
+        patterns:
+          - "@typescript-eslint/*"
       # Group all patch and minor updates into a single PR
       patch-and-minor:
         applies-to: version-updates
@@ -24,6 +31,17 @@ updates:
       # These track the Keycloak server version, not semver — bump them by hand.
       - dependency-name: "@keycloakify/*"
       - dependency-name: "@keycloak/keycloak-admin-client"
+      # The Keycloakify account/admin UI packages pin these as peer deps:
+      # PatternFly 5 and react-i18next 16 majors, oidc-spa ~10.0.x. They move
+      # when @keycloakify/* moves — bump them by hand at the same time.
+      - dependency-name: "@patternfly/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-i18next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "oidc-spa"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
 
   - package-ecosystem: "github-actions"
     directory: "/"

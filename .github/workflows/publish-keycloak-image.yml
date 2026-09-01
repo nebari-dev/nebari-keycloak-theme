@@ -35,13 +35,14 @@ jobs:
           node-version: 20
           cache: npm
 
-      # keycloakify shells out to Maven to assemble the theme JARs.
+      # keycloakify shells out to Maven to assemble the theme JARs. No Maven
+      # cache: setup-java@v6 errors when no pom.xml exists at checkout time,
+      # and this repo only gets one generated during the keycloakify build.
       - name: Set up Java and Maven
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
-          cache: maven
 
       - name: Install dependencies
         run: npm ci
