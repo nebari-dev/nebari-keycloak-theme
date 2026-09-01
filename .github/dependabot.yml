@@ -21,8 +21,13 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    # Major updates are not grouped, so each opens its own PR
     ignore:
+      # Nearly every dependency here sits under a peer pin from the
+      # Keycloakify / PatternFly / Vite stack (PatternFly 5, react-i18next 16,
+      # i18next 25, i18next-fetch-backend 6, vite 7, ...), so major bumps
+      # fail npm ci with ERESOLVE. Take all majors by hand.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
       # React 18 is required by the Keycloakify / PatternFly admin UI packages.
       - dependency-name: "react"
       - dependency-name: "react-dom"
@@ -31,17 +36,12 @@ updates:
       # These track the Keycloak server version, not semver — bump them by hand.
       - dependency-name: "@keycloakify/*"
       - dependency-name: "@keycloak/keycloak-admin-client"
-      # The Keycloakify account/admin UI packages pin these as peer deps:
-      # PatternFly 5 and react-i18next 16 majors, oidc-spa ~10.0.x. They move
-      # when @keycloakify/* moves — bump them by hand at the same time.
-      - dependency-name: "@patternfly/*"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "react-i18next"
-        update-types: ["version-update:semver-major"]
+      # @keycloakify/keycloak-ui-shared pins react-hook-form to exactly
+      # 7.70.0, so even a minor bump fails npm ci.
+      - dependency-name: "react-hook-form"
+      # @keycloakify/keycloak-ui-shared pins oidc-spa to ~10.0.x.
       - dependency-name: "oidc-spa"
-        update-types:
-          - "version-update:semver-major"
-          - "version-update:semver-minor"
+        update-types: ["version-update:semver-minor"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
