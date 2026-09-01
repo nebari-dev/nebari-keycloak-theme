@@ -42,6 +42,10 @@ updates:
       # @keycloakify/keycloak-ui-shared pins oidc-spa to ~10.0.x.
       - dependency-name: "oidc-spa"
         update-types: ["version-update:semver-minor"]
+      # Still 0.x, so 0.4 -> 0.5 counts as a minor bump, but 0.5 requires
+      # eslint 9+ and this repo is on eslint 8. Moves with the eslint major.
+      - dependency-name: "eslint-plugin-react-refresh"
+        update-types: ["version-update:semver-minor"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
