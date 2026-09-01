@@ -23,7 +23,7 @@
     "@keycloakify/keycloak-account-ui": "~260502.0.2",
     "@keycloakify/keycloak-admin-ui": "~260502.0.0",
     "@keycloakify/keycloak-ui-shared": "~260502.0.0",
-    "@patternfly/patternfly": "^5.4.2",
+    "@patternfly/patternfly": "^6.6.1",
     "@patternfly/react-core": "^5.4.14",
     "@patternfly/react-icons": "^5.4.2",
     "@patternfly/react-styles": "^5.4.1",
