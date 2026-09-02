@@ -19,22 +19,22 @@ for (const preview of previews) {
         const theme = page.locator(".nebari-login-card");
         await expect(theme).toBeVisible();
         await expect(page.locator(".nebari-logo-light")).toHaveCount(1);
-        await expect(page.locator(".collab-brand")).toHaveCount(0);
+        await expect(page.locator(".openteams-logo")).toHaveCount(0);
         await expect(theme).toHaveScreenshot(`${preview}.png`, { animations: "disabled" });
     });
 }
 
 for (const preview of previews) {
-    test(`OpenTeams Collab ${preview} smoke test`, async ({ page }) => {
+    test(`OpenTeams ${preview} smoke test`, async ({ page }) => {
         await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-        await page.goto(`/?preview=${preview}&theme=openteams-collab`);
+        await page.goto(`/?preview=${preview}&theme=openteams`);
 
         await expect(page.locator("html")).toHaveAttribute(
             "data-kc-theme",
-            "openteams-collab"
+            "openteams"
         );
         await expect(page.locator(".nebari-login-card")).toBeVisible();
-        await expect(page.getByRole("img", { name: "OpenTeams Collab" })).toBeVisible();
+        await expect(page.getByRole("img", { name: "OpenTeams" })).toBeVisible();
         await expect(page.locator(".nebari-logo")).toHaveCount(0);
         expect(
             await page.evaluate(
@@ -52,12 +52,12 @@ test("dark login page", async ({ page }) => {
     await expect(theme).toHaveScreenshot("login-dark.png", { animations: "disabled" });
 });
 
-test("OpenTeams Collab login page", async ({ page }) => {
+test("OpenTeams login page", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-    await page.goto("/?preview=login-providers&theme=openteams-collab");
+    await page.goto("/?preview=login-providers&theme=openteams");
     const theme = page.locator(".nebari-login-card");
     await expect(theme).toBeVisible();
-    await expect(theme).toHaveScreenshot("openteams-collab-login.png", {
+    await expect(theme).toHaveScreenshot("openteams-login.png", {
         animations: "disabled"
     });
 });
@@ -78,27 +78,27 @@ for (const colorScheme of ["light", "dark"] as const) {
     });
 }
 
-test("OpenTeams Collab full page", async ({ page }) => {
+test("OpenTeams full page", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-    await page.goto("/?preview=login-providers&theme=openteams-collab");
+    await page.goto("/?preview=login-providers&theme=openteams");
     await expect(page.locator(".nebari-login-card")).toBeVisible();
-    await expect(page).toHaveScreenshot("openteams-collab-full-page.png", {
+    await expect(page).toHaveScreenshot("openteams-full-page.png", {
         fullPage: true,
         animations: "disabled"
     });
 });
 
-test("OpenTeams Collab mobile layout", async ({ page }) => {
+test("OpenTeams mobile layout", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-    await page.goto("/?preview=login-providers&theme=openteams-collab");
+    await page.goto("/?preview=login-providers&theme=openteams");
     await expect(page.locator(".nebari-login-card")).toBeVisible();
     expect(
         await page.evaluate(
             () => document.documentElement.scrollWidth <= document.documentElement.clientWidth
         )
     ).toBe(true);
-    await expect(page).toHaveScreenshot("openteams-collab-mobile.png", {
+    await expect(page).toHaveScreenshot("openteams-mobile.png", {
         fullPage: true,
         animations: "disabled"
     });

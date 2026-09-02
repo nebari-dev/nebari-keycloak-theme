@@ -7,6 +7,7 @@ import type { KcContext } from "./KcContext";
 import type { I18n } from "./i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getBrandLogos } from "@/lib/branding";
 
 export default function Template(props: TemplateProps<KcContext, I18n>) {
     const {
@@ -39,34 +40,26 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
         isValidElement<{ className?: string }>(headerNode) &&
         (headerNode.props.className?.includes("nebari-title") ||
             headerNode.props.className?.includes("nebari-heading-group"));
-    const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
-    const isCollabTheme = kcContext.themeName === "openteams-collab";
+    const isOpenTeamsTheme = kcContext.themeName === "openteams";
+    // Both variants are rendered and CSS picks one, because the login page has
+    // no JS colour-scheme flag to choose with.
+    const brandLogos = getBrandLogos(kcContext.themeName);
 
     return (
         <main className="nebari-login-wrapper">
             <Card className="nebari-login-card gap-0 py-0">
                 <div className="nebari-logo-header">
-                    {isCollabTheme ? (
-                        <div className="collab-brand">
-                            <img
-                                src={publicAssetUrl("logo/openteams-collab-mark.svg")}
-                                alt="OpenTeams Collab"
-                                className="collab-brand-mark"
-                            />
-                            <div className="collab-brand-name" aria-hidden="true">
-                                <span>OpenTeams</span>
-                                <strong>Collab</strong>
-                            </div>
-                        </div>
+                    {isOpenTeamsTheme ? (
+                        <img src={brandLogos.dark} alt="OpenTeams" className="openteams-logo" />
                     ) : (
                         <>
                             <img
-                                src={publicAssetUrl("logo/nebari-logo-light.svg")}
+                                src={brandLogos.light}
                                 alt="Nebari"
                                 className="nebari-logo nebari-logo-light"
                             />
                             <img
-                                src={publicAssetUrl("logo/nebari-logo-dark.svg")}
+                                src={brandLogos.dark}
                                 alt="Nebari"
                                 className="nebari-logo nebari-logo-dark"
                             />

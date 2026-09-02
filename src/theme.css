@@ -1,3 +1,17 @@
+/* PatternFly sits between Tailwind's `base` and `utilities`, which is the only
+ * position that satisfies both directions of this theme:
+ *
+ *   - above `base`, so Tailwind's preflight (`*{ margin:0; padding:0; border:0 }`)
+ *     does not strip the padding and borders off PatternFly's own components;
+ *   - below `utilities`, so a Tailwind utility on a Nebari design-system
+ *     component still beats PatternFly's global reset.
+ *
+ * The `patternflyCssLayer` plugin in vite.config.ts is what puts PatternFly's
+ * stylesheets into this layer. Declaring the order explicitly here — rather
+ * than relying on first appearance — keeps it independent of the order in which
+ * stylesheets happen to be injected. */
+@layer theme, base, patternfly, components, utilities;
+
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
@@ -111,16 +125,58 @@
     --accent-light: var(--nebari-purple-light);
 }
 
+/* Header tokens. The Nebari registry deliberately does not ship these — the
+ * consuming app owns its header palette — but the canonical header recipe
+ * styles the bar only through them, so they have to exist in both themes. */
+:root {
+    --header-background: #f8f8f8;
+    --header-border: #b7b7bb;
+    --header-foreground: #262628;
+    --header-action-hover: #d9d9dc;
+    --sign-out-foreground: #d2161c;
+}
+
+/* ========================
+   BASE UI PORTAL STACKING
+
+   Base UI portals every popup — menus, tooltips, selects — into its own
+   `[data-base-ui-portal]` container on <body>, and the registry components stack
+   them at z-index 50. PatternFly's `.pf-v5-c-page__main` is z-index 100, so it
+   painted straight over the profile menu in both consoles: the menu opened
+   (`aria-expanded="true"`, a laid-out 248x240 popup) but was invisible.
+
+   Lifting to PatternFly's `md` step keeps the layering honest — clear of the
+   page (100) and PatternFly's own menus (200), still below the modal backdrop
+   (400) so a dialog covers a popup rather than the other way round.
+
+   The z-index goes on the positioner rather than the popup: the registry marks
+   the positioner `isolate`, so a popup raised inside it cannot escape that
+   stacking context. Position is deliberately left alone — the positioner is
+   absolute against the initial containing block, and making the portal root
+   `relative` would move its containing block and break placement.
+   ======================== */
+
+[data-base-ui-portal] > * {
+    z-index: 300;
+}
+
 /* ========================
    BASE RESET
    ======================== */
 
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+/* Kept in `base` so it cannot outrank Tailwind's `utilities` layer. Unlayered,
+ * this reset beat every utility class at equal specificity and stripped the
+ * padding off each design-system component (`px-3` on Button, and so on).
+ * Tailwind's own preflight already performs the same reset in this layer; this
+ * block stays so the reset survives if preflight is ever disabled. */
+@layer base {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 }
 
 html,
@@ -255,8 +311,6 @@ samp {
     font-weight: 400;
 }
 
-
-
 /* ========================
    FORM CONTAINER
    ======================== */
@@ -296,15 +350,29 @@ samp {
 
 /* ========================
    INPUT FIELDS
+
+   The bare element selectors below are scoped with `:where(.nebari-login-wrapper)`
+   — the login `Template`'s root. Unscoped, they matched every `input`, `select`,
+   `textarea` and `button[type="submit"]` in the app, and because they are
+   unlayered they beat both PatternFly (layer `patternfly`) and every Tailwind
+   utility (layer `utilities`). That leaked login styling into the Admin and
+   Account consoles: a stray 1px/6px-radius box inside PatternFly's
+   `TextInputGroup`, hardcoded hex that ignored dark mode, and `width: 100%` on
+   every submit button, which is what stopped icon+label buttons sitting on one
+   line.
+
+   `:where()` contributes no specificity, so scoping does not change which rule
+   wins inside the login pages — they render identically, which the screenshot
+   suite verifies. Prefer adding to the `.nebari-*` classes over widening these.
    ======================== */
 
 .nebari-input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"],
-select,
-textarea {
+:where(.nebari-login-wrapper) input[type="text"],
+:where(.nebari-login-wrapper) input[type="email"],
+:where(.nebari-login-wrapper) input[type="password"],
+:where(.nebari-login-wrapper) input[type="tel"],
+:where(.nebari-login-wrapper) select,
+:where(.nebari-login-wrapper) textarea {
     width: 100%;
     padding: 0.625rem 0.875rem;
     font-size: 0.9375rem;
@@ -319,50 +387,41 @@ textarea {
 }
 
 .nebari-input::placeholder,
-input::placeholder {
+:where(.nebari-login-wrapper) input::placeholder {
     color: var(--text-muted);
     font-weight: 400;
 }
 
 .nebari-input:hover,
-input[type="text"]:hover,
-input[type="email"]:hover,
-input[type="password"]:hover,
-input[type="tel"]:hover,
-select:hover {
+:where(.nebari-login-wrapper) input[type="text"]:hover,
+:where(.nebari-login-wrapper) input[type="email"]:hover,
+:where(.nebari-login-wrapper) input[type="password"]:hover,
+:where(.nebari-login-wrapper) input[type="tel"]:hover,
+:where(.nebari-login-wrapper) select:hover {
     border-color: var(--border-subtle);
 }
 
 .nebari-input:focus,
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="tel"]:focus,
-select:focus,
-textarea:focus {
+:where(.nebari-login-wrapper) input[type="text"]:focus,
+:where(.nebari-login-wrapper) input[type="email"]:focus,
+:where(.nebari-login-wrapper) input[type="password"]:focus,
+:where(.nebari-login-wrapper) input[type="tel"]:focus,
+:where(.nebari-login-wrapper) select:focus,
+:where(.nebari-login-wrapper) textarea:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
 }
 
 .nebari-input[aria-invalid="true"],
-input[aria-invalid="true"] {
+:where(.nebari-login-wrapper) input[aria-invalid="true"] {
     border-color: var(--nebari-red);
 }
 
 .nebari-input[aria-invalid="true"]:focus,
-input[aria-invalid="true"]:focus {
+:where(.nebari-login-wrapper) input[aria-invalid="true"]:focus {
     border-color: var(--nebari-red);
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
-}
-
-/* Input error messages */
-.nebari-input-error {
-    display: block;
-    margin-top: 0.375rem;
-    font-size: 0.8125rem;
-    color: var(--nebari-red);
-    font-weight: 400;
 }
 
 /* ========================
@@ -370,8 +429,8 @@ input[aria-invalid="true"]:focus {
    ======================== */
 
 .nebari-button,
-button[type="submit"],
-input[type="submit"],
+:where(.nebari-login-wrapper) button[type="submit"],
+:where(.nebari-login-wrapper) input[type="submit"],
 .btn {
     display: inline-flex;
     align-items: center;
@@ -391,28 +450,28 @@ input[type="submit"],
 }
 
 .nebari-button-primary,
-button[type="submit"],
-input[type="submit"] {
+:where(.nebari-login-wrapper) button[type="submit"],
+:where(.nebari-login-wrapper) input[type="submit"] {
     background: var(--accent);
     color: #ffffff;
 }
 
 .nebari-button-primary:hover,
-button[type="submit"]:hover,
-input[type="submit"]:hover {
+:where(.nebari-login-wrapper) button[type="submit"]:hover,
+:where(.nebari-login-wrapper) input[type="submit"]:hover {
     background: var(--accent-dark);
 }
 
 .nebari-button-primary:active,
-button[type="submit"]:active,
-input[type="submit"]:active {
+:where(.nebari-login-wrapper) button[type="submit"]:active,
+:where(.nebari-login-wrapper) input[type="submit"]:active {
     background: var(--accent-dark);
     transform: scale(0.99);
 }
 
 .nebari-button-primary:disabled,
-button[type="submit"]:disabled,
-input[type="submit"]:disabled {
+:where(.nebari-login-wrapper) button[type="submit"]:disabled,
+:where(.nebari-login-wrapper) input[type="submit"]:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
@@ -482,64 +541,25 @@ a.nebari-button-secondary:hover {
     color: var(--nebari-red);
 }
 
-/* Checkbox label row (e.g. "Log out of other sessions") */
-.nebari-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    user-select: none;
-}
-
-.nebari-checkbox-label input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
-    accent-color: var(--nebari-purple);
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-/* ========================
-   CHECKBOX
-   ======================== */
-
-.nebari-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.nebari-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    cursor: pointer;
-    accent-color: var(--accent);
-    border-radius: 4px;
-}
-
-.nebari-checkbox label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    margin: 0;
-    font-weight: 400;
-}
-
 /* ========================
    LINKS
    ======================== */
 
-a {
+/* Scoped like the other bare element selectors above: unlayered, this beat the
+ * design system's own link and button colours everywhere in the consoles.
+ *
+ * `:not([data-slot])` excludes design-system components for the same reason
+ * inside the login pages: a `Button` rendered as an `<a>` (a "back to
+ * application" link, say) would otherwise take this colour instead of its own
+ * `text-primary-foreground`, and its label would disappear into the fill. */
+:where(.nebari-login-wrapper) a:not([data-slot]) {
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.15s;
 }
 
-a:hover {
+:where(.nebari-login-wrapper) a:not([data-slot]):hover {
     color: var(--accent-dark);
     text-decoration: underline;
 }
@@ -555,7 +575,6 @@ a:hover {
     margin: 0.875rem 0 1.25rem;
     font-size: 0.875rem;
 }
-
 
 /* ========================
    SOCIAL PROVIDERS
@@ -620,7 +639,6 @@ a:hover {
     color: var(--text-muted);
     font-weight: 400;
 }
-
 
 /* ========================
    RESPONSIVE
@@ -778,9 +796,12 @@ textarea { font-family: var(--font-sans); }
 .nebari-heading-group { display: flex; flex-direction: column; gap: 2px; }
 .nebari-subtitle { margin: 0; color: #262628; font-size: 16px; font-weight: 400; line-height: 24px; }
 
-#kc-form-login,
-#kc-reset-password-form,
-#kc-passwd-update-form { display: flex; flex-direction: column; gap: 20px; }
+/* One vertical rhythm for every login form. This used to be a hand-picked list
+ * of form ids, with the pages not on it falling back to per-group margins — the
+ * reason field spacing differed between, say, sign-in and register. Every login
+ * page renders inside `.nebari-login-wrapper`, so the gap is stated once and the
+ * `Field` components stack against it. */
+.nebari-login-wrapper form { display: flex; flex-direction: column; gap: 20px; }
 
 .nebari-form-group,
 .nebari-form-group:last-child { margin: 0; }
@@ -790,12 +811,12 @@ textarea { font-family: var(--font-sans); }
 .nebari-forgot-link { margin-bottom: 4px; padding: 2px 8px; color: #70707a; font-size: 12px; font-weight: 500; line-height: 16px; }
 
 .nebari-input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"],
-select,
-textarea {
+:where(.nebari-login-wrapper) input[type="text"],
+:where(.nebari-login-wrapper) input[type="email"],
+:where(.nebari-login-wrapper) input[type="password"],
+:where(.nebari-login-wrapper) input[type="tel"],
+:where(.nebari-login-wrapper) select,
+:where(.nebari-login-wrapper) textarea {
     height: 32px;
     padding: 5px 12px;
     border: 1px solid #9d9da6;
@@ -808,24 +829,21 @@ textarea {
 }
 
 .nebari-input::placeholder,
-input::placeholder { color: #70707a; font-weight: 400; }
+:where(.nebari-login-wrapper) input::placeholder { color: #70707a; font-weight: 400; }
 .nebari-input[aria-invalid="true"],
-input[aria-invalid="true"] { border-color: #d2161c; }
-.nebari-field-error,
-.nebari-input-error { display: block; margin-top: 0; color: #d2161c; font-size: 12px; font-weight: 400; line-height: 16px; }
+:where(.nebari-login-wrapper) input[aria-invalid="true"] { border-color: #d2161c; }
+.nebari-field-error { display: block; margin-top: 0; color: #d2161c; font-size: 12px; font-weight: 400; line-height: 16px; }
 #kc-form-login .nebari-form-group:has(#username[aria-invalid="true"]) > .nebari-label { display: none; }
 
 .nebari-button,
-button[type="submit"],
-input[type="submit"],
+:where(.nebari-login-wrapper) button[type="submit"],
+:where(.nebari-login-wrapper) input[type="submit"],
 .btn { min-height: 32px; padding: 5px 10px; border-radius: 6px; font-size: 14px; font-weight: 500; line-height: 20px; }
 .nebari-button-primary,
-button[type="submit"],
-input[type="submit"] { background: #9547c0; }
+:where(.nebari-login-wrapper) button[type="submit"],
+:where(.nebari-login-wrapper) input[type="submit"] { background: #9547c0; }
 .nebari-form-options { margin: 0; }
 .nebari-form-actions { margin: 4px 0 0; gap: 12px; }
-.nebari-checkbox-label { color: #262628; font-size: 14px; font-weight: 500; line-height: 20px; }
-.nebari-checkbox-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: #9547c0; }
 
 .nebari-social-section { margin-top: 12px; }
 .nebari-social-providers { gap: 12px; }
@@ -997,13 +1015,10 @@ a.nebari-button.nebari-button-primary:visited {
 
 [data-theme="dark"] .nebari-logo-light { display: none; }
 [data-theme="dark"] .nebari-logo-dark { display: block; }
-
 [data-theme="dark"] .nebari-title,
 [data-theme="dark"] .nebari-subtitle,
 [data-theme="dark"] .nebari-label,
-[data-theme="dark"] .nebari-label-wrapper .nebari-label,
-[data-theme="dark"] .nebari-checkbox-label,
-[data-theme="dark"] .nebari-checkbox label {
+[data-theme="dark"] .nebari-label-wrapper .nebari-label {
     color: #f7f7f8;
 }
 
@@ -1015,37 +1030,35 @@ a.nebari-button.nebari-button-primary:visited {
 }
 
 [data-theme="dark"] .nebari-input,
-[data-theme="dark"] input[type="text"],
-[data-theme="dark"] input[type="email"],
-[data-theme="dark"] input[type="password"],
-[data-theme="dark"] input[type="tel"],
-[data-theme="dark"] select,
-[data-theme="dark"] textarea {
+[data-theme="dark"] :where(.nebari-login-wrapper) input[type="text"],
+[data-theme="dark"] :where(.nebari-login-wrapper) input[type="email"],
+[data-theme="dark"] :where(.nebari-login-wrapper) input[type="password"],
+[data-theme="dark"] :where(.nebari-login-wrapper) input[type="tel"],
+[data-theme="dark"] :where(.nebari-login-wrapper) select,
+[data-theme="dark"] :where(.nebari-login-wrapper) textarea {
     background-color: #262629;
     border-color: #62626b;
     color: #f7f7f8;
 }
 
 [data-theme="dark"] .nebari-input::placeholder,
-[data-theme="dark"] input::placeholder { color: #a7a7b0; }
+[data-theme="dark"] :where(.nebari-login-wrapper) input::placeholder { color: #a7a7b0; }
 
 [data-theme="dark"] .nebari-input[aria-invalid="true"],
-[data-theme="dark"] input[aria-invalid="true"] { border-color: #d96c64; }
-
+[data-theme="dark"] :where(.nebari-login-wrapper) input[aria-invalid="true"] { border-color: #d96c64; }
 [data-theme="dark"] .nebari-field-error,
-[data-theme="dark"] .nebari-input-error,
 [data-theme="dark"] .nebari-label-wrapper { color: #eb8a83; }
 
 [data-theme="dark"] .nebari-button-primary,
-[data-theme="dark"] button[type="submit"],
-[data-theme="dark"] input[type="submit"] {
+[data-theme="dark"] :where(.nebari-login-wrapper) button[type="submit"],
+[data-theme="dark"] :where(.nebari-login-wrapper) input[type="submit"] {
     background: #b34ee4;
     color: #111114;
 }
 
 [data-theme="dark"] .nebari-button-primary:hover,
-[data-theme="dark"] button[type="submit"]:hover,
-[data-theme="dark"] input[type="submit"]:hover { background: #c268ec; color: #111114; }
+[data-theme="dark"] :where(.nebari-login-wrapper) button[type="submit"]:hover,
+[data-theme="dark"] :where(.nebari-login-wrapper) input[type="submit"]:hover { background: #c268ec; color: #111114; }
 
 [data-theme="dark"] a.nebari-button.nebari-button-primary,
 [data-theme="dark"] a.nebari-button.nebari-button-primary:hover,
@@ -1066,7 +1079,6 @@ a.nebari-button.nebari-button-primary:visited {
     border-color: #777780;
     color: #fff;
 }
-
 
 @theme inline {
     --radius: 0.625rem;
@@ -1093,6 +1105,11 @@ a.nebari-button.nebari-button-primary:visited {
     --color-chart-2: var(--chart-2);
     --color-chart-1: var(--chart-1);
     --color-ring: var(--ring);
+    --color-header-background: var(--header-background);
+    --color-header-border: var(--header-border);
+    --color-header-foreground: var(--header-foreground);
+    --color-header-action-hover: var(--header-action-hover);
+    --color-sign-out-foreground: var(--sign-out-foreground);
     --color-border-strong: var(--border-strong);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -1166,6 +1183,11 @@ a.nebari-button.nebari-button-primary:visited {
 
 .dark,
 [data-theme="dark"] {
+    --header-background: var(--card);
+    --header-border: #5a5a61;
+    --header-foreground: #f8f8f8;
+    --header-action-hover: #4a4a50;
+    --sign-out-foreground: #ff6b6b;
     --background: oklch(26.94% 0.0037 286.15);
     --foreground: oklch(97.91% 0 0);
     --scrim: rgba(0, 0, 0, 0.6);
@@ -1289,15 +1311,24 @@ a.nebari-button.nebari-button-primary:visited {
 }
 
 /* ==========================================================================
-   OPENTEAMS COLLAB THEME VARIANT
+   OPENTEAMS THEME VARIANT
 
-   Palette and typography sampled from https://openteams.com/collab/:
-   Inter Tight, midnight #000f3a, deep blue #022791, electric blue #4d75fe,
-   coral #ff8a69, and amber #faa944. The selectors are deliberately scoped to
-   the Keycloak theme name so the original Nebari variant remains unchanged.
+   Palette and typography taken from the https://openteams.com landing page —
+   its Elementor global kit, so these are the brand values rather than colours
+   sampled off a screenshot: midnight #000f3a, deep blue #022791, electric blue
+   #4d75fe (primary), coral #ff8a69 (secondary), amber #faa944 (accent), all set
+   in Inter Tight.
+
+   The landing page's shape language is what the login form borrows: a midnight
+   ground lit by one off-centre blue glow, pill buttons (the hero CTA is an
+   outlined pill, the nav CTA a filled one), coral reserved for small accents,
+   and headings in Inter Tight 600 with tight tracking.
+
+   Selectors are deliberately scoped to the Keycloak theme name so the Nebari
+   variant remains untouched.
    ========================================================================== */
 
-html[data-kc-theme="openteams-collab"] {
+html[data-kc-theme="openteams"] {
     color-scheme: dark;
     --font-sans: "Inter Tight Variable", "Inter Tight", sans-serif;
     --Font-Sans: var(--font-sans);
@@ -1341,39 +1372,41 @@ html[data-kc-theme="openteams-collab"] {
     --login-backdrop: #000f3a;
 }
 
-html[data-kc-theme="openteams-collab"] body,
-html[data-kc-theme="openteams-collab"] button,
-html[data-kc-theme="openteams-collab"] input,
-html[data-kc-theme="openteams-collab"] select,
-html[data-kc-theme="openteams-collab"] textarea {
+html[data-kc-theme="openteams"] body,
+html[data-kc-theme="openteams"] button,
+html[data-kc-theme="openteams"] input,
+html[data-kc-theme="openteams"] select,
+html[data-kc-theme="openteams"] textarea {
     font-family: var(--font-sans);
 }
 
-html[data-kc-theme="openteams-collab"] body {
+html[data-kc-theme="openteams"] body {
     background: #000f3a;
     color: #ffffff;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-login-wrapper {
+html[data-kc-theme="openteams"] .nebari-login-wrapper {
     padding: 32px;
     background-color: #000f3a;
-    background-image: radial-gradient(circle at bottom center, #000f3a 0%, #000f3a 42%, #022791 100%);
+    background-image: none;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-login-wrapper::before {
+/* The landing page's hero is a flat midnight ground lit from one side by a
+ * single soft blue bloom, and it does not move. This is that: one off-centre
+ * glow, no drift animation, so the page reads as the same surface. */
+html[data-kc-theme="openteams"] .nebari-login-wrapper::before {
     top: 50%;
     left: 50%;
     width: 140vmax;
     height: 140vmax;
     margin: -70vmax 0 0 -70vmax;
     background-image:
-        radial-gradient(36vmax 28vmax at 72% 24%, rgba(77, 117, 254, .34) 0%, rgba(77, 117, 254, .08) 55%, transparent 100%),
-        radial-gradient(30vmax 24vmax at 24% 72%, rgba(255, 138, 105, .15) 0%, transparent 100%),
-        radial-gradient(22vmax 18vmax at 73% 76%, rgba(250, 169, 68, .10) 0%, transparent 100%);
-    animation: collab-background-drift 28s ease-in-out infinite alternate;
+        radial-gradient(46vmax 36vmax at 70% 38%, rgba(2, 39, 145, .5) 0%, rgba(2, 39, 145, .16) 58%, transparent 100%),
+        radial-gradient(30vmax 24vmax at 28% 76%, rgba(77, 117, 254, .08) 0%, transparent 100%);
+    animation: none;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-login-wrapper::after {
+html[data-kc-theme="openteams"] .nebari-login-wrapper::after {
     content: "";
     position: absolute;
     z-index: -1;
@@ -1386,247 +1419,227 @@ html[data-kc-theme="openteams-collab"] .nebari-login-wrapper::after {
     mask-image: linear-gradient(to bottom, transparent, #000 24%, #000 76%, transparent);
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-login-card {
+/* The landing page states a panel plainly: a barely-lighter navy fill, one hairline
+ * blue rule, and a small radius. Deliberately not a glass card — no gradient border,
+ * no blur — because nothing on openteams.com is built that way. */
+html[data-kc-theme="openteams"] .nebari-login-card {
     width: min(440px, 100%);
     padding: 38px;
     overflow: visible;
-    background:
-        linear-gradient(145deg, rgba(2, 39, 145, .76), rgba(0, 15, 58, .94)) padding-box,
-        linear-gradient(135deg, rgba(77, 117, 254, .9), rgba(255, 138, 105, .45)) border-box;
-    border: 1px solid transparent;
-    border-radius: 24px;
-    box-shadow: 0 45px 71px rgba(0, 10, 24, .23), 0 12px 32px rgba(0, 5, 20, .3);
-    backdrop-filter: blur(20px);
+    background: rgba(2, 39, 145, .22);
+    border: 1px solid rgba(77, 117, 254, .38);
+    border-radius: 8px;
+    box-shadow: 0 32px 64px rgba(0, 5, 20, .38);
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-logo-header {
+html[data-kc-theme="openteams"] .nebari-logo-header {
     margin-bottom: 28px;
 }
 
-.collab-brand {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    color: #ffffff;
+/* The official horizontal wordmark, sized to the ~177x34 it occupies in the
+ * site header. Its viewBox is cropped to the artwork, so height alone drives
+ * the width and there is no invisible padding to account for. */
+.openteams-logo {
+    display: block;
+    width: auto;
+    height: 34px;
 }
 
-.collab-brand-mark {
-    width: 48px;
-    height: 48px;
-    flex: 0 0 48px;
-}
-
-.collab-brand-name {
-    display: flex;
-    flex-direction: column;
-    line-height: 1;
-    letter-spacing: .2px;
-}
-
-.collab-brand-name span {
-    font-size: 13px;
-    font-weight: 400;
-    color: #b9c7f6;
-}
-
-.collab-brand-name strong {
-    margin-top: 4px;
-    font-size: 22px;
-    font-weight: 700;
-}
-
-html[data-kc-theme="openteams-collab"] .nebari-header {
+html[data-kc-theme="openteams"] .nebari-header {
     margin-bottom: 26px;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-header .nebari-title {
+/* Landing-page headings are Inter Tight 600 pulled in tight, not 700. */
+html[data-kc-theme="openteams"] .nebari-header .nebari-title {
     color: #ffffff;
     font-family: var(--font-sans);
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 600;
     line-height: 1.15;
-    letter-spacing: -.2px;
+    letter-spacing: -.4px;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-header .nebari-title::after {
+/* The site runs a blue-to-coral gradient through the second line of every
+ * headline. A login title is one line, so the gradient is carried by the rule
+ * beneath it instead — square-ended, like the coral dash that marks the site's
+ * eyebrow labels. */
+html[data-kc-theme="openteams"] .nebari-header .nebari-title::after {
     content: "";
     display: block;
-    width: 72px;
-    height: 3px;
+    width: 56px;
+    height: 2px;
     margin-top: 14px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #4d75fe 0%, #ff8a69 70%, #faa944 100%);
+    background: linear-gradient(90deg, #4d75fe 0%, #ff8a69 100%);
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-subtitle,
-html[data-kc-theme="openteams-collab"] .nebari-label,
-html[data-kc-theme="openteams-collab"] [data-slot="field-label"],
-html[data-kc-theme="openteams-collab"] .nebari-label-wrapper .nebari-label,
-html[data-kc-theme="openteams-collab"] [data-slot="checkbox"] {
+html[data-kc-theme="openteams"] .nebari-subtitle,
+html[data-kc-theme="openteams"] .nebari-label,
+html[data-kc-theme="openteams"] [data-slot="field-label"],
+html[data-kc-theme="openteams"] .nebari-label-wrapper .nebari-label,
+html[data-kc-theme="openteams"] [data-slot="checkbox"] {
     color: #ffffff;
     font-family: var(--font-sans);
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-label,
-html[data-kc-theme="openteams-collab"] [data-slot="field-label"],
-html[data-kc-theme="openteams-collab"] .nebari-label-wrapper .nebari-label {
+html[data-kc-theme="openteams"] .nebari-label,
+html[data-kc-theme="openteams"] [data-slot="field-label"],
+html[data-kc-theme="openteams"] .nebari-label-wrapper .nebari-label {
     font-size: 14px;
     font-weight: 500;
     letter-spacing: .2px;
 }
 
-html[data-kc-theme="openteams-collab"] #kc-form-login,
-html[data-kc-theme="openteams-collab"] #kc-reset-password-form,
-html[data-kc-theme="openteams-collab"] #kc-passwd-update-form {
+html[data-kc-theme="openteams"] .nebari-login-wrapper form {
     gap: 22px;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-input,
-html[data-kc-theme="openteams-collab"] [data-slot="input"],
-html[data-kc-theme="openteams-collab"] input[type="text"],
-html[data-kc-theme="openteams-collab"] input[type="email"],
-html[data-kc-theme="openteams-collab"] input[type="password"],
-html[data-kc-theme="openteams-collab"] input[type="tel"],
-html[data-kc-theme="openteams-collab"] select,
-html[data-kc-theme="openteams-collab"] textarea {
+html[data-kc-theme="openteams"] .nebari-input,
+html[data-kc-theme="openteams"] [data-slot="input"],
+html[data-kc-theme="openteams"] input[type="text"],
+html[data-kc-theme="openteams"] input[type="email"],
+html[data-kc-theme="openteams"] input[type="password"],
+html[data-kc-theme="openteams"] input[type="tel"],
+html[data-kc-theme="openteams"] select,
+html[data-kc-theme="openteams"] textarea {
     height: 46px;
-    padding: 11px 17px;
-    border: 1px solid rgba(255, 255, 255, .34);
-    border-radius: 10px;
-    background: rgba(0, 15, 58, .58);
+    padding: 11px 16px;
+    /* Square-ish, to sit with the panel rather than echo the pill buttons —
+     * on the site only calls to action are pill-shaped. */
+    border: 1px solid rgba(77, 117, 254, .42);
+    border-radius: 6px;
+    background: rgba(0, 15, 58, .55);
     color: #ffffff;
     font-family: var(--font-sans);
     font-size: 15px;
     line-height: 22px;
 }
 
-html[data-kc-theme="openteams-collab"] [data-slot="input"]::placeholder,
-html[data-kc-theme="openteams-collab"] input::placeholder {
+html[data-kc-theme="openteams"] [data-slot="input"]::placeholder,
+html[data-kc-theme="openteams"] input::placeholder {
     color: #9eaddd;
 }
 
-html[data-kc-theme="openteams-collab"] [data-slot="input"]:hover,
-html[data-kc-theme="openteams-collab"] .nebari-input:hover {
-    border-color: rgba(255, 255, 255, .58);
+html[data-kc-theme="openteams"] [data-slot="input"]:hover,
+html[data-kc-theme="openteams"] .nebari-input:hover {
+    border-color: rgba(77, 117, 254, .75);
 }
 
-html[data-kc-theme="openteams-collab"] [data-slot="input"]:focus,
-html[data-kc-theme="openteams-collab"] .nebari-input:focus {
+html[data-kc-theme="openteams"] [data-slot="input"]:focus,
+html[data-kc-theme="openteams"] .nebari-input:focus {
     border-width: 1px;
     border-color: #4d75fe;
     box-shadow: 0 0 0 3px rgba(77, 117, 254, .22);
 }
 
-html[data-kc-theme="openteams-collab"] [data-slot="input-end-adornment"] [data-slot="button"] {
+html[data-kc-theme="openteams"] [data-slot="input-end-adornment"] [data-slot="button"] {
     color: #b9c7f6;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-label-row .nebari-forgot-link,
-html[data-kc-theme="openteams-collab"] .nebari-link,
-html[data-kc-theme="openteams-collab"] .nebari-info-section,
-html[data-kc-theme="openteams-collab"] .nebari-required-notice {
+html[data-kc-theme="openteams"] .nebari-label-row .nebari-forgot-link,
+html[data-kc-theme="openteams"] .nebari-link,
+html[data-kc-theme="openteams"] .nebari-info-section,
+html[data-kc-theme="openteams"] .nebari-required-notice {
     color: #b9c7f6;
     font-family: var(--font-sans);
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-label-row .nebari-forgot-link:hover,
-html[data-kc-theme="openteams-collab"] .nebari-link:hover {
+/* Standalone action links are the site's blue ("Learn more about us →"); the
+ * forgot-password link stays muted because it sits inside a field label row. */
+html[data-kc-theme="openteams"] .nebari-info-section .nebari-link {
+    color: #4d75fe;
+    font-weight: 500;
+}
+
+html[data-kc-theme="openteams"] .nebari-label-row .nebari-forgot-link:hover,
+html[data-kc-theme="openteams"] .nebari-link:hover,
+html[data-kc-theme="openteams"] .nebari-info-section .nebari-link:hover {
     color: #ffffff;
 }
 
-html[data-kc-theme="openteams-collab"] #kc-login,
-html[data-kc-theme="openteams-collab"] .nebari-button-primary,
-html[data-kc-theme="openteams-collab"] button[type="submit"],
-html[data-kc-theme="openteams-collab"] input[type="submit"] {
-    min-height: 46px;
-    padding: 11px 24px;
+html[data-kc-theme="openteams"] #kc-login,
+html[data-kc-theme="openteams"] .nebari-button-primary,
+html[data-kc-theme="openteams"] button[type="submit"],
+html[data-kc-theme="openteams"] input[type="submit"] {
+    /* The site's call to action: a flat pill in Inter Tight 500 at 16/0.3px.
+     * No lift or glow — every button on openteams.com is flat. */
+    min-height: 48px;
+    padding: 13px 30px;
     border: 1px solid #4d75fe;
     border-radius: 999px;
     background: #4d75fe;
     color: #ffffff;
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
+    letter-spacing: .3px;
     line-height: 22px;
-    box-shadow: 0 10px 28px rgba(77, 117, 254, .24);
+    box-shadow: none;
 }
 
-html[data-kc-theme="openteams-collab"] #kc-login:hover,
-html[data-kc-theme="openteams-collab"] .nebari-button-primary:hover,
-html[data-kc-theme="openteams-collab"] button[type="submit"]:hover,
-html[data-kc-theme="openteams-collab"] input[type="submit"]:hover {
+html[data-kc-theme="openteams"] #kc-login:hover,
+html[data-kc-theme="openteams"] .nebari-button-primary:hover,
+html[data-kc-theme="openteams"] button[type="submit"]:hover,
+html[data-kc-theme="openteams"] input[type="submit"]:hover {
     border-color: #6c8cff;
     background: #6c8cff;
     color: #ffffff;
     text-decoration: none;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-button-secondary,
-html[data-kc-theme="openteams-collab"] .nebari-social-button {
-    min-height: 44px;
-    padding: 10px 20px;
-    border: 1px solid rgba(77, 117, 254, .9);
+/* The hero's secondary call to action: an outlined pill on the midnight ground,
+ * hairline white rather than blue, so it reads as the quieter of the two. */
+html[data-kc-theme="openteams"] .nebari-button-secondary,
+html[data-kc-theme="openteams"] .nebari-social-button {
+    min-height: 46px;
+    padding: 12px 24px;
+    border: 1px solid rgba(255, 255, 255, .5);
     border-radius: 999px;
-    background: rgba(255, 255, 255, .025);
+    background: transparent;
     color: #ffffff;
     font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 400;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: .3px;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-button-secondary:hover,
-html[data-kc-theme="openteams-collab"] .nebari-social-button:hover {
-    border-color: #4d75fe;
-    background: #4d75fe;
+html[data-kc-theme="openteams"] .nebari-button-secondary:hover,
+html[data-kc-theme="openteams"] .nebari-social-button:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, .08);
     color: #ffffff;
     text-decoration: none;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-social-section {
+html[data-kc-theme="openteams"] .nebari-social-section {
     margin-top: 16px;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-social-providers {
+html[data-kc-theme="openteams"] .nebari-social-providers {
     gap: 12px;
 }
 
-html[data-kc-theme="openteams-collab"] .nebari-social-icon {
+html[data-kc-theme="openteams"] .nebari-social-icon {
     filter: invert(1);
 }
 
-html[data-kc-theme="openteams-collab"] [data-slot="checkbox-control"] {
+html[data-kc-theme="openteams"] [data-slot="checkbox-control"] {
     border-color: rgba(255, 255, 255, .58);
 }
 
-html[data-kc-theme="openteams-collab"] [data-slot="alert"] {
-    border-radius: 14px;
-    backdrop-filter: blur(10px);
-}
-
-@keyframes collab-background-drift {
-    from { transform: translate3d(-2%, -1%, 0) scale(1); }
-    to { transform: translate3d(2%, 1%, 0) scale(1.04); }
+html[data-kc-theme="openteams"] [data-slot="alert"] {
+    border-radius: 6px;
 }
 
 @media (max-width: 480px) {
-    html[data-kc-theme="openteams-collab"] .nebari-login-wrapper {
+    html[data-kc-theme="openteams"] .nebari-login-wrapper {
         padding: 18px;
     }
 
-    html[data-kc-theme="openteams-collab"] .nebari-login-card {
+    html[data-kc-theme="openteams"] .nebari-login-card {
         padding: 28px 24px;
-        border-radius: 20px;
     }
 
-    .collab-brand-mark {
-        width: 42px;
-        height: 42px;
-        flex-basis: 42px;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    html[data-kc-theme="openteams-collab"] .nebari-login-wrapper::before {
-        animation: none;
+    .openteams-logo {
+        height: 28px;
     }
 }

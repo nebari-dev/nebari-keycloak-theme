@@ -40,7 +40,7 @@ const previewThemeName = searchParams.get("theme");
 const kcContext: KcContext =
     injectedKcContext ?? {
         ...getKcContextMockForPreview(searchParams.get("preview")),
-        themeName: previewThemeName ?? "openteams-collab"
+        themeName: previewThemeName ?? "openteams"
     };
 
 document.documentElement.dataset.kcTheme = kcContext.themeName;
