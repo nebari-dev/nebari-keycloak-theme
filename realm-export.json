@@ -15,7 +15,8 @@
     "editUsernameAllowed": false,
     "bruteForceProtected": true,
     "loginTheme": "nebari",
-    "accountTheme": "keycloak.v3",
+    "accountTheme": "nebari",
+    "adminTheme": "nebari",
     "emailTheme": "keycloak",
     "internationalizationEnabled": false,
     "supportedLocales": [
@@ -104,8 +105,34 @@
                 }
             ],
             "realmRoles": [
+                "default-roles-nebari",
                 "user"
             ],
+            "requiredActions": []
+        },
+        {
+            "username": "nebari-admin",
+            "enabled": true,
+            "emailVerified": true,
+            "firstName": "Nebari",
+            "lastName": "Admin",
+            "email": "nebari-admin@nebari.dev",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "nebari-admin",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": [
+                "default-roles-nebari",
+                "admin"
+            ],
+            "clientRoles": {
+                "realm-management": [
+                    "realm-admin"
+                ]
+            },
             "requiredActions": []
         }
     ],

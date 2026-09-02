@@ -1,8 +1,10 @@
 /**
- * This file has been claimed for ownership from @keycloakify/keycloak-admin-ui version 260502.0.0.
- * To relinquish ownership and restore this file to its original content, run the following command:
+ * WARNING: Before modifying this file, run the following command:
  * 
- * $ npx keycloakify own --path "admin/client-scopes/ClientScopesSection.tsx" --revert
+ * $ npx keycloakify own --path "admin/client-scopes/ClientScopesSection.tsx"
+ * 
+ * This file is provided by @keycloakify/keycloak-admin-ui version 260502.0.0.
+ * It was copied into your repository by the postinstall script: `keycloakify sync-extensions`.
  */
 
 /* eslint-disable */
@@ -155,13 +157,10 @@ export default function ClientScopesSection() {
       })
       .filter(filter);
 
-    return {
-      rows: localeSort(transformed, mapByKey("name")).slice(
-        first,
-        Number(first) + Number(max),
-      ),
-      total: transformed.length,
-    };
+    return localeSort(transformed, mapByKey("name")).slice(
+      first,
+      Number(first) + Number(max),
+    );
   };
 
   const [toggleDeleteDialog, DeleteConfirm] = useConfirmDialog({

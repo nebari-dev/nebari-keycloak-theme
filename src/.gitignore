@@ -1,6 +1,7 @@
 # This file is managed by Keycloakify, do not edit it manually.
 
 # === Owned files start ===
+# account/colorScheme.ts
 # account/KcAccountUi.tsx
 # admin/colorScheme.ts
 # admin/index.css
@@ -9,11 +10,8 @@
 # admin/PageNav.tsx
 # account/root/header.module.css
 # account/root/Header.tsx
-# admin/client-scopes/ClientScopesSection.tsx
-# admin/components/users/UserDataTable.tsx
-# admin/components/users/UserDataTableToolbarItems.tsx
+# admin/assets/icon.svg
 # shared/@patternfly/react-core/index.tsx
-# shared/keycloak-ui-shared/masthead/Masthead.tsx
 # shared/keycloak-ui-shared/controls/table/KeycloakDataTable.tsx
 # shared/keycloak-ui-shared/controls/table/PaginatingTableToolbar.tsx
 # === Owned files end =====
@@ -36,7 +34,6 @@
 /admin/routes.tsx
 /admin/util.ts
 /admin/assets/favicon.svg
-/admin/assets/icon.svg
 /admin/assets/img_avatar.svg
 /admin/assets/logo.svg
 /admin/authentication/AuthenticationSection.tsx
@@ -53,6 +50,7 @@
 /admin/authentication/RequiredActions.tsx
 /admin/authentication/routes.ts
 /admin/client-scopes/ChangeTypeDropdown.tsx
+/admin/client-scopes/ClientScopesSection.tsx
 /admin/client-scopes/CreateClientScope.tsx
 /admin/client-scopes/EditClientScope.tsx
 /admin/client-scopes/routes.ts
@@ -441,7 +439,9 @@
 /admin/components/time-selector/TimeSelector.tsx
 /admin/components/time-selector/TimeSelectorControl.tsx
 /admin/components/time-selector/TimeSelectorForm.tsx
+/admin/components/users/UserDataTable.tsx
 /admin/components/users/UserDataTableAttributeSearchForm.tsx
+/admin/components/users/UserDataTableToolbarItems.tsx
 /admin/components/users/UserSelect.tsx
 /admin/components/view-header/ViewHeader.tsx
 /admin/components/wizard-section-header/wizard-section-header.css
@@ -699,6 +699,7 @@
 /shared/keycloak-ui-shared/icons/IconMapper.tsx
 /shared/keycloak-ui-shared/masthead/DefaultAvatar.tsx
 /shared/keycloak-ui-shared/masthead/KeycloakDropdown.tsx
+/shared/keycloak-ui-shared/masthead/Masthead.tsx
 /shared/keycloak-ui-shared/scroll-form/form-title.module.css
 /shared/keycloak-ui-shared/scroll-form/FormPanel.tsx
 /shared/keycloak-ui-shared/scroll-form/FormTitle.tsx
@@ -737,7 +738,6 @@
 
 # === @keycloakify/keycloak-account-ui v260502.0.2 ===
 /account/api.ts
-/account/colorScheme.ts
 /account/environment.ts
 /account/i18next.d.ts
 /account/KcContext.ts
