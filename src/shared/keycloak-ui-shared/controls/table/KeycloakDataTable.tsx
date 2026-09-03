@@ -65,7 +65,6 @@ import type {
 import { useFetch } from "../../utils/useFetch";
 import { useStoredState } from "../../utils/useStoredState";
 import { ListEmptyState } from "./ListEmptyState";
-import { correctedFirst } from "./pagination";
 
 type RowData = Record<string, unknown>;
 
@@ -442,35 +441,6 @@ export function KeycloakDataTable<T extends RowData>({
     : filteredData?.length;
   const searching = search !== "" || isSearching;
   const noData = !loading && visibleData.length === 0;
-
-  /* A page can fall off the end of its data: rows are deleted, a refresh
-     returns fewer, or a filter narrows the set. `first` then points past the
-     last row, the table renders empty — and because the pager is hidden when
-     there is no data and no active search, the controls needed to get back
-     would go with it.
-     Client-side tables always know the full length; server-side ones know it
-     only when the endpoint reports a count. Where the total is known the offset
-     is corrected here, and where it is not, the pager stays visible below so
-     the page is at least navigable. */
-  const knownTotal = isPaginated ? serverCount : filteredData?.length;
-
-  useEffect(() => {
-    if (loading || loadedData === undefined || first === 0) return;
-
-    if (knownTotal !== undefined) {
-      const corrected = correctedFirst(knownTotal, first, max);
-
-      if (corrected !== undefined) setFirst(corrected);
-      return;
-    }
-
-    /* A server-paginated endpoint that reports no count leaves nothing to
-       compute against — the only evidence is that this page came back empty.
-       Stepping back one page at a time refetches until rows appear, which lands
-       on the last populated page instead of dropping the admin back to the
-       first. `first` only decreases, so this settles. */
-    if (visibleData.length === 0) setFirst(Math.max(0, first - max));
-  }, [first, knownTotal, loadedData, loading, max, visibleData.length]);
   const rowsSelectedOnPage = useMemo(
     () => intersectionBy(selected, visibleData, "id"),
     [selected, visibleData],
@@ -836,10 +806,7 @@ export function KeycloakDataTable<T extends RowData>({
         table
       )}
 
-      {/* `first > 0` keeps the pager present on an empty page that is not the
-          first one. Without it a server-paginated table whose rows disappeared
-          loses the only control that could navigate back. */}
-      {!loading && (!noData || searching || first > 0) ? (
+      {!loading && (!noData || searching) ? (
         <KeycloakPagination
           first={first}
           hasNext={hasNext}

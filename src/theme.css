@@ -1278,7 +1278,7 @@ a.nebari-button.nebari-button-primary:visited {
 /* Label/LG — shared input-label typography across all login-flow forms. */
 .nebari-label,
 [data-slot="field-label"],
-:where(.nebari-login-wrapper) .kcLabelClass,
+.kcLabelClass,
 .nebari-label-wrapper .nebari-label {
     color: var(--color-foreground-default, #262628);
     font-family: var(--Font-Sans, Geist);

@@ -38,10 +38,3 @@ so they stay on PatternFly and are restyled through the token bridge in
 | `Tooltip` | Nebari's `TooltipTrigger` anchors itself through a ref on the rendered element. The registry components take `ref` as a plain prop — the React 19 convention — and this app is on React 18, where a function component cannot receive one, so the anchor would come back null and the tooltip would not position. `PageHeader.tsx` works around this for its one menu trigger by rendering a DOM element; doing the same across 16 tooltip call sites is not worth the churn until the app moves to React 19. |
 | `variant="control"` buttons | Designed to sit flush inside a PatternFly `InputGroup`; rounded Nebari corners would detach them. |
 | `Page` / outer `PageSidebar` / `PageToggleButton` | `Page` owns the Admin Console's breakpoint-aware open state. `PageNav.tsx` keeps `PageSidebar` only as that responsive shell and renders the complete visible navigation with Nebari's Sidebar primitives. The masthead toggle must remain connected to the same Page context. |
-
-## Related
-
-`src/components/ui/` is not the only component set in the repo. The unbranded
-`template` login theme is built on stock shadcn/ui in
-[`src/components/shadcn/`](../shadcn/README.md); see that file for why the two
-are kept apart.
