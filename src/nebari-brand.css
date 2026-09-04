@@ -1,6 +1,8 @@
 /*
- * Nebari brand overrides for PatternFly 5
- * Applied to both the Account and Admin themes.
+ * Nebari brand overrides for PatternFly 5.
+ *
+ * Imported by the Account console only (`KcAccountUi.tsx`). The Admin console
+ * loads `admin/index.css` instead — do not assume a rule added here reaches it.
  *
  * Design system: NIC dashboard (nebari-dashboard.html reference)
  *   Accent  light: #7c3aed  (violet)
@@ -183,42 +185,27 @@ samp,
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MASTHEAD — NIC nav style: white surface, thin border-bottom separator
-   PF5 sets individual background vars for __main and __content sub-sections;
-   we must override them all or the parts come out black/dark.
+   MASTHEAD
    ═══════════════════════════════════════════════════════════════════════════ */
-.pf-v5-c-masthead {
-    background: #ffffff !important;
-    border-bottom: 1px solid #e3e3ea;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-    /* Override PF5 component-level sub-section vars */
-    --pf-v5-c-masthead--BackgroundColor: #ffffff;
-    --pf-v5-c-masthead__main--BackgroundColor: #ffffff;
-    --pf-v5-c-masthead__content--BackgroundColor: #ffffff;
-}
 
-.pf-v5-c-masthead__main,
-.pf-v5-c-masthead__content,
-.pf-v5-c-masthead__toggle {
-    background: transparent !important;
-    background-color: transparent !important;
-}
-
-/* Toolbar inside masthead — PF5 sets its own dark bg var */
-.pf-v5-c-masthead .pf-v5-c-toolbar,
-.pf-v5-c-masthead .pf-v5-c-toolbar__content {
-    background: transparent !important;
-    --pf-v5-c-toolbar--BackgroundColor: transparent;
-}
-
-.pf-v5-theme-dark .pf-v5-c-masthead {
-    background: #17171f !important;
-    border-bottom-color: #26262f;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
-    --pf-v5-c-masthead--BackgroundColor: #17171f;
-    --pf-v5-c-masthead__main--BackgroundColor: #17171f;
-    --pf-v5-c-masthead__content--BackgroundColor: #17171f;
-}
+/* Nothing to override here any more, and that is the point.
+ *
+ * This block used to force `background` on `.pf-v5-c-masthead` and on the
+ * `__main` / `__content` / `__toggle` / toolbar sub-sections, with `!important`
+ * on each, because PatternFly's Masthead paints those parts from its own
+ * component variables. Neither console renders that component now: both headers
+ * are composed from the Nebari `NavigationMenu`, which keeps the
+ * `pf-v5-c-masthead` class only so the legacy selectors below (logo sizing)
+ * still find it. The sub-section elements do not exist at all — a DOM query for
+ * `__main`, `__content`, `__toggle` and the masthead toolbar returns nothing in
+ * either console — so those rules styled no element and their `!important`
+ * declarations were purely inherited baggage.
+ *
+ * The header's own surface now comes from where it should: the component asks
+ * for `bg-header-background`, `border-header-border` and `text-header-foreground`,
+ * so it follows `--header-*` in both themes and both consoles render the same
+ * header. Forcing a literal `#ffffff` here fought that token and was the reason
+ * Account rendered a white bar while Admin rendered `--header-background`. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CARDS — 12px radius, NIC shadow-sm, 1px border

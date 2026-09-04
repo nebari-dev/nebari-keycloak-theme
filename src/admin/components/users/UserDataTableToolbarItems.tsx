@@ -1,8 +1,10 @@
 /**
- * This file has been claimed for ownership from @keycloakify/keycloak-admin-ui version 260502.0.0.
- * To relinquish ownership and restore this file to its original content, run the following command:
+ * WARNING: Before modifying this file, run the following command:
  * 
- * $ npx keycloakify own --path "admin/components/users/UserDataTableToolbarItems.tsx" --revert
+ * $ npx keycloakify own --path "admin/components/users/UserDataTableToolbarItems.tsx"
+ * 
+ * This file is provided by @keycloakify/keycloak-admin-ui version 260502.0.0.
+ * It was copied into your repository by the postinstall script: `keycloakify sync-extensions`.
  */
 
 /* eslint-disable */
@@ -34,7 +36,6 @@ import { UserFilter } from "./UserDataTable";
 import { UserDataTableAttributeSearchForm } from "./UserDataTableAttributeSearchForm";
 
 type UserDataTableToolbarItemsProps = {
-  section?: "all" | "search" | "actions";
   searchDropdownOpen: boolean;
   setSearchDropdownOpen: (open: boolean) => void;
   realm: RealmRepresentation;
@@ -56,7 +57,6 @@ type UserDataTableToolbarItemsProps = {
 };
 
 export function UserDataTableToolbarItems({
-  section = "all",
   searchDropdownOpen,
   setSearchDropdownOpen,
   realm,
@@ -91,8 +91,6 @@ export function UserDataTableToolbarItems({
     return (
       <ToolbarItem>
         <InputGroup>
-          {searchType === "default" && defaultSearchInput()}
-          {searchType === "attribute" && attributeSearchInput()}
           <InputGroupItem>
             <SearchDropdown
               searchType={searchType}
@@ -102,6 +100,8 @@ export function UserDataTableToolbarItems({
               }}
             />
           </InputGroupItem>
+          {searchType === "default" && defaultSearchInput()}
+          {searchType === "attribute" && attributeSearchInput()}
         </InputGroup>
       </ToolbarItem>
     );
@@ -239,8 +239,8 @@ export function UserDataTableToolbarItems({
 
   return (
     <>
-      {section !== "actions" ? searchItem() : null}
-      {section !== "search" && isManager ? actionItems : null}
+      {searchItem()}
+      {isManager ? actionItems : null}
     </>
   );
 }

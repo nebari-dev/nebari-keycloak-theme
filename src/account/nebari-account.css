@@ -72,9 +72,16 @@
     --pf-v5-c-nav__link--after--BorderLeftWidth: 0;
 }
 
+/* PatternFly draws the nav item's active indicator as two absolutely positioned
+ * pseudo-elements. Its own rule is `.pf-v5-c-nav__link::after,
+ * .pf-v5-c-nav__link::before { position: absolute; content: ""; border: 0 solid }`
+ * — the same specificity as this one, and it sets no `display`. This file is
+ * unlayered while PatternFly's ships inside `@layer patternfly`, and an
+ * unlayered normal declaration outranks any layered one, so the plain
+ * declaration already wins; the `!important` here was never doing work. */
 .pf-v5-c-nav__link::before,
 .pf-v5-c-nav__link::after {
-    display: none !important;
+    display: none;
 }
 
 .pf-v5-c-nav__link:hover {
@@ -523,189 +530,28 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MASTHEAD HAMBURGER TOGGLE (mobile / narrow)
+   SIDEBAR TOGGLE (mobile / narrow)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.pf-v5-c-masthead__toggle .pf-v5-c-button,
-.pf-v5-c-masthead__toggle button {
-    color: #374151 !important;
-    background: transparent !important;
-    width: auto;
+/* The one masthead control still rendered by PatternFly. It has to stay a
+ * `PageToggleButton` because it is wired to the `Page` context that owns the
+ * sidebar's expanded state, so it cannot be swapped for a Nebari button — the
+ * same reason `admin/index.css` keeps `.nebari-admin-nav-toggle`. Everything
+ * else in this header is composed from design-system components.
+ *
+ * The rules this replaces targeted `.pf-v5-c-masthead__toggle` and
+ * `.pf-v5-c-masthead .pf-v5-c-dropdown__*`, which the header stopped rendering
+ * when `KeycloakMasthead` was handed back to upstream: the toggle is no longer
+ * wrapped in a `MastheadToggle`, and the user menu is the shared `ProfileMenu`
+ * rather than a PatternFly dropdown. Both blocks styled nothing. */
+.nebari-account-nav-toggle {
+    flex: 0 0 auto;
+    color: var(--header-foreground);
 }
 
-.pf-v5-c-masthead__toggle .pf-v5-c-button:hover,
-.pf-v5-c-masthead__toggle button:hover {
-    color: #7c3aed !important;
-    background: rgba(124, 58, 237, 0.07) !important;
-    border-radius: 6px;
+.nebari-account-nav-toggle:hover {
+    background: var(--header-action-hover);
 }
-
-.pf-v5-theme-dark .pf-v5-c-masthead__toggle .pf-v5-c-button,
-.pf-v5-theme-dark .pf-v5-c-masthead__toggle button {
-    color: #c9cdd3 !important;
-}
-
-.pf-v5-theme-dark .pf-v5-c-masthead__toggle .pf-v5-c-button:hover,
-.pf-v5-theme-dark .pf-v5-c-masthead__toggle button:hover {
-    color: #a78bfa !important;
-    background: rgba(167, 139, 250, 0.10) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   MASTHEAD USER PILL + DROPDOWN
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.pf-v5-c-masthead .pf-v5-c-dropdown__toggle,
-.pf-v5-c-masthead .pf-v5-c-dropdown>button,
-.pf-v5-c-masthead .pf-v5-c-dropdown__toggle.pf-m-plain {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent;
-    border: 1px solid #e3e3ea;
-    border-radius: 100px;
-    padding: 4px 12px 4px 4px;
-    color: #111118;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    width: fit-content;
-    transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
-}
-
-.pf-v5-c-masthead .pf-v5-c-dropdown__toggle:hover,
-.pf-v5-c-masthead .pf-v5-c-dropdown>button:hover {
-    background: #f0ebff;
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
-}
-
-.pf-v5-c-masthead .pf-v5-c-dropdown.pf-m-expanded .pf-v5-c-dropdown__toggle,
-.pf-v5-c-masthead .pf-v5-c-dropdown.pf-m-expanded>button {
-    background: #f0ebff;
-    border-color: #7c3aed;
-}
-
-/* Dark */
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown__toggle,
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown>button {
-    border-color: #26262f;
-    color: #f0f0f8;
-}
-
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown__toggle:hover,
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown>button:hover {
-    background: rgba(167, 139, 250, 0.12);
-    border-color: #a78bfa;
-    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.10);
-}
-
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown.pf-m-expanded .pf-v5-c-dropdown__toggle,
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown.pf-m-expanded>button {
-    background: rgba(167, 139, 250, 0.14);
-    border-color: #a78bfa;
-}
-
-/* Avatar circle — hidden from trigger, shown in dropdown card */
-.pf-v5-c-masthead .pf-v5-c-avatar {
-    display: none;
-}
-
-/* Caret */
-.pf-v5-c-masthead .pf-v5-c-dropdown__toggle-icon {
-    color: #6a6a7a;
-    font-size: 0.75rem;
-    margin-left: 2px;
-    transition: transform 0.15s;
-}
-
-.pf-v5-c-masthead .pf-v5-c-dropdown.pf-m-expanded .pf-v5-c-dropdown__toggle-icon {
-    transform: rotate(180deg);
-    color: #7c3aed;
-}
-
-/* Dropdown panel */
-.pf-v5-c-masthead .pf-v5-c-dropdown__menu,
-.pf-v5-c-page__header .pf-v5-c-dropdown__menu {
-    background: #ffffff;
-    border: 1px solid #e3e3ea;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, .08), 0 1px 4px rgba(0, 0, 0, .06);
-    padding: 6px;
-    min-width: 210px;
-    overflow: hidden;
-}
-
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown__menu,
-.pf-v5-theme-dark .pf-v5-c-page__header .pf-v5-c-dropdown__menu {
-    background: #17171f;
-    border-color: #26262f;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, .4), 0 1px 4px rgba(0, 0, 0, .3);
-}
-
-/* Menu items */
-.pf-v5-c-masthead .pf-v5-c-dropdown__menu-item,
-.pf-v5-c-page__header .pf-v5-c-dropdown__menu-item {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #111118;
-    padding: 0.5rem 0.875rem;
-    border-radius: 8px;
-    transition: background 0.1s, color 0.1s;
-    display: block;
-    background: transparent;
-    border: none;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-    line-height: 1.4;
-}
-
-.pf-v5-c-masthead .pf-v5-c-dropdown__menu-item:hover,
-.pf-v5-c-page__header .pf-v5-c-dropdown__menu-item:hover {
-    background: #f0ebff;
-    color: #7c3aed;
-}
-
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown__menu-item,
-.pf-v5-theme-dark .pf-v5-c-page__header .pf-v5-c-dropdown__menu-item {
-    color: #e0e0f0;
-}
-
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown__menu-item:hover,
-.pf-v5-theme-dark .pf-v5-c-page__header .pf-v5-c-dropdown__menu-item:hover {
-    background: rgba(167, 139, 250, 0.12);
-    color: #a78bfa;
-}
-
-/* Divider */
-.pf-v5-c-masthead .pf-v5-c-dropdown__menu .pf-v5-c-divider,
-.pf-v5-c-page__header .pf-v5-c-dropdown__menu .pf-v5-c-divider,
-.pf-v5-c-masthead .pf-v5-c-dropdown__separator {
-    border: none;
-    border-top: 1px solid #efeff3;
-    margin: 4px 0;
-}
-
-.pf-v5-theme-dark .pf-v5-c-masthead .pf-v5-c-dropdown__menu .pf-v5-c-divider,
-.pf-v5-theme-dark .pf-v5-c-page__header .pf-v5-c-dropdown__menu .pf-v5-c-divider {
-    border-top-color: #26262f;
-}
-
-/* Sign out — danger tint */
-.pf-v5-c-masthead .pf-v5-c-dropdown__menu-item:last-child:hover,
-.pf-v5-c-page__header .pf-v5-c-dropdown__menu-item:last-child:hover {
-    background: rgba(239, 68, 68, 0.08);
-    color: #ef4444;
-}
-
-/* The standalone theme-toggle button and the user-identity dropdown item that
- * used to live here are gone: the account control is now the shared
- * `ProfileMenu` (src/components/nebari/ProfileMenu.tsx), which renders the
- * identity block and the Light/Dark/System picker from design-system
- * components and semantic tokens. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MENU TOGGLE (pf-v5-c-menu-toggle) — selects & dropdowns

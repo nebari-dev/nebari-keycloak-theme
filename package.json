@@ -6,11 +6,14 @@
   "scripts": {
     "postinstall": "keycloakify sync-extensions",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npm run check && tsc && vite build",
     "build-keycloak-theme": "npm run build && keycloakify build",
+    "check": "npm run check:page-nav-sync && npm run check:patternfly-version",
+    "check:page-nav-sync": "node scripts/check-page-nav-sync.mjs",
+    "check:patternfly-version": "node scripts/check-patternfly-version.mjs",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "npm run check && tsc --noEmit",
     "test:screenshots": "playwright test",
     "test:screenshots:update": "playwright test --update-snapshots=all"
   },
