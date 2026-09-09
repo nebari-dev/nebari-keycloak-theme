@@ -5,11 +5,7 @@
  * $ npx keycloakify own --path "shared/keycloak-ui-shared/controls/table/KeycloakDataTable.tsx" --revert
  */
 
-/* eslint-disable */
-
-// @ts-nocheck
-
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type DataTableColumnDef } from "@/components/ui/data-table";
 import {
@@ -59,6 +55,7 @@ import type {
   IAction,
   IActionsResolver,
   IFormatter,
+  IFormatterValueType,
   ITransform,
   TableProps,
 } from "../../../@patternfly/react-table";
@@ -86,7 +83,19 @@ export type Action<T> = IAction & {
   onRowClick?: (row: T) => Promise<boolean | void> | void;
 };
 
-export type LoaderResult<T> = T[] | { rows: T[]; total: number };
+/**
+ * A bare array is upstream's contract, and every loader in the tree returns one
+ * — so the pager currently always works out "next page?" from the `max + 1`
+ * sentinel row rather than from a total.
+ *
+ * The object form is a seam for a Nebari-owned screen that can cheaply ask
+ * Keycloak for a count and wants the pager to read "of N". It has no callers
+ * today; it is kept because it costs one branch in the fetch handler and the
+ * alternative — reintroducing it later — means re-diverging this file from
+ * upstream. `total` stays optional so an endpoint that cannot supply one can
+ * still use the object shape.
+ */
+export type LoaderResult<T> = T[] | { rows: T[]; total?: number };
 
 export type LoaderFunction<T> = (
   first?: number,
@@ -116,7 +125,23 @@ export type DataListProps<T> = Omit<TableProps, "rows" | "cells" | "onSelect"> &
   isNotCompact?: boolean;
   isRadio?: boolean;
   isSearching?: boolean;
-  /** Opts back into per-row action menus when a screen cannot use row navigation. */
+  /**
+   * Forwarded to the table wrapper. Kept as an explicit prop rather than a
+   * blanket `...rest` spread: the remaining `TableProps` are PatternFly table
+   * options with no Nebari equivalent, and spreading them onto a `div` would
+   * put unknown attributes in the DOM. Six Admin Console tables pass this one,
+   * and Keycloak's own end-to-end selectors depend on it.
+   */
+  "data-testid"?: string;
+  /**
+   * Opts *out* of per-row action menus.
+   *
+   * Upstream has no such flag — PatternFly renders the kebab whenever `actions`
+   * or `actionResolver` is supplied — so this defaults to that behaviour and
+   * exists only for a screen that deliberately replaces the menu with something
+   * else. Thirty-two Admin Console screens supply row actions, so a `false`
+   * default silently removes real functionality from all of them.
+   */
   showRowActions?: boolean;
 };
 
@@ -156,10 +181,19 @@ function RowActions({ actions, disabled, onAction, rowLabel }: RowActionsProps) 
 
   return (
     <DropdownMenu>
+      {/* Same override as `ProfileMenu`: the registry's trigger renders the
+          Nebari `Button`, which takes `ref` as a plain prop (React 19), and this
+          app is on React 18 — so Base UI's anchor ref came back null and the menu
+          never positioned itself. A DOM element gives it a real node, and
+          `buttonVariants` reapplies the styling, including the compact `icon-sm`
+          sizing the trigger's own props cannot express. */}
       <DropdownMenuTrigger
         aria-label={`Actions for ${rowLabel}`}
-        className="focus-visible:ring-offset-0"
-        size="icon-sm"
+        className={cn(
+          buttonVariants({ size: "icon-sm", variant: "ghost" }),
+          "focus-visible:ring-offset-0",
+        )}
+        render={<button type="button" />}
         variant="ghost"
       >
         <MoreVerticalIcon />
@@ -173,7 +207,21 @@ function RowActions({ actions, disabled, onAction, rowLabel }: RowActionsProps) 
               <DropdownMenuItem
                 disabled={action.isDisabled || action.isAriaDisabled}
                 key={action.itemKey ?? `action-${index}`}
-                onClick={(event) => onAction(action, event as React.MouseEvent)}
+                onClick={(event) => {
+                  /* The menu renders through a portal, so in the DOM it sits on
+                     `document.body` — but React bubbles portal events up the
+                     *React* tree, which puts this click on the table row that
+                     owns the cell. `DataTable`'s row-navigation guard skips
+                     clicks on interactive elements via
+                     `currentTarget.contains(target)`, a DOM check that a
+                     portalled node fails, so without this the row followed its
+                     primary link and "Delete" navigated to the detail page
+                     instead of opening the confirm dialog. Stopping propagation
+                     here keeps the fix at the call site; `data-table.tsx` is
+                     registry-managed and not ours to edit. */
+                  event.stopPropagation();
+                  onAction(action, event as React.MouseEvent);
+                }}
                 variant={action.variant === "danger" ? "destructive" : "default"}
               >
                 {action.title}
@@ -352,8 +400,9 @@ export function KeycloakDataTable<T extends RowData>({
   emptyState,
   icon,
   isSearching = false,
-  showRowActions = false,
+  showRowActions = true,
   className,
+  "data-testid": dataTestId,
 }: DataListProps<T>) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<T[]>([]);
@@ -445,6 +494,23 @@ export function KeycloakDataTable<T extends RowData>({
     () => intersectionBy(selected, visibleData, "id"),
     [selected, visibleData],
   );
+  /*
+   * `isRowDisabled` is an authorization signal on several screens, not just a
+   * styling one — Users marks rows the admin has no `manage` access to, Role
+   * mapping marks inherited roles, User groups marks indirect memberships — and
+   * upstream expressed it as PatternFly's `disableSelection`, which excluded
+   * those rows from "select all". Select-all here therefore operates on the
+   * selectable subset only, so a bulk Delete/Unassign can never be handed a row
+   * the screen declared off limits.
+   */
+  const selectableData = useMemo(
+    () => (isRowDisabled ? visibleData.filter((row) => !isRowDisabled(row)) : visibleData),
+    [isRowDisabled, visibleData],
+  );
+  const selectedSelectableCount = useMemo(
+    () => intersectionBy(selected, selectableData, "id").length,
+    [selectableData, selected],
+  );
 
   const updateSelected = useCallback((next: T[]) => {
     setSelected(next);
@@ -480,12 +546,17 @@ export function KeycloakDataTable<T extends RowData>({
     }));
   }, [actionResolver, actions, isPaginated, refresh]);
 
-  const renderCell = useCallback((column: Field<T> | DetailField<T>, row: T) => {
+  const renderCell = useCallback((column: Field<T> | DetailField<T>, row: T): ReactNode => {
     if ("cellFormatters" in column && column.cellFormatters) {
-      return column.cellFormatters.reduce(
-        (value, formatter) => formatter(value),
-        get(row, column.name),
-      );
+      /* PatternFly's formatters are a loosely typed pipeline: `IFormatter`
+         returns a value its own parameter type does not accept, so chaining
+         them — the entire point of `cellFormatters` — does not type-check
+         unaided. The casts restate the chain rather than widen it; every
+         formatter Keycloak ships here returns a renderable value. */
+      return column.cellFormatters.reduce<IFormatterValueType | undefined>(
+        (value, formatter) => formatter(value) as IFormatterValueType,
+        get(row, column.name) as IFormatterValueType | undefined,
+      ) as ReactNode;
     }
     if (column.cellRenderer) {
       const Component = column.cellRenderer;
@@ -544,19 +615,21 @@ export function KeycloakDataTable<T extends RowData>({
             <Checkbox
               aria-label={t("selectAll")}
               checked={
-                visibleData.length > 0 && rowsSelectedOnPage.length === visibleData.length
+                selectableData.length > 0 &&
+                selectedSelectableCount === selectableData.length
               }
+              disabled={selectableData.length === 0}
               indeterminate={
-                rowsSelectedOnPage.length > 0 &&
-                rowsSelectedOnPage.length < visibleData.length
+                selectedSelectableCount > 0 &&
+                selectedSelectableCount < selectableData.length
               }
               onCheckedChange={(checked) => {
-                const pageIds = new Set(visibleData.map((row) => get(row, "id")));
+                const pageIds = new Set(selectableData.map((row) => get(row, "id")));
                 updateSelected(
                   checked
                     ? [
                         ...selected,
-                        ...visibleData.filter(
+                        ...selectableData.filter(
                           (row) =>
                             !selected.some(
                               (item) => get(item, "id") === get(row, "id"),
@@ -664,13 +737,13 @@ export function KeycloakDataTable<T extends RowData>({
     onSelect,
     renderCell,
     resolveActions,
-    rowsSelectedOnPage,
+    selectableData,
     selected,
+    selectedSelectableCount,
     showRowActions,
     t,
     toggleRow,
     updateSelected,
-    visibleData,
   ]);
 
   const table = (
@@ -698,6 +771,7 @@ export function KeycloakDataTable<T extends RowData>({
     <div
       className="flex w-full flex-col gap-4 px-4 pt-4 pb-6 sm:px-6"
       data-slot="keycloak-data-table"
+      data-testid={dataTestId}
     >
       <div
         className="flex min-h-8 flex-wrap items-center gap-2"

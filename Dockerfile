@@ -1,5 +1,8 @@
 ARG KEYCLOAK_VERSION=26.0
-ARG THEME_JAR=nebari-keycloak-theme-for-kc-all-other-versions.jar
+# Which theme JARs to install. The default takes every theme that was built, so
+# a local `docker compose up --build` can switch a realm between them. Narrow it
+# to one file to publish an image carrying a single theme.
+ARG THEME_JAR=*-keycloak-theme-for-kc-all-other-versions.jar
 
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} AS builder
 ARG THEME_JAR
@@ -10,7 +13,8 @@ ENV KC_METRICS_ENABLED=true
 
 # Copy the custom theme
 WORKDIR /opt/keycloak
-COPY dist_keycloak/${THEME_JAR} /opt/keycloak/providers/nebari-theme.jar
+# A directory destination, so ${THEME_JAR} may match more than one file.
+COPY dist_keycloak/${THEME_JAR} /opt/keycloak/providers/
 
 # Build Keycloak with the custom theme
 RUN /opt/keycloak/bin/kc.sh build

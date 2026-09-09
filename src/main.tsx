@@ -44,6 +44,11 @@ const kcContext: KcContext =
     };
 
 document.documentElement.dataset.kcTheme = kcContext.themeName;
+/* The theme *type* as well as its name. A theme's login styling has to be
+   scoped to the login pages: this attribute is set for every theme type, so
+   scoping on the name alone let the OpenTeams login card's input sizing,
+   fonts and tokens apply to the Admin and Account consoles too. */
+document.documentElement.dataset.kcThemeType = kcContext.themeType;
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>

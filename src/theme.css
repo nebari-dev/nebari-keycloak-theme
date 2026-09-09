@@ -488,17 +488,24 @@ samp {
     color: var(--text-primary);
 }
 
-/* Link buttons — prevent underline override */
+/* Link buttons keep button semantics, not link semantics.
+ *
+ * What they have to beat is the login-wrapper anchor rule further down, whose
+ * `:hover` sets `text-decoration: underline`. That rule is deliberately
+ * specificity-free — `:where(.nebari-login-wrapper) a:where(:not([data-slot]))`
+ * scores (0,0,1) — while these selectors score (0,1,1), so plain specificity
+ * settles it in source-order-independent fashion. `!important` was belt and
+ * braces and made the next override need `!important` too. */
 a.nebari-button,
 a.nebari-button-primary,
 a.nebari-button-secondary {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 a.nebari-button:hover,
 a.nebari-button-primary:hover,
 a.nebari-button-secondary:hover {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 /* Full-width button modifier */
@@ -551,15 +558,21 @@ a.nebari-button-secondary:hover {
  * `:not([data-slot])` excludes design-system components for the same reason
  * inside the login pages: a `Button` rendered as an `<a>` (a "back to
  * application" link, say) would otherwise take this colour instead of its own
- * `text-primary-foreground`, and its label would disappear into the fill. */
-:where(.nebari-login-wrapper) a:not([data-slot]) {
+ * `text-primary-foreground`, and its label would disappear into the fill.
+ *
+ * It is wrapped in `:where()` so it contributes no specificity. A bare
+ * `:not([data-slot])` counts as an attribute selector, which pushed this rule to
+ * (0,1,1) and let it beat single-class rules on plain anchors — the social
+ * sign-in buttons turned purple. `:where()` keeps the exclusion and puts the
+ * rule back at (0,0,1), below `.nebari-social-button` and friends. */
+:where(.nebari-login-wrapper) a:where(:not([data-slot])) {
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.15s;
 }
 
-:where(.nebari-login-wrapper) a:not([data-slot]):hover {
+:where(.nebari-login-wrapper) a:where(:not([data-slot])):hover {
     color: var(--accent-dark);
     text-decoration: underline;
 }
@@ -800,7 +813,9 @@ textarea { font-family: var(--font-sans); }
  * of form ids, with the pages not on it falling back to per-group margins — the
  * reason field spacing differed between, say, sign-in and register. Every login
  * page renders inside `.nebari-login-wrapper`, so the gap is stated once and the
- * `Field` components stack against it. */
+ * `Field` components stack against it. The update-profile visual baseline is
+ * intentionally 80px taller as a result: its four previously collapsed
+ * inter-field gaps and action gap now use this same 20px rhythm. */
 .nebari-login-wrapper form { display: flex; flex-direction: column; gap: 20px; }
 
 .nebari-form-group,
@@ -971,13 +986,19 @@ textarea { font-family: var(--font-sans); }
     color: #262628;
 }
 
-/* Keep link-style primary buttons legible in every interaction state. */
+/* Keep link-style primary buttons legible in every interaction state.
+ *
+ * Two classes plus an element — (0,2,1) — which already outranks both the
+ * browser's `a:visited` default and the (0,0,1) login-wrapper anchor rule, so no
+ * `!important` is needed. It mattered that this one dropped it: while it was
+ * important, the dark-theme override below had to be important purely to beat
+ * it, and the two were an arms race rather than a cascade. */
 a.nebari-button.nebari-button-primary,
 a.nebari-button.nebari-button-primary:hover,
 a.nebari-button.nebari-button-primary:focus,
 a.nebari-button.nebari-button-primary:active,
 a.nebari-button.nebari-button-primary:visited {
-    color: #fff !important;
+    color: #fff;
 }
 
 /* Figma: NIC Landing Page / Login (Dark), node 366:1291.
@@ -1064,7 +1085,7 @@ a.nebari-button.nebari-button-primary:visited {
 [data-theme="dark"] a.nebari-button.nebari-button-primary:hover,
 [data-theme="dark"] a.nebari-button.nebari-button-primary:focus,
 [data-theme="dark"] a.nebari-button.nebari-button-primary:active,
-[data-theme="dark"] a.nebari-button.nebari-button-primary:visited { color: #111114 !important; }
+[data-theme="dark"] a.nebari-button.nebari-button-primary:visited { color: #111114; }
 
 [data-theme="dark"] .nebari-button-secondary,
 [data-theme="dark"] .nebari-social-button {
@@ -1178,6 +1199,369 @@ a.nebari-button.nebari-button-primary:visited {
     opacity: 0;
     transform: translateY(6px);
         }
+    }
+}
+
+/* ==========================================================================
+   OPENTEAMS THEME VARIANT
+
+   Palette and typography taken from the https://openteams.com landing page —
+   its Elementor global kit, so these are the brand values rather than colours
+   sampled off a screenshot: midnight #000f3a, deep blue #022791, electric blue
+   #4d75fe (primary), coral #ff8a69 (secondary), amber #faa944 (accent), all set
+   in Inter Tight.
+
+   The landing page's shape language is what the login form borrows: a midnight
+   ground lit by one off-centre blue glow, pill buttons (the hero CTA is an
+   outlined pill, the nav CTA a filled one), coral reserved for small accents,
+   and headings in Inter Tight 600 with tight tracking.
+
+   Selectors are scoped to the theme name *and* the theme type. The name keeps
+   the Nebari variant untouched; the type keeps this off the Admin and Account
+   consoles. `data-kc-theme` alone is not enough — `src/main.tsx` sets it for
+   every theme type, because the console mastheads need it to pick a logo, so
+   scoping on the name alone applied this login card's input sizing, fonts and
+   colour tokens to both consoles: a 30px console search field became 46px and
+   its text ran under the search icon.
+   ========================================================================== */
+
+/* Login and Admin only. The Account console is excluded because
+   `src/account/nebari-account.css` paints its content panel light regardless of
+   these tokens: with a dark `--foreground` its field labels turned white on a
+   white panel and disappeared. Until that stylesheet can follow a dark palette,
+   the Account console keeps the Nebari console styling, which is readable. */
+html[data-kc-theme="openteams"]:not([data-kc-theme-type="account"]) {
+    color-scheme: dark;
+    --font-sans: "Inter Tight Variable", "Inter Tight", sans-serif;
+    --Font-Sans: var(--font-sans);
+    --background: #000f3a;
+    --foreground: #ffffff;
+    --card: rgba(2, 39, 145, .42);
+    --card-foreground: #ffffff;
+    --popover: #00184f;
+    --popover-foreground: #ffffff;
+    --primary: #4d75fe;
+    --primary-foreground: #ffffff;
+    --primary-hover: #6487ff;
+    --secondary: rgba(77, 117, 254, .15);
+    --secondary-foreground: #ffffff;
+    --muted: rgba(255, 255, 255, .08);
+    --muted-foreground: #b9c7f6;
+    --muted-foreground-strong: #dce4ff;
+    --accent: rgba(77, 117, 254, .18);
+    --accent-foreground: #ffffff;
+    --destructive: rgba(255, 138, 105, .15);
+    --destructive-foreground: #ffad96;
+    --border: rgba(255, 255, 255, .24);
+    --input: rgba(255, 255, 255, .34);
+    --border-strong: rgba(255, 255, 255, .55);
+    --ring: #4d75fe;
+    --bg-primary: #000f3a;
+    --bg-secondary: #00184f;
+    --bg-elevated: rgba(2, 39, 145, .55);
+    --bg-hover: rgba(77, 117, 254, .18);
+    --text-primary: #ffffff;
+    --text-secondary: #dce4ff;
+    --text-muted: #b9c7f6;
+    --border-color: rgba(255, 255, 255, .24);
+    --border-subtle: rgba(255, 255, 255, .14);
+    --color-foreground-default: #ffffff;
+    --color-foreground-destructive: #ffad96;
+    --nebari-purple: #4d75fe;
+    --nebari-purple-dark: #6487ff;
+    --nebari-purple-light: rgba(77, 117, 254, .15);
+    --nebari-red: #ff8a69;
+    --login-backdrop: #000f3a;
+
+    /* The Admin and Account console chrome reads its own token set, separate
+       from the palette above. Without these the masthead and sidebar keep the
+       light `:root` values while everything else turns navy — which is what
+       made the sidebar white-on-white. Values mirror the palette: the deep-blue
+       surface for chrome, electric blue for selection, coral for sign-out. */
+    --header-background: #00184f;
+    --header-border: rgba(255, 255, 255, .24);
+    --header-foreground: #ffffff;
+    --header-action-hover: rgba(77, 117, 254, .18);
+    --sign-out-foreground: #ff8a69;
+    --sidebar: #00184f;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #4d75fe;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: rgba(77, 117, 254, .18);
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: rgba(255, 255, 255, .24);
+    --sidebar-ring: #4d75fe;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] body,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] button,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] input,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] select,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] textarea {
+    font-family: var(--font-sans);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] body {
+    background: #000f3a;
+    color: #ffffff;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper {
+    padding: 32px;
+    background-color: #000f3a;
+    background-image: none;
+}
+
+/* The landing page's hero is a flat midnight ground lit from one side by a
+ * single soft blue bloom, and it does not move. This is that: one off-centre
+ * glow, no drift animation, so the page reads as the same surface. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper::before {
+    top: 50%;
+    left: 50%;
+    width: 140vmax;
+    height: 140vmax;
+    margin: -70vmax 0 0 -70vmax;
+    background-image:
+        radial-gradient(46vmax 36vmax at 70% 38%, rgba(2, 39, 145, .5) 0%, rgba(2, 39, 145, .16) 58%, transparent 100%),
+        radial-gradient(30vmax 24vmax at 28% 76%, rgba(77, 117, 254, .08) 0%, transparent 100%);
+    animation: none;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    opacity: .16;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, transparent, #000 24%, #000 76%, transparent);
+}
+
+/* The landing page states a panel plainly: a barely-lighter navy fill, one hairline
+ * blue rule, and a small radius. Deliberately not a glass card — no gradient border,
+ * no blur — because nothing on openteams.com is built that way. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-card {
+    width: min(440px, 100%);
+    padding: 38px;
+    overflow: visible;
+    background: rgba(2, 39, 145, .22);
+    border: 1px solid rgba(77, 117, 254, .38);
+    border-radius: 8px;
+    box-shadow: 0 32px 64px rgba(0, 5, 20, .38);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-logo-header {
+    margin-bottom: 28px;
+}
+
+/* The official horizontal wordmark, sized to the ~177x34 it occupies in the
+ * site header. Its viewBox is cropped to the artwork, so height alone drives
+ * the width and there is no invisible padding to account for. */
+.openteams-logo {
+    display: block;
+    width: auto;
+    height: 34px;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-header {
+    margin-bottom: 26px;
+}
+
+/* Landing-page headings are Inter Tight 600 pulled in tight, not 700. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-header .nebari-title {
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -.4px;
+}
+
+/* The site runs a blue-to-coral gradient through the second line of every
+ * headline. A login title is one line, so the gradient is carried by the rule
+ * beneath it instead — square-ended, like the coral dash that marks the site's
+ * eyebrow labels. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-header .nebari-title::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 2px;
+    margin-top: 14px;
+    background: linear-gradient(90deg, #4d75fe 0%, #ff8a69 100%);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-subtitle,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-label,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="field-label"],
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-label-wrapper .nebari-label,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="checkbox"] {
+    color: #ffffff;
+    font-family: var(--font-sans);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-label,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="field-label"],
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-label-wrapper .nebari-label {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .2px;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper form {
+    gap: 22px;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-input,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="input"],
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] input[type="text"],
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] input[type="email"],
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] input[type="password"],
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] input[type="tel"],
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] select,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] textarea {
+    height: 46px;
+    padding: 11px 16px;
+    /* Square-ish, to sit with the panel rather than echo the pill buttons —
+     * on the site only calls to action are pill-shaped. */
+    border: 1px solid rgba(77, 117, 254, .42);
+    border-radius: 6px;
+    background: rgba(0, 15, 58, .55);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 22px;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="input"]::placeholder,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] input::placeholder {
+    color: #9eaddd;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="input"]:hover,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-input:hover {
+    border-color: rgba(77, 117, 254, .75);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="input"]:focus,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-input:focus {
+    border-width: 1px;
+    border-color: #4d75fe;
+    box-shadow: 0 0 0 3px rgba(77, 117, 254, .22);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="input-end-adornment"] [data-slot="button"] {
+    color: #b9c7f6;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-label-row .nebari-forgot-link,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-link,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-info-section,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-required-notice {
+    color: #b9c7f6;
+    font-family: var(--font-sans);
+}
+
+/* Standalone action links are the site's blue ("Learn more about us →"); the
+ * forgot-password link stays muted because it sits inside a field label row. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-info-section .nebari-link {
+    color: #4d75fe;
+    font-weight: 500;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-label-row .nebari-forgot-link:hover,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-link:hover,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-info-section .nebari-link:hover {
+    color: #ffffff;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] #kc-login,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-primary,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] button[type="submit"],
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] input[type="submit"] {
+    /* The site's call to action: a flat pill in Inter Tight 500 at 16/0.3px.
+     * No lift or glow — every button on openteams.com is flat. */
+    min-height: 48px;
+    padding: 13px 30px;
+    border: 1px solid #4d75fe;
+    border-radius: 999px;
+    background: #4d75fe;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: .3px;
+    line-height: 22px;
+    box-shadow: none;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] #kc-login:hover,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-primary:hover,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] button[type="submit"]:hover,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] input[type="submit"]:hover {
+    border-color: #6c8cff;
+    background: #6c8cff;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* The hero's secondary call to action: an outlined pill on the midnight ground,
+ * hairline white rather than blue, so it reads as the quieter of the two. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-secondary,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-button {
+    min-height: 46px;
+    padding: 12px 24px;
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-radius: 999px;
+    background: transparent;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: .3px;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-secondary:hover,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-button:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, .08);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-section {
+    margin-top: 16px;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-providers {
+    gap: 12px;
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-icon {
+    filter: invert(1);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="checkbox-control"] {
+    border-color: rgba(255, 255, 255, .58);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="alert"] {
+    border-radius: 6px;
+}
+
+@media (max-width: 480px) {
+    html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper {
+        padding: 18px;
+    }
+
+    html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-card {
+        padding: 28px 24px;
+    }
+
+    .openteams-logo {
+        height: 28px;
     }
 }
 
@@ -1310,336 +1694,45 @@ a.nebari-button.nebari-button-primary:visited {
     box-shadow: none;
 }
 
-/* ==========================================================================
-   OPENTEAMS THEME VARIANT
-
-   Palette and typography taken from the https://openteams.com landing page —
-   its Elementor global kit, so these are the brand values rather than colours
-   sampled off a screenshot: midnight #000f3a, deep blue #022791, electric blue
-   #4d75fe (primary), coral #ff8a69 (secondary), amber #faa944 (accent), all set
-   in Inter Tight.
-
-   The landing page's shape language is what the login form borrows: a midnight
-   ground lit by one off-centre blue glow, pill buttons (the hero CTA is an
-   outlined pill, the nav CTA a filled one), coral reserved for small accents,
-   and headings in Inter Tight 600 with tight tracking.
-
-   Selectors are deliberately scoped to the Keycloak theme name so the Nebari
-   variant remains untouched.
-   ========================================================================== */
-
-html[data-kc-theme="openteams"] {
-    color-scheme: dark;
-    --font-sans: "Inter Tight Variable", "Inter Tight", sans-serif;
-    --Font-Sans: var(--font-sans);
-    --background: #000f3a;
-    --foreground: #ffffff;
-    --card: rgba(2, 39, 145, .42);
-    --card-foreground: #ffffff;
-    --popover: #00184f;
-    --popover-foreground: #ffffff;
-    --primary: #4d75fe;
-    --primary-foreground: #ffffff;
-    --primary-hover: #6487ff;
-    --secondary: rgba(77, 117, 254, .15);
-    --secondary-foreground: #ffffff;
-    --muted: rgba(255, 255, 255, .08);
-    --muted-foreground: #b9c7f6;
-    --muted-foreground-strong: #dce4ff;
-    --accent: rgba(77, 117, 254, .18);
-    --accent-foreground: #ffffff;
-    --destructive: rgba(255, 138, 105, .15);
-    --destructive-foreground: #ffad96;
-    --border: rgba(255, 255, 255, .24);
-    --input: rgba(255, 255, 255, .34);
-    --border-strong: rgba(255, 255, 255, .55);
-    --ring: #4d75fe;
-    --bg-primary: #000f3a;
-    --bg-secondary: #00184f;
-    --bg-elevated: rgba(2, 39, 145, .55);
-    --bg-hover: rgba(77, 117, 254, .18);
-    --text-primary: #ffffff;
-    --text-secondary: #dce4ff;
-    --text-muted: #b9c7f6;
-    --border-color: rgba(255, 255, 255, .24);
-    --border-subtle: rgba(255, 255, 255, .14);
-    --color-foreground-default: #ffffff;
-    --color-foreground-destructive: #ffad96;
-    --nebari-purple: #4d75fe;
-    --nebari-purple-dark: #6487ff;
-    --nebari-purple-light: rgba(77, 117, 254, .15);
-    --nebari-red: #ff8a69;
-    --login-backdrop: #000f3a;
-}
-
-html[data-kc-theme="openteams"] body,
-html[data-kc-theme="openteams"] button,
-html[data-kc-theme="openteams"] input,
-html[data-kc-theme="openteams"] select,
-html[data-kc-theme="openteams"] textarea {
-    font-family: var(--font-sans);
-}
-
-html[data-kc-theme="openteams"] body {
-    background: #000f3a;
-    color: #ffffff;
-}
-
-html[data-kc-theme="openteams"] .nebari-login-wrapper {
-    padding: 32px;
-    background-color: #000f3a;
-    background-image: none;
-}
-
-/* The landing page's hero is a flat midnight ground lit from one side by a
- * single soft blue bloom, and it does not move. This is that: one off-centre
- * glow, no drift animation, so the page reads as the same surface. */
-html[data-kc-theme="openteams"] .nebari-login-wrapper::before {
-    top: 50%;
-    left: 50%;
-    width: 140vmax;
-    height: 140vmax;
-    margin: -70vmax 0 0 -70vmax;
-    background-image:
-        radial-gradient(46vmax 36vmax at 70% 38%, rgba(2, 39, 145, .5) 0%, rgba(2, 39, 145, .16) 58%, transparent 100%),
-        radial-gradient(30vmax 24vmax at 28% 76%, rgba(77, 117, 254, .08) 0%, transparent 100%);
-    animation: none;
-}
-
-html[data-kc-theme="openteams"] .nebari-login-wrapper::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    opacity: .16;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: linear-gradient(to bottom, transparent, #000 24%, #000 76%, transparent);
-}
-
-/* The landing page states a panel plainly: a barely-lighter navy fill, one hairline
- * blue rule, and a small radius. Deliberately not a glass card — no gradient border,
- * no blur — because nothing on openteams.com is built that way. */
-html[data-kc-theme="openteams"] .nebari-login-card {
-    width: min(440px, 100%);
-    padding: 38px;
-    overflow: visible;
-    background: rgba(2, 39, 145, .22);
-    border: 1px solid rgba(77, 117, 254, .38);
-    border-radius: 8px;
-    box-shadow: 0 32px 64px rgba(0, 5, 20, .38);
-}
-
-html[data-kc-theme="openteams"] .nebari-logo-header {
-    margin-bottom: 28px;
-}
-
-/* The official horizontal wordmark, sized to the ~177x34 it occupies in the
- * site header. Its viewBox is cropped to the artwork, so height alone drives
- * the width and there is no invisible padding to account for. */
-.openteams-logo {
-    display: block;
-    width: auto;
-    height: 34px;
-}
-
-html[data-kc-theme="openteams"] .nebari-header {
-    margin-bottom: 26px;
-}
-
-/* Landing-page headings are Inter Tight 600 pulled in tight, not 700. */
-html[data-kc-theme="openteams"] .nebari-header .nebari-title {
-    color: #ffffff;
-    font-family: var(--font-sans);
-    font-size: 26px;
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -.4px;
-}
-
-/* The site runs a blue-to-coral gradient through the second line of every
- * headline. A login title is one line, so the gradient is carried by the rule
- * beneath it instead — square-ended, like the coral dash that marks the site's
- * eyebrow labels. */
-html[data-kc-theme="openteams"] .nebari-header .nebari-title::after {
-    content: "";
-    display: block;
-    width: 56px;
-    height: 2px;
-    margin-top: 14px;
-    background: linear-gradient(90deg, #4d75fe 0%, #ff8a69 100%);
-}
-
-html[data-kc-theme="openteams"] .nebari-subtitle,
-html[data-kc-theme="openteams"] .nebari-label,
-html[data-kc-theme="openteams"] [data-slot="field-label"],
-html[data-kc-theme="openteams"] .nebari-label-wrapper .nebari-label,
-html[data-kc-theme="openteams"] [data-slot="checkbox"] {
-    color: #ffffff;
-    font-family: var(--font-sans);
-}
-
-html[data-kc-theme="openteams"] .nebari-label,
-html[data-kc-theme="openteams"] [data-slot="field-label"],
-html[data-kc-theme="openteams"] .nebari-label-wrapper .nebari-label {
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: .2px;
-}
-
-html[data-kc-theme="openteams"] .nebari-login-wrapper form {
-    gap: 22px;
-}
-
-html[data-kc-theme="openteams"] .nebari-input,
-html[data-kc-theme="openteams"] [data-slot="input"],
-html[data-kc-theme="openteams"] input[type="text"],
-html[data-kc-theme="openteams"] input[type="email"],
-html[data-kc-theme="openteams"] input[type="password"],
-html[data-kc-theme="openteams"] input[type="tel"],
-html[data-kc-theme="openteams"] select,
-html[data-kc-theme="openteams"] textarea {
-    height: 46px;
-    padding: 11px 16px;
-    /* Square-ish, to sit with the panel rather than echo the pill buttons —
-     * on the site only calls to action are pill-shaped. */
-    border: 1px solid rgba(77, 117, 254, .42);
-    border-radius: 6px;
-    background: rgba(0, 15, 58, .55);
-    color: #ffffff;
-    font-family: var(--font-sans);
-    font-size: 15px;
-    line-height: 22px;
-}
-
-html[data-kc-theme="openteams"] [data-slot="input"]::placeholder,
-html[data-kc-theme="openteams"] input::placeholder {
-    color: #9eaddd;
-}
-
-html[data-kc-theme="openteams"] [data-slot="input"]:hover,
-html[data-kc-theme="openteams"] .nebari-input:hover {
-    border-color: rgba(77, 117, 254, .75);
-}
-
-html[data-kc-theme="openteams"] [data-slot="input"]:focus,
-html[data-kc-theme="openteams"] .nebari-input:focus {
-    border-width: 1px;
-    border-color: #4d75fe;
-    box-shadow: 0 0 0 3px rgba(77, 117, 254, .22);
-}
-
-html[data-kc-theme="openteams"] [data-slot="input-end-adornment"] [data-slot="button"] {
-    color: #b9c7f6;
-}
-
-html[data-kc-theme="openteams"] .nebari-label-row .nebari-forgot-link,
-html[data-kc-theme="openteams"] .nebari-link,
-html[data-kc-theme="openteams"] .nebari-info-section,
-html[data-kc-theme="openteams"] .nebari-required-notice {
-    color: #b9c7f6;
-    font-family: var(--font-sans);
-}
-
-/* Standalone action links are the site's blue ("Learn more about us →"); the
- * forgot-password link stays muted because it sits inside a field label row. */
-html[data-kc-theme="openteams"] .nebari-info-section .nebari-link {
-    color: #4d75fe;
-    font-weight: 500;
-}
-
-html[data-kc-theme="openteams"] .nebari-label-row .nebari-forgot-link:hover,
-html[data-kc-theme="openteams"] .nebari-link:hover,
-html[data-kc-theme="openteams"] .nebari-info-section .nebari-link:hover {
-    color: #ffffff;
-}
-
-html[data-kc-theme="openteams"] #kc-login,
-html[data-kc-theme="openteams"] .nebari-button-primary,
-html[data-kc-theme="openteams"] button[type="submit"],
-html[data-kc-theme="openteams"] input[type="submit"] {
-    /* The site's call to action: a flat pill in Inter Tight 500 at 16/0.3px.
-     * No lift or glow — every button on openteams.com is flat. */
-    min-height: 48px;
-    padding: 13px 30px;
-    border: 1px solid #4d75fe;
-    border-radius: 999px;
-    background: #4d75fe;
-    color: #ffffff;
-    font-family: var(--font-sans);
-    font-size: 16px;
-    font-weight: 500;
-    letter-spacing: .3px;
-    line-height: 22px;
-    box-shadow: none;
-}
-
-html[data-kc-theme="openteams"] #kc-login:hover,
-html[data-kc-theme="openteams"] .nebari-button-primary:hover,
-html[data-kc-theme="openteams"] button[type="submit"]:hover,
-html[data-kc-theme="openteams"] input[type="submit"]:hover {
-    border-color: #6c8cff;
-    background: #6c8cff;
-    color: #ffffff;
-    text-decoration: none;
-}
-
-/* The hero's secondary call to action: an outlined pill on the midnight ground,
- * hairline white rather than blue, so it reads as the quieter of the two. */
-html[data-kc-theme="openteams"] .nebari-button-secondary,
-html[data-kc-theme="openteams"] .nebari-social-button {
-    min-height: 46px;
-    padding: 12px 24px;
-    border: 1px solid rgba(255, 255, 255, .5);
-    border-radius: 999px;
-    background: transparent;
-    color: #ffffff;
-    font-family: var(--font-sans);
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: .3px;
-}
-
-html[data-kc-theme="openteams"] .nebari-button-secondary:hover,
-html[data-kc-theme="openteams"] .nebari-social-button:hover {
-    border-color: #ffffff;
-    background: rgba(255, 255, 255, .08);
-    color: #ffffff;
-    text-decoration: none;
-}
-
-html[data-kc-theme="openteams"] .nebari-social-section {
-    margin-top: 16px;
-}
-
-html[data-kc-theme="openteams"] .nebari-social-providers {
-    gap: 12px;
-}
-
-html[data-kc-theme="openteams"] .nebari-social-icon {
-    filter: invert(1);
-}
-
-html[data-kc-theme="openteams"] [data-slot="checkbox-control"] {
-    border-color: rgba(255, 255, 255, .58);
-}
-
-html[data-kc-theme="openteams"] [data-slot="alert"] {
-    border-radius: 6px;
-}
-
-@media (max-width: 480px) {
-    html[data-kc-theme="openteams"] .nebari-login-wrapper {
-        padding: 18px;
-    }
-
-    html[data-kc-theme="openteams"] .nebari-login-card {
-        padding: 28px 24px;
-    }
-
-    .openteams-logo {
-        height: 28px;
-    }
+.dark {
+    --background: oklch(26.94% 0.0037 286.15);
+    --foreground: oklch(97.91% 0 0);
+    --scrim: rgba(0, 0, 0, 0.6);
+    --card: oklch(33.01% 0.0052 286.11);
+    --card-foreground: oklch(97.91% 0 0);
+    --popover: oklch(26.94% 0.0037 286.15);
+    --popover-foreground: oklch(97.91% 0 0);
+    --primary: oklch(61.98% 0.2159 311.67);
+    --primary-foreground: oklch(0% 0 0);
+    --primary-hover: oklch(69.98% 0.1926 311.48);
+    --secondary: oklch(40% 0.0269 250.57);
+    --secondary-foreground: oklch(95.04% 0.0042 236.50);
+    --muted: oklch(33.01% 0.0052 286.11);
+    --muted-foreground: oklch(69.88% 0.0130 286.06);
+    --muted-foreground-strong: oklch(78.06% 0.0056 286.27);
+    --accent: oklch(40% 0.0269 250.57);
+    --accent-foreground: oklch(95.04% 0.0042 236.50);
+    --destructive: oklch(33.1% 0.1332 27.42);
+    --destructive-foreground: oklch(78.02% 0.1024 27.78);
+    --warning: oklch(33.09% 0.0677 92.20);
+    --warning-foreground: oklch(87.09% 0.1248 91.93);
+    --success: oklch(32.88% 0.0887 149.73);
+    --success-foreground: oklch(87.04% 0.0814 149.55);
+    --border: oklch(47.01% 0.0112 285.96);
+    --input: oklch(54.86% 0.0154 285.88);
+    --border-strong: oklch(61.96% 0.0134 286.00);
+    --ring: oklch(69.98% 0.1926 311.48);
+    --chart-1: oklch(69.98% 0.1926 311.48);
+    --chart-2: oklch(69.9% 0.0995 187.56);
+    --chart-3: oklch(77.95% 0.1259 85.96);
+    --chart-4: oklch(69.95% 0.1433 264.44);
+    --chart-5: oklch(69.96% 0.1814 149.67);
+    --sidebar: oklch(26.94% 0.0037 286.15);
+    --sidebar-foreground: oklch(97.91% 0 0);
+    --sidebar-primary: oklch(61.98% 0.2159 311.67);
+    --sidebar-primary-foreground: oklch(0% 0 0);
+    --sidebar-accent: oklch(40% 0.0269 250.57);
+    --sidebar-accent-foreground: oklch(95.04% 0.0042 236.50);
+    --sidebar-border: oklch(47.01% 0.0112 285.96);
+    --sidebar-ring: oklch(69.98% 0.1926 311.48);
 }
