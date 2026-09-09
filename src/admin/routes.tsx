@@ -15,6 +15,7 @@ import type { ComponentType } from "react";
 import type { NonIndexRouteObject, RouteObject } from "react-router-dom";
 import { PageNotFoundSection } from "./PageNotFoundSection";
 import { Root } from "./Root";
+import { isThemeCustomizationEnabled } from "./themeCustomization";
 import authenticationRoutes from "./authentication/routes";
 import brandingRoutes from "./branding/routes";
 import clientScopesRoutes from "./client-scopes/routes";
@@ -54,7 +55,11 @@ export const NotFoundRoute: AppRouteObject = {
 
 export const routes: AppRouteObject[] = [
   ...authenticationRoutes,
-  ...brandingRoutes,
+  // Deployment- and theme-level switch; see ./themeCustomization.ts. Dropping
+  // the route is the whole gate: LeftNav renders nothing for a path it cannot
+  // find here, so the sidebar entry goes with it, and a hand-typed URL falls
+  // through to NotFoundRoute.
+  ...(isThemeCustomizationEnabled() ? brandingRoutes : []),
   ...clientRoutes,
   ...clientScopesRoutes,
   ...eventRoutes,

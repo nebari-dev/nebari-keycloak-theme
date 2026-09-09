@@ -45,25 +45,74 @@ shows whichever theme is currently the default.
 ### Working on the Admin or Account console
 
 **The dev server cannot show these.** Both consoles authenticate against a real
-Keycloak, so there is no mock `kcContext` to preview them with — and the theme is
-delivered as a JAR baked into the image at build time, so restarting the
-container is not enough either. Rebuild the JAR and the image:
+Keycloak, so there is no mock `kcContext` to preview them with — and the themes
+are delivered as JARs baked into the image at build time, so restarting the
+container is not enough either. Rebuild the JARs and the image:
 
 ```bash
 npm run build-keycloak-theme
 docker compose up -d --build keycloak
 ```
 
-Then open http://localhost:8080/admin/master/console/ (admin / admin, from
-`docker-compose.yml`). `start-dev` disables Keycloak's theme cache, so a fresh
-image is all that is needed. `--build` is the part that is easy to forget: without
-it the container starts from the previously baked JAR and nothing appears to
-change.
+`start-dev` disables Keycloak's theme cache, so a fresh image is all that is
+needed. `--build` is the part that is easy to forget: without it the container
+starts from the previously baked JAR and nothing appears to change.
 
-The theme has to be selected per realm, under **Realm settings → Themes**
-(*Login theme*, *Admin console theme*, *Account theme*). `realm-export.json` sets
-only the login theme, so a realm imported with `--import-realm` will not pick up
-the console themes until they are set there too.
+The image installs **every** theme that was built (`THEME_JAR` in the
+[Dockerfile](Dockerfile) defaults to a glob), so a realm can be switched between
+them without rebuilding — build only one with
+`npm run build-keycloak-theme -- --theme <name>` and a realm pointing at any
+other silently falls back to stock Keycloak.
+
+A theme is selected per realm, and only the imported `nebari` realm selects this
+one — `master` still runs the stock consoles. So open the themed consoles on
+`nebari`, each with its own account:
+
+| Console | URL | Sign in as |
+| --- | --- | --- |
+| Admin | http://localhost:8080/admin/nebari/console/ | `nebari-admin` / `nebari-admin` |
+| Account | http://localhost:8080/realms/nebari/account/ | `demo` / `demo` |
+
+`admin` / `admin` from `docker-compose.yml` is the *master* realm's bootstrap
+admin. It can administer the `nebari` realm, but only through
+http://localhost:8080/admin/master/console/, which renders in master's own
+(stock) theme — a Keycloak session belongs to the realm it was created in. That
+is why `realm-export.json` also seeds `nebari-admin`, a user in the `nebari`
+realm holding the built-in `realm-management` → `realm-admin` role: signing in as
+that user is what renders the themed Admin Console with every section present.
+
+> `realm-export.json` is development-only. `docker-compose.yml` mounts it for
+> `--import-realm`; the `Dockerfile` copies **only** the theme JAR, so neither
+> these credentials nor this realm reach the published image.
+
+`realm-export.json` sets all three themes (*Login theme*, *Admin console theme*,
+*Account theme*) to `nebari`. Any other realm has to select them by hand under
+**Realm settings → Themes**.
+
+### Upgrade guards
+
+`npm run check` runs as part of both `npm run typecheck` and `npm run build`, and
+covers the two ways this theme can break *silently* on a Keycloak bump — neither
+of which `tsc` can see:
+
+- **`check:page-nav-sync`** — the Admin navigation is the single owned routing
+  seam, reserved for the planned
+  [Software Packs page](https://github.com/nebari-dev/nebari-keycloak-theme/issues/14).
+  Owned files are the ones `keycloakify sync-extensions` will not refresh, so a
+  console section Keycloak adds upstream would simply never appear here. The
+  check compares the static `<LeftNav>` destinations *and* the number of render
+  sites (which catches a section added with a computed path), and fails on a
+  dropped section or on a destination not declared in the script's `NEBARI_ONLY`
+  allowlist.
+- **`check:patternfly-version`** — around 400 selectors in this theme name
+  PatternFly's classes directly (`.pf-v5-c-table`, `--pf-v5-global--*`). When
+  Keycloak moves to PatternFly 6 those all become `pf-v6-*` and every selector
+  stops matching, with no error anywhere. The check compares the *installed*
+  PatternFly major against every `pf-vN-` reference in tracked files and fails on
+  a mismatch. Treat that failure as a port, not a version bump.
+
+Neither guard covers the Admin or Account console visually — the screenshot
+baselines below are login pages only. That gap is why both of these exist.
 
 ## Visual Tests
 
@@ -96,27 +145,54 @@ it out.
 ## Building the Theme
 
 ```bash
-# Build the Keycloak theme
+# Build every theme
 npm run build-keycloak-theme
+
+# Or just one
+npm run build-keycloak-theme -- --theme nebari
+npm run build-keycloak-theme -- --list
 ```
 
-This produces two JARs in `dist_keycloak/`:
+**Each theme is packaged into its own JAR**, so a consumer downloads only the
+theme they use rather than every theme in the repository. For each theme in
+[`themes.json`](themes.json) the build writes two files to `dist_keycloak/`:
 
 | File | Target |
 | --- | --- |
-| `keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
-| `keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
+| `<theme>-keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
+| `<theme>-keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
+
+With `template` and `nebari` that is four JARs of about 12 MB each, against
+24 MB for a combined one — every theme subtree carries its own copy of the
+login, admin and account bundles, so packaging them separately halves what a
+consumer downloads, and keeps it flat as themes are added.
+
+[`scripts/build-keycloak-themes.mjs`](scripts/build-keycloak-themes.mjs) drives
+this. It compiles the app once, then runs `keycloakify build` per theme with
+`KEYCLOAKIFY_THEME_NAME` set, which is what narrows
+[`vite.config.ts`](vite.config.ts)'s `themeName` to a single entry. Every JAR is
+then reopened and rejected unless it contains exactly one `theme/<name>/`
+directory *and* advertises exactly that one theme in
+`META-INF/keycloak-themes.json` — a theme leaking into another's JAR fails the
+build rather than shipping. JARs for themes you did not select with `--theme`
+are left in place, and `src/kc.gen.tsx` is restored afterwards, since resolving
+the Vite config rewrites it for whichever theme is being packaged.
 
 ## Releasing
 
 Pushing to `main` runs
 [publish-keycloak-image.yml](.github/workflows/publish-keycloak-image.yml), which
-builds both JARs and republishes the container image to
+builds every theme's JARs and republishes the container image to
 `ghcr.io/<owner>/<repo>` tagged `latest`, `sha-<commit>` and the `version` from
-`package.json`.
+`package.json`. The published image carries every theme, so a realm can switch between them
+without a new image; the per-theme JARs attached to the release are the
+size-sensitive channel. Pass `THEME_JAR` as a build arg to publish an image
+carrying just one.
 
-It also cuts a GitHub release for `v<version>`. The only assets are the two
-JARs — that is all a consumer needs to install the theme. The screenshots are
+It also cuts a GitHub release for `v<version>`. The only assets are the JARs —
+that is all a consumer needs to install a theme, and each is downloadable on its
+own. The install table in the release notes is generated from `themes.json`, so
+adding a theme needs no workflow edit. The screenshots are
 embedded in the release notes as links to this repository rather than attached,
 so the release page shows what the theme looks like without carrying the weight.
 A release is only created when `v<version>` does not already exist, so **bump
@@ -140,18 +216,19 @@ every release; those cannot be turned off.
    npm run build-keycloak-theme
    ```
 
-2. Locate the generated JAR file:
+2. Locate the JAR for the theme you want:
    ```bash
-   ls dist_keycloak/keycloak-theme-*.jar
+   ls dist_keycloak/*-keycloak-theme-*.jar
    ```
 
-3. Copy the JAR to your Keycloak deployment:
+3. Copy that one JAR to your Keycloak deployment — installing a theme you do
+   not use only adds weight:
    ```bash
    # For standalone Keycloak
-   cp dist_keycloak/keycloak-theme-*.jar /path/to/keycloak/providers/
+   cp dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar /path/to/keycloak/providers/
 
    # For containerized Keycloak (Docker/Kubernetes)
-   kubectl cp dist_keycloak/keycloak-theme-*.jar <keycloak-pod>:/opt/keycloak/providers/
+   kubectl cp dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar <keycloak-pod>:/opt/keycloak/providers/
    ```
 
 4. Restart Keycloak to load the theme:
@@ -169,7 +246,7 @@ every release; those cannot be turned off.
    ```bash
    npm run build-keycloak-theme
    mkdir -p theme-extracted
-   unzip dist_keycloak/keycloak-theme-*.jar -d theme-extracted/
+   unzip dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar -d theme-extracted/
    ```
 
 2. Create a ConfigMap:
@@ -199,8 +276,8 @@ Create a `Dockerfile`:
 ```dockerfile
 FROM quay.io/keycloak/keycloak:latest
 
-# Copy the theme JAR
-COPY dist_keycloak/keycloak-theme-*.jar /opt/keycloak/providers/
+# Copy the JAR for the theme you want
+COPY dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/
 
 # Build the Keycloak image with the provider
 RUN /opt/keycloak/bin/kc.sh build
@@ -294,18 +371,25 @@ name is no longer a separate pointer target, keyboard stop or visually styled
 link. Instead, the row has one labelled keyboard stop with the standard rounded
 purple focus ring, and Enter follows the underlying semantic link. Checkboxes
 and inline controls retain independent behaviour. Search precedes the filter
-field selector, so changing that selector cannot shift the search input. The
-Users screen explicitly assigns that search/filter group to the leading toolbar
-slot while its create and bulk-action controls remain right-aligned. The Users
-toolbar/table files and Client scopes list are explicitly claimed from
-Keycloakify, so `sync-extensions` and subsequent theme builds preserve these
-compositions rather than restoring the upstream toolbar order.
-Per-row kebab menus are hidden by default; exceptional screens can explicitly
-opt back in when an operation cannot be represented elsewhere.
-The compatibility loader can return `{ rows, total }` when a Keycloak endpoint
-provides a count. The Users and Client scopes lists do so, allowing the
-Nebari-styled pager to show `Page X of N` and working first, previous, next and
-last-page controls. For endpoints without a count, next-page availability still
+field selector, so changing that selector cannot shift the search input.
+
+Per-row kebab menus follow upstream: the menu renders whenever a screen supplies
+`actions` or `actionResolver`, which 32 Admin Console screens do. `showRowActions`
+exists only as an opt-*out* for a screen that replaces the menu with something
+else. Because the menu renders through a portal, and React bubbles portal events
+up the *React* tree rather than the DOM tree, `RowActions` stops propagation on
+each item — otherwise the click reaches the row and follows its primary link
+instead of running the action.
+
+`UserDataTable`, `UserDataTableToolbarItems` and `ClientScopesSection` were
+previously claimed from Keycloakify to give two screens a server-side page count
+and a custom toolbar order. They have been handed back: three forks maintained
+across every Keycloak upgrade was too high a price for two of 48 screens, and
+`src/components/patternfly/README.md` argues for the shim over ownership for
+exactly this reason. Those screens now use the upstream composition.
+
+The compatibility loader still accepts `{ rows, total }` for a Keycloak endpoint
+that can supply a count, but no caller uses it today — next-page availability
 comes from Keycloak's existing `page size + 1` request, the total is inferred on
 the terminal page, and the last-page control stays disabled until it is known.
 
@@ -318,19 +402,55 @@ token bridge in `src/admin/index.css`.
 
 ### Themes
 
-The build ships two login themes in one JAR, listed in
-[`src/themes/themeCatalog.ts`](src/themes/themeCatalog.ts) and selected per realm
-by Keycloak's **Login theme** setting:
+The build ships two login themes, **each in its own JAR**, selected per realm by
+Keycloak's **Login theme** setting:
 
 | Theme | Components | Branding | For |
 | --- | --- | --- | --- |
 | `template` | stock shadcn/ui (Radix) | none | the default — a starting point to customize |
 | `nebari` | Nebari registry (Base UI) | Nebari logo and palette | Nebari's own deployments |
 
-`template` is the default: `resolveThemeName` and the console's
-`getConfiguredThemeName` both fall back to `DEFAULT_THEME_NAME`, and it is first
-in keycloakify's `themeName` array, so a realm that has not chosen a theme gets
-the unbranded one rather than someone else's branding.
+#### The registry
+
+A theme is registered in exactly two places, and they are checked against each
+other rather than left to agree by convention:
+
+- **[`themes.json`](themes.json)** — the names, in packaging order. Read by
+  [`vite.config.ts`](vite.config.ts) and
+  [`scripts/build-keycloak-themes.mjs`](scripts/build-keycloak-themes.mjs),
+  which run in Node and cannot import the app's React-typed modules.
+- **`THEME_CATALOG` in
+  [`src/themes/themeCatalog.ts`](src/themes/themeCatalog.ts)** — the metadata,
+  keyed by those names. The key *is* the name, so a definition cannot disagree
+  with its own identity.
+
+`themeCatalog.ts` derives `CUSTOM_THEME_NAMES` from `themes.json` and throws at
+module load if either side has a name the other lacks. A name in `themes.json`
+with no catalog entry would package a theme whose login pages silently fall back
+to another theme's; a catalog entry missing from `themes.json` would work in dev
+and never reach a JAR. Both are quiet failures, so they are made loud.
+
+**Adding a theme** is therefore:
+
+1. Add the name to `themes.json` — position matters only for the first entry,
+   which is the default.
+2. Add its entry to `THEME_CATALOG`: `componentSet` picks which login pages it
+   renders, `logo` is used by all three consoles, `themeCustomization` decides
+   whether its Admin Console carries the editor, `defaultBranding` is its
+   palette.
+3. Add its pages under `src/login/` if it needs its own, and register the set in
+   [`src/login/uiSets.ts`](src/login/uiSets.ts). A theme that reuses an existing
+   component set needs neither.
+
+Nothing else. The build script, the JAR names, the CI release table, the Admin
+Console masthead and the theme.properties switches all follow from those two
+files.
+
+`template` is the default because it is *first* in `themes.json`:
+`DEFAULT_THEME_NAME` is `CUSTOM_THEME_NAMES[0]`, which is also the theme
+keycloakify packages as primary. A realm that has not chosen a theme therefore
+gets the unbranded one rather than someone else's branding, and the two meanings
+of "default" cannot drift apart.
 
 The two are not interchangeable at the component level — Base UI's
 `<FieldError match={…}>` has no Radix equivalent — so each owns its own pages.
@@ -377,6 +497,36 @@ components. The shared shell also supplies the page's `<main>` landmark and
 semantic `<h1>`; individual flow pages provide the localized heading text.
 
 ### Login pages
+
+Three contracts that Keycloak drives from server state are shared by both
+themes' pages, rather than reimplemented per theme — a second copy is how they
+drifted apart before:
+
+| Module | What it owns |
+| --- | --- |
+| [`src/login/userProfileClasses.ts`](src/login/userProfileClasses.ts) (and its `template/` counterpart) | The `kcClsx` map `UserProfileFormFields` needs, including the keys for the password reveal toggle. |
+| [`src/login/recaptcha.ts`](src/login/recaptcha.ts) | The global callback the action-based ("invisible") reCAPTCHA submits through. |
+| [`src/login/infoMessage.ts`](src/login/infoMessage.ts) | `info.ftl`'s continue-target precedence and its sanitized message HTML. |
+
+Two of these are worth knowing about when writing a page:
+
+**Registration fields are realm configuration.** `Register` renders
+`UserProfileFormFields`, not a hand-written field list. Which attributes a
+registration form has comes from the realm's User Profile, so a fixed list drops
+any required custom attribute the realm declares — and registration then cannot
+be completed at all, because the server keeps rejecting a field the page never
+showed. `termsAcceptanceRequired` and the reCAPTCHA variants are realm
+configuration in the same way.
+
+**Server-supplied messages are message keys or HTML, not text.** Render one
+directly and an advanced key shows as the key itself, and markup shows its tags.
+Resolve with `advancedMsgStr` and insert through `kcSanitize`, which is
+Keycloak's own allow-list — it keeps `b`, `strong`, `p` and friends and strips
+anything else. The screenshot baselines for `info` therefore show no heading:
+keycloakify's mock uses the literal `<Message header>` as a placeholder, which
+sanitizes away because it is shaped like an unknown tag.
+
+
 
 The `nebari` theme's login pages are built from the design-system components — `Field` /
 `FieldLabel` / `FieldError`, `Input`, `Button`, `Checkbox`, `Alert` — so the
@@ -466,7 +616,11 @@ Two consequences worth knowing before adding CSS:
 - **`display: block` on `svg`** comes from Tailwind's preflight and breaks
   PatternFly's inline icon layout, which is why icons wrapped onto their own line
   and inflated control heights. `src/admin/index.css` restores inline icons
-  inside PatternFly.
+  inside PatternFly — declared inside `@layer components`, which is load-bearing:
+  that file is otherwise unlayered, and an unlayered rule outranks *every* named
+  layer however weak its selector, so it also beat Tailwind's `hidden` utility and
+  pinned a permanent error icon onto every valid field. Adding a rule to that file
+  means deciding whether it should sit above or below the utilities.
 
 ### Header
 
@@ -477,10 +631,89 @@ Light/Dark/System picker inside it as a `menuitemradio` group. The header is
 styled only through app-defined `--header-*` tokens in `src/theme.css`; the
 registry does not ship them.
 
-Theme state comes from `useNebariTheme` (`src/hooks/use-nebari-theme.ts`), which
-mirrors one preference onto both theming systems — Nebari's `.dark` /
-`[data-theme]` and PatternFly's `.pf-v5-theme-dark`. It must be mounted **once
-per document**, so a console calls it in its header and passes `themeMode` down.
+Theme state comes from `useNebariTheme` (`src/hooks/use-nebari-theme.ts`). The
+`.dark` class has exactly one owner — `useThemePreference`, the registry hook —
+and `useNebariTheme` only mirrors the resolved state onto PatternFly's
+`.pf-v5-theme-dark` plus `[data-theme]` and `color-scheme`. It used to toggle
+`.dark` as well, which worked only because of hook declaration order. It must be
+mounted **once per document**, so a console calls it in its header and passes
+`themeMode` down.
+
+A realm with Dark Mode switched off (Realm settings → Themes) does not mount the
+hook at all: the header renders a static light theme, leaving `colorScheme.ts` —
+which runs before React and is paired with a `public/keycloak-theme/*/early-color-scheme.js`
+that reads the same storage key before first paint — the single owner of the
+forced-light state.
+
+### Branding the consoles
+
+The Admin and Account consoles are PatternFly, re-skinned onto the design
+system's tokens by the bridge in
+[`src/admin/index.css`](src/admin/index.css). Every theme shares that skin —
+what varies per theme is the mark in the masthead, not the palette.
+
+The Admin Console masthead takes the first of:
+
+1. the live preview, while an admin is editing under **Realm settings → Themes**;
+2. `logo` from the theme's `theme.properties` — Keycloak's own hook, so a
+   deployment can point at its own file by layering a child theme, with no
+   rebuild;
+3. **the realm's published console logo**, set in **Theme customization** under
+   *Console header logos*. That group has its own light and dark artwork plus a
+   **Use the login card logos** checkbox, on by default — so one mark can serve
+   both surfaces, or the console can have its own. It arrives through the
+   realm's localization messages, which the console's i18n already loads before
+   first paint, so it needs no fetch of its own and cannot flash;
+4. `ThemeDefinition.logo` for the theme Keycloak is rendering, read from the
+   same catalog the login pages use — `kcContext.themeName` is injected into
+   both consoles, so a theme cannot brand one and not the other;
+5. otherwise the realm's display name, as a wordmark.
+
+Steps 1–4 are resolved by
+[`src/branding/consoleLogo.ts`](src/branding/consoleLogo.ts), shared by both
+consoles so they cannot disagree.
+
+`useLoginLogoInConsole` defaults to **true**, which is what a realm that
+published before the field existed normalizes to — so adding it changed nothing
+for existing realms. Turn it off and `consoleLogo` is used instead, which is
+worth doing when a login-card mark looks cramped in a 32px-tall masthead.
+
+Step 5 is why the unbranded `template` theme does not show someone else's logo
+in its console.
+
+**The Account console stops at step 4.** It runs the same resolver, so a
+published logo and a theme's own artwork both reach it — but a theme with
+neither falls back to the bundled Nebari mark rather than to the realm name.
+`realm-export.json` sets `accountTheme` to `nebari`, so this *is* reached.
+Adding the last fallback there is a small change: the account header renders its
+own `<img>` and no longer goes through the shared `KeycloakMasthead`, so it
+needs no change to vendored shared code.
+
+### Turning the Theme customization page off
+
+Not every deployment wants the editor. Two layers decide, in
+[`src/admin/themeCustomization.ts`](src/admin/themeCustomization.ts):
+
+| | Where | Effect |
+| --- | --- | --- |
+| Per theme | `themeCustomization` in `THEME_CATALOG` | Baked into that theme's `theme.properties` at build time. Because each theme is packaged into its own JAR, a theme with no use for the editor ships without it. |
+| Per deployment | `NEBARI_THEME_CUSTOMIZATION=enabled\|disabled` | An environment variable on the Keycloak container, resolved by Keycloak when it renders the page. Overrides the theme. No rebuild, no realm change. |
+
+Dropping the route in [`src/admin/routes.tsx`](src/admin/routes.tsx) is the
+whole gate: `LeftNav` renders nothing for a path it cannot find among the
+routes, so the sidebar entry goes with it, and a hand-typed
+`#/<realm>/branding` lands on the not-found page.
+
+This hides the editor rather than revoking anything. The published config lives
+in the realm's localization messages, which any holder of `manage-realm` can
+still write through the Admin API, and the login pages go on honouring what is
+already published. Treat it as a deployment deciding the page is not part of its
+product, not as an access control.
+
+Both values arrive as `kcContext.properties`, which is how Keycloak hands
+`theme.properties` to the console. Keys beginning with `kc`, plus `locales`,
+`import`, `meta` and `accountResourceProvider`, are filtered out of that object
+by the generated FTL — do not name a property `kc*`.
 
 ### Runtime login branding
 
@@ -530,6 +763,37 @@ relying on it:
 
 `--import-realm` only seeds an empty database, and `realm-export.json` carries no
 `localizationTexts`, so a clean instance always starts unbranded.
+
+#### It is stored once per locale, and the copies can disagree
+
+A localization message belongs to a locale, so the config is written under every
+locale the realm supports plus `en`. That is
+[`src/branding/localeVariants.ts`](src/branding/localeVariants.ts), and three
+hazards follow from it — all covered by
+[`tests/localeVariants.spec.ts`](tests/localeVariants.spec.ts):
+
+- **Never trust the default locale alone.** Change a realm's default locale to
+  one that was never published to and it reads empty. Treating that as the truth
+  would show the editor a set of theme defaults indistinguishable from an
+  unbranded realm, and the next publish would write those defaults over the real
+  config in every other locale. So the editor reads *all* locales first and a
+  populated value always outranks an empty one.
+- **Two populated values that disagree are not a guess.** The editor refuses to
+  open and asks which to keep, previewing each, because either answer discards a
+  theme somebody published.
+- **Publishing is also the repair.** A locale added after the last publish, or a
+  publish that failed part way, leaves locales behind while the draft still
+  equals the published config — so Publish is enabled whenever locales are out
+  of sync, not only when the draft is dirty. There is no multi-locale write to
+  make it atomic; the writes are sequential, failures are reported per locale,
+  and retrying is idempotent.
+- **A locale that could not be read is not an empty locale.** They mean opposite
+  things — nothing was published there, versus it may hold anything, including
+  the realm's only copy. `readLocaleVariants` therefore reports failed reads
+  separately, and finding no theme while some locale was unreadable is treated
+  as *unknown*, not unbranded: the editor stays closed, exactly as for a failed
+  load. Folding the two together is what would let a transient outage present
+  as an unbranded realm and invite an overwrite.
 
 **⋮ → Export theme as JSON** is what closes that gap. Save the file into
 [`custom_themes/`](custom_themes/README.md) at the project root and commit it: it
@@ -715,9 +979,14 @@ nebari-keycloak-theme/
 │   │   ├── nebari/          # App-owned compositions (ProfileMenu)
 │   │   └── patternfly/      # PatternFly API → Nebari component adapters
 │   ├── hooks/               # Registry hooks + useNebariTheme
+│   ├── themes/              # Theme catalog and preset import/export
 │   ├── theme.css            # Tokens, cascade layers, login styles
 │   └── main.tsx             # Entry point
-├── dist_keycloak/           # Built theme (after build)
+├── custom_themes/           # Committed branding presets (see its README)
+├── scripts/
+│   └── build-keycloak-themes.mjs  # Packages one JAR per theme
+├── dist_keycloak/           # Built JARs, one pair per theme (after build)
+├── themes.json              # The theme name registry
 ├── package.json
 ├── vite.config.ts
 └── tsconfig.json

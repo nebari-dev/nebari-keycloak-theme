@@ -29,6 +29,22 @@ export type BrandingConfig = {
     version: 1 | 2;
     companyName: string;
     logo: BrandingImageSet;
+    /**
+     * Artwork for the Admin and Account console mastheads, used only when
+     * `useLoginLogoInConsole` is false.
+     *
+     * Separate from `logo` because the slots are different shapes: a masthead is
+     * short and wide, a login card taller. A deployment that has one mark for
+     * both leaves this empty and keeps the reuse flag on.
+     */
+    consoleLogo: BrandingImageSet;
+    /**
+     * Whether the console mastheads reuse `logo` instead of `consoleLogo`.
+     *
+     * Defaults to true, which is what a realm that published before this field
+     * existed gets — so adding it changed no existing realm's appearance.
+     */
+    useLoginLogoInConsole: boolean;
     backgroundImage: BrandingImageSet;
     cardRadius: number;
     colorScheme: BrandingColorScheme;
@@ -41,6 +57,8 @@ export const DEFAULT_BRANDING_CONFIG: BrandingConfig = {
     version: 2,
     companyName: "Nebari",
     logo: { light: "", dark: "" },
+    consoleLogo: { light: "", dark: "" },
+    useLoginLogoInConsole: true,
     backgroundImage: { light: "", dark: "" },
     cardRadius: 12,
     /* Defaults describe an unbranded realm, so they have to reproduce the
@@ -92,6 +110,8 @@ export const TEMPLATE_BRANDING_CONFIG: BrandingConfig = {
     version: 2,
     companyName: "",
     logo: { light: "", dark: "" },
+    consoleLogo: { light: "", dark: "" },
+    useLoginLogoInConsole: true,
     backgroundImage: { light: "", dark: "" },
     /* shadcn's own `--radius` is 0.625rem = 10px. */
     cardRadius: 10,
@@ -208,6 +228,11 @@ export function normalizeBrandingConfig(
         version: 2,
         companyName: safeText(config.companyName, defaults.companyName, 80),
         logo: normalizeImageSet(config.logo, defaults.logo),
+        consoleLogo: normalizeImageSet(config.consoleLogo, defaults.consoleLogo),
+        useLoginLogoInConsole:
+            typeof config.useLoginLogoInConsole === "boolean"
+                ? config.useLoginLogoInConsole
+                : defaults.useLoginLogoInConsole,
         backgroundImage: normalizeImageSet(
             config.backgroundImage,
             defaults.backgroundImage

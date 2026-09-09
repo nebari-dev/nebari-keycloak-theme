@@ -102,18 +102,84 @@
     border-top: 1px solid var(--border);
 }
 
+/*
+ * Typography on this page, deliberately.
+ *
+ * Every row was label / description / input at 14px, and a group heading was
+ * one weight step from a field label — so nothing told the eye where a group
+ * began and half the text on the page competed at full volume. The sizes below
+ * put three clear levels between a group heading, a field label and a
+ * description, which is what makes the density readable without removing any of
+ * the guidance.
+ *
+ * Scoped to this page rather than changing `Field` in the registry: the same
+ * components are used throughout the console, where the surrounding density is
+ * different.
+ */
 .branding-image-set__header h3 {
     margin: 0;
     color: var(--foreground);
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
 }
 
 .branding-image-set__header p {
-    margin: 0.25rem 0 0;
+    margin: 0.1875rem 0 0;
     color: var(--muted-foreground);
-    font-size: 0.8125rem;
-    line-height: 1.25rem;
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+}
+
+/* Labels carry the row, so they get the weight rather than sharing it with the
+   description underneath. */
+.branding-page-content [data-slot="field-label"] {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+/* The single biggest change: field help was 14px, the same as the label above
+   it. At 12px and fully muted it reads as an aside instead of a second label,
+   which is what removes the wall-of-text feeling. */
+.branding-page-content [data-slot="field-description"] {
+    margin-top: 0.0625rem;
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+}
+
+/*
+ * Make a field look like a field.
+ *
+ * Measured on this page: the input fill was rgb(248,248,248) against a page of
+ * rgb(248,248,248) — pixel-identical — so the only thing separating an input
+ * from the page was a border at 2.53:1, under the 3:1 that WCAG 1.4.11 asks of
+ * a non-text UI component. With a dozen fields stacked, that reads as a wall of
+ * text rather than a form.
+ *
+ * `--border-strong` measures 3.44:1 against this page, and `--card` puts the
+ * fill a step lighter than the surface it sits on, which is the conventional
+ * cue that a rectangle accepts input. Both are existing tokens, so a branded
+ * realm still recolours them.
+ *
+ * This is the contrast standard the template login theme already holds itself
+ * to (see the note in `custom_themes/README.md`); the editor page simply was
+ * not held to it.
+ */
+.branding-page-content input,
+.branding-page-content textarea,
+.branding-page-content select {
+    border-color: var(--border-strong);
+    background-color: var(--card);
+}
+
+/* Tighter inside a field, looser between them: proximity is what groups a
+   label with its own input rather than with the next row's. */
+.branding-page-content [data-slot="field"] {
+    gap: 0.375rem;
+}
+
+.branding-image-set {
+    gap: 1.25rem;
 }
 
 .branding-mode-switch {
@@ -550,6 +616,37 @@
     display: grid;
     gap: 8px;
     margin-top: 12px;
+}
+
+/* The "use the login card logos" row, above the console logo inputs it gates. */
+.branding-reuse-toggle {
+    margin-bottom: 4px;
+}
+
+/* The chooser shown when locales carry conflicting themes. Each option is a
+   real preview, because the locale names alone do not tell an admin which
+   configuration they are about to discard. */
+.branding-variant-choice {
+    display: grid;
+    gap: 16px;
+    margin-top: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.branding-variant-choice__option {
+    display: grid;
+    gap: 8px;
+    justify-items: stretch;
+}
+
+/* Shown when the realm's identity providers could not be read, so the absence
+   of provider buttons above is not mistaken for the realm having none. */
+.branding-preview__providers-unknown {
+    margin-top: 12px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-style: italic;
+    text-align: center;
 }
 
 .branding-preview__providers div {

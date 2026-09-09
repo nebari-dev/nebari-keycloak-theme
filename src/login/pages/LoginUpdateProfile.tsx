@@ -4,24 +4,8 @@ import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { getKcClsx } from "keycloakify/login/lib/kcClsx";
 import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
+import { kcClassesMap } from "../userProfileClasses";
 
-// Map keycloak logical class names → our nebari CSS classes
-const kcClassesMap = {
-    kcFormGroupClass: "nebari-form-group",
-    kcLabelClass: "nebari-label",
-    kcLabelWrapperClass: "nebari-label-wrapper",
-    kcInputClass: "nebari-input",
-    kcInputWrapperClass: "",
-    kcInputErrorMessageClass: "nebari-field-error",
-    kcSelectClass: "nebari-input",
-    kcFormClass: "",
-    kcFormButtonsClass: "",
-    kcButtonClass: "nebari-button",
-    kcButtonPrimaryClass: "nebari-button-primary nebari-button-full",
-    kcButtonDefaultClass: "nebari-button nebari-button-secondary",
-    kcButtonLargeClass: "",
-    kcButtonBlockClass: "",
-} as const;
 
 type Props = PageProps<Extract<KcContext, { pageId: "login-update-profile.ftl" }>, I18n> & {
     UserProfileFormFields: LazyOrNot<(props: UserProfileFormFieldsProps) => React.ReactElement>;

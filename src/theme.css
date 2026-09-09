@@ -503,17 +503,24 @@ samp {
     color: var(--text-primary);
 }
 
-/* Link buttons — prevent underline override */
+/* Link buttons keep button semantics, not link semantics.
+ *
+ * What they have to beat is the login-wrapper anchor rule further down, whose
+ * `:hover` sets `text-decoration: underline`. That rule is deliberately
+ * specificity-free — `:where(.nebari-login-wrapper) a:where(:not([data-slot]))`
+ * scores (0,0,1) — while these selectors score (0,1,1), so plain specificity
+ * settles it in source-order-independent fashion. `!important` was belt and
+ * braces and made the next override need `!important` too. */
 a.nebari-button,
 a.nebari-button-primary,
 a.nebari-button-secondary {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 a.nebari-button:hover,
 a.nebari-button-primary:hover,
 a.nebari-button-secondary:hover {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 /* Full-width button modifier */
@@ -556,6 +563,15 @@ a.nebari-button-secondary:hover {
     color: var(--nebari-red);
 }
 
+/* Helper text that `UserProfileFormFields` renders around an attribute when the
+   realm's User Profile declares one. */
+.nebari-field-hint {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
 /* ========================
    LINKS
    ======================== */
@@ -566,15 +582,21 @@ a.nebari-button-secondary:hover {
  * `:not([data-slot])` excludes design-system components for the same reason
  * inside the login pages: a `Button` rendered as an `<a>` (a "back to
  * application" link, say) would otherwise take this colour instead of its own
- * `text-primary-foreground`, and its label would disappear into the fill. */
-:where(.nebari-login-wrapper) a:not([data-slot]) {
+ * `text-primary-foreground`, and its label would disappear into the fill.
+ *
+ * It is wrapped in `:where()` so it contributes no specificity. A bare
+ * `:not([data-slot])` counts as an attribute selector, which pushed this rule to
+ * (0,1,1) and let it beat single-class rules on plain anchors — the social
+ * sign-in buttons turned purple. `:where()` keeps the exclusion and puts the
+ * rule back at (0,0,1), below `.nebari-social-button` and friends. */
+:where(.nebari-login-wrapper) a:where(:not([data-slot])) {
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.15s;
 }
 
-:where(.nebari-login-wrapper) a:not([data-slot]):hover {
+:where(.nebari-login-wrapper) a:where(:not([data-slot])):hover {
     color: var(--accent-dark);
     text-decoration: underline;
 }
@@ -825,7 +847,9 @@ textarea { font-family: var(--font-sans); }
  * of form ids, with the pages not on it falling back to per-group margins — the
  * reason field spacing differed between, say, sign-in and register. Every login
  * page renders inside `.nebari-login-wrapper`, so the gap is stated once and the
- * `Field` components stack against it. */
+ * `Field` components stack against it. The update-profile visual baseline is
+ * intentionally 80px taller as a result: its four previously collapsed
+ * inter-field gaps and action gap now use this same 20px rhythm. */
 .nebari-login-wrapper form { display: flex; flex-direction: column; gap: 20px; }
 
 .nebari-form-group,
@@ -996,13 +1020,19 @@ textarea { font-family: var(--font-sans); }
     color: #262628;
 }
 
-/* Keep link-style primary buttons legible in every interaction state. */
+/* Keep link-style primary buttons legible in every interaction state.
+ *
+ * Two classes plus an element — (0,2,1) — which already outranks both the
+ * browser's `a:visited` default and the (0,0,1) login-wrapper anchor rule, so no
+ * `!important` is needed. It mattered that this one dropped it: while it was
+ * important, the dark-theme override below had to be important purely to beat
+ * it, and the two were an arms race rather than a cascade. */
 a.nebari-button.nebari-button-primary,
 a.nebari-button.nebari-button-primary:hover,
 a.nebari-button.nebari-button-primary:focus,
 a.nebari-button.nebari-button-primary:active,
 a.nebari-button.nebari-button-primary:visited {
-    color: #fff !important;
+    color: #fff;
 }
 
 /* Figma: NIC Landing Page / Login (Dark), node 366:1291.
@@ -1089,7 +1119,7 @@ a.nebari-button.nebari-button-primary:visited {
 [data-theme="dark"] a.nebari-button.nebari-button-primary:hover,
 [data-theme="dark"] a.nebari-button.nebari-button-primary:focus,
 [data-theme="dark"] a.nebari-button.nebari-button-primary:active,
-[data-theme="dark"] a.nebari-button.nebari-button-primary:visited { color: #111114 !important; }
+[data-theme="dark"] a.nebari-button.nebari-button-primary:visited { color: #111114; }
 
 [data-theme="dark"] .nebari-button-secondary,
 [data-theme="dark"] .nebari-social-button {
@@ -1377,96 +1407,58 @@ a.nebari-button.nebari-button-primary:visited {
     --sidebar-border: oklch(47.01% 0.0112 285.96);
     --sidebar-ring: oklch(69.98% 0.1926 311.48);
 }
-/* ==========================================================================
-   Runtime login branding
+/* ===================================================================
 
-   Everything here is gated on [data-branded], which Template only sets when the
-   realm has published a config that differs from the theme's defaults. That gate
-   is the point: an unbranded realm gets neither these rules nor the inline
-   custom properties, so it renders exactly as it did before branding existed and
-   the feature cannot silently restyle every login page.
-
-   Branding reaches the page through the design system's tokens, set inline on
-   the wrapper by `getBrandingCssVariables`. Rules below only cover chrome that
-   is class-driven rather than a component.
-   ========================================================================== */
-
-.nebari-login-wrapper[data-branded] {
-    background-color: var(--background);
-    color: var(--foreground);
+/*
+ * Password reveal toggle for `UserProfileFormFields`.
+ *
+ * Both themes have their own React password field with a lucide icon, but
+ * keycloakify's `UserProfileFormFields` renders the toggle itself — a `<button>`
+ * wrapping a bare `<i>` whose class it takes from `kcClsx`. Keycloak's own
+ * themes point that at an icon font, which this build does not ship, so the
+ * glyph is drawn here with a mask instead. Shared by both themes because the
+ * markup is keycloakify's, not either theme's.
+ *
+ * Used by `src/login/userProfileClasses.ts` and its template counterpart, which
+ * is also where the `Register` and `LoginUpdateProfile` forms pick it up.
+ */
+.kc-input-group {
+    position: relative;
 }
 
-.nebari-login-wrapper[data-branded]::before {
-    background-color: var(--background);
+.kc-input-group > input {
+    /* Keep the value from running under the toggle. */
+    padding-right: 2.5rem;
 }
 
-.nebari-login-wrapper[data-branded][data-has-custom-background] {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-
-/* The page-wide glows would sit on top of an admin's background image. */
-.nebari-login-wrapper[data-branded][data-has-custom-background]::before {
-    display: none;
-}
-
-.nebari-login-wrapper[data-branded] .nebari-login-card {
-    background: var(--card);
-    border-color: var(--border);
-    color: var(--card-foreground);
-}
-
-.nebari-login-wrapper[data-branded] :is(.nebari-title, .nebari-subtitle, .nebari-label) {
-    color: var(--foreground);
-}
-
-.nebari-login-wrapper[data-branded]
-    :is(.nebari-forgot-link, .nebari-link, .nebari-info-section, .nebari-required-notice) {
+.kc-password-toggle {
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    display: flex;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: none;
     color: var(--muted-foreground);
+    cursor: pointer;
 }
 
-/* The class-driven controls, which `UserProfileFormFields` and the login
-   stylesheet style by class rather than through a component. */
-.nebari-login-wrapper[data-branded] :is(.nebari-input, input, select, textarea) {
-    background-color: var(--muted);
-    border-color: var(--input);
+.kc-password-toggle:hover {
     color: var(--foreground);
 }
 
-.nebari-login-wrapper[data-branded] :is(.nebari-input, input)::placeholder {
-    color: var(--muted-foreground);
+.kc-password-icon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2.062%2012.348a1%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%2019.876%200%201%201%200%200%201%200%20.696%2010.75%2010.75%200%200%201-19.876%200%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2.062%2012.348a1%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%2019.876%200%201%201%200%200%201%200%20.696%2010.75%2010.75%200%200%201-19.876%200%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
 }
 
-/* The login stylesheet draws the focus border from `--accent`, which the design
-   system uses for muted hover surfaces — so branding sets it to a surface colour
-   and the focus border would vanish. `--ring` is the token that means "focus"
-   in both vocabularies. */
-.nebari-login-wrapper[data-branded] :is(.nebari-input, input, select, textarea):focus {
-    border-color: var(--ring);
-}
-
-.nebari-login-wrapper[data-branded]
-    :is(.nebari-button-primary, button[type="submit"], input[type="submit"]) {
-    background: var(--primary);
-    color: var(--primary-foreground);
-}
-
-.nebari-login-wrapper[data-branded]
-    :is(.nebari-button-primary, button[type="submit"], input[type="submit"]):hover {
-    background: var(--primary-hover);
-    color: var(--primary-foreground);
-}
-
-.nebari-login-wrapper[data-branded]
-    :is(.nebari-button-secondary, .nebari-social-button) {
-    background: var(--card);
-    border-color: var(--input);
-    color: var(--foreground);
-}
-
-.nebari-login-wrapper[data-branded]
-    :is(.nebari-button-secondary, .nebari-social-button):hover {
-    background: var(--muted);
-    color: var(--foreground);
+.kc-password-icon-hide {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.733%205.076a10.744%2010.744%200%200%201%2011.205%206.575%201%201%200%200%201%200%20.696%2010.747%2010.747%200%200%201-1.444%202.49%22%2F%3E%3Cpath%20d%3D%22M14.084%2014.158a3%203%200%200%201-4.242-4.242%22%2F%3E%3Cpath%20d%3D%22M17.479%2017.499a10.75%2010.75%200%200%201-15.417-5.151%201%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%204.446-5.143%22%2F%3E%3Cpath%20d%3D%22m2%202%2020%2020%22%2F%3E%3C%2Fsvg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.733%205.076a10.744%2010.744%200%200%201%2011.205%206.575%201%201%200%200%201%200%20.696%2010.747%2010.747%200%200%201-1.444%202.49%22%2F%3E%3Cpath%20d%3D%22M14.084%2014.158a3%203%200%200%201-4.242-4.242%22%2F%3E%3Cpath%20d%3D%22M17.479%2017.499a10.75%2010.75%200%200%201-15.417-5.151%201%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%204.446-5.143%22%2F%3E%3Cpath%20d%3D%22m2%202%2020%2020%22%2F%3E%3C%2Fsvg%3E");
 }

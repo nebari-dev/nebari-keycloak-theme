@@ -1,0 +1,25 @@
+// Map keycloak logical class names → our nebari CSS classes
+export const kcClassesMap = {
+    kcFormGroupClass: "nebari-form-group",
+    kcLabelClass: "nebari-label",
+    kcLabelWrapperClass: "nebari-label-wrapper",
+    kcInputClass: "nebari-input",
+    kcInputWrapperClass: "",
+    kcInputErrorMessageClass: "nebari-field-error",
+    kcInputHelperTextBeforeClass: "nebari-field-hint",
+    kcInputHelperTextAfterClass: "nebari-field-hint",
+    kcContentWrapperClass: "",
+    kcInputGroup: "kc-input-group",
+    kcFormPasswordVisibilityButtonClass: "kc-password-toggle",
+    kcFormPasswordVisibilityIconShow: "kc-password-icon",
+    kcFormPasswordVisibilityIconHide: "kc-password-icon kc-password-icon-hide",
+
+    kcSelectClass: "nebari-input",
+    kcFormClass: "",
+    kcFormButtonsClass: "",
+    kcButtonClass: "nebari-button",
+    kcButtonPrimaryClass: "nebari-button-primary nebari-button-full",
+    kcButtonDefaultClass: "nebari-button nebari-button-secondary",
+    kcButtonLargeClass: "",
+    kcButtonBlockClass: "",
+} as const;

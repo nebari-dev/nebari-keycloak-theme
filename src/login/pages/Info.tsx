@@ -5,28 +5,22 @@ import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+    getInfoContinueTarget,
+    getInfoHeaderHtml,
+    getInfoMessageHtml
+} from "../infoMessage";
 
 export default function Info(
     props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>
 ) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-    const { msgStr, msg } = i18n;
+    const { msg } = i18n;
 
-    const { messageHeader, message, requiredActions, skipLink, pageRedirectUri, actionUri, client } = kcContext;
-
-    /* Keycloak offers at most one continue target, in this order of preference. */
-    const continueHref = !skipLink && pageRedirectUri !== undefined
-        ? pageRedirectUri
-        : actionUri !== undefined
-            ? actionUri
-            : !skipLink
-                ? client.baseUrl
-                : undefined;
-
-    const continueLabel = actionUri !== undefined && pageRedirectUri === undefined
-        ? msg("proceedWithAction")
-        : msg("backToApplication");
+    /* Message resolution, sanitization and the `skipLink` rules are shared with
+       the template theme — see `src/login/infoMessage.ts`. */
+    const continueTarget = getInfoContinueTarget(kcContext);
 
     return (
         <Template
@@ -36,42 +30,32 @@ export default function Info(
             classes={classes}
             displayMessage={false}
             headerNode={
-                messageHeader !== undefined ? (
-                    <>{messageHeader}</>
-                ) : (
-                    <>{message.summary}</>
-                )
+                <span
+                    dangerouslySetInnerHTML={{
+                        __html: getInfoHeaderHtml(kcContext, i18n)
+                    }}
+                />
             }
         >
             <div id="kc-info-message">
                 <Alert>
                     <InfoIcon aria-hidden />
                     <AlertDescription>
-                        {message.summary}
-                        {requiredActions !== undefined && (
-                            <b>
-                                {" "}
-                                {requiredActions
-                                    .map((requiredAction: string) =>
-                                        // The key is only known at runtime, so it
-                                        // is asserted to the message-key union
-                                        // rather than widened to `any`.
-                                        msgStr(
-                                            `requiredAction.${requiredAction}` as Parameters<
-                                                typeof msgStr
-                                            >[0]
-                                        )
-                                    )
-                                    .join(", ")}
-                            </b>
-                        )}
+                        <span
+                            dangerouslySetInnerHTML={{
+                                __html: getInfoMessageHtml(kcContext, i18n)
+                            }}
+                        />
                     </AlertDescription>
                 </Alert>
 
-                {continueHref !== undefined && (
+                {continueTarget !== undefined && (
                     <div className="nebari-form-actions">
-                        <Button className="w-full" render={<a href={continueHref} />}>
-                            {continueLabel}
+                        <Button
+                            className="w-full"
+                            render={<a href={continueTarget.href} />}
+                        >
+                            {msg(continueTarget.label)}
                         </Button>
                     </div>
                 )}

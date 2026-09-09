@@ -1,6 +1,7 @@
 import { useState, type FormEventHandler } from "react";
 import { clsx } from "keycloakify/tools/clsx";
 import { getKcClsx } from "keycloakify/login/lib/kcClsx";
+import { useScript } from "keycloakify/login/pages/Login.useScript";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import type { KcContext } from "../../KcContext";
 import type { I18n } from "../../i18n";
@@ -17,10 +18,28 @@ export default function Login(
 ) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
     const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
-    const { social, realm, url, usernameHidden, login, auth, messagesPerField } = kcContext;
+    const {
+        social,
+        realm,
+        url,
+        usernameHidden,
+        login,
+        auth,
+        messagesPerField,
+        enableWebAuthnConditionalUI,
+        authenticators
+    } = kcContext;
     const { msg, msgStr } = i18n;
 
     const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
+
+    /* Loads Keycloak's WebAuthn script and wires it to the button below. It
+       no-ops unless the realm enabled conditional passkeys, so it is safe to
+       call unconditionally — and it must be, being a hook. */
+    const webAuthnButtonId = "authenticateWebAuthnButton";
+
+    useScript({ webAuthnButtonId, kcContext, i18n });
+
     const hasLoginError = messagesPerField.existsError("username", "password");
 
     const themeDefinition = getThemeDefinition(kcContext.themeName);
@@ -109,7 +128,11 @@ export default function Login(
                                 defaultValue={login.username ?? ""}
                                 type="text"
                                 autoFocus
-                                autoComplete="username"
+                                autoComplete={
+                                    enableWebAuthnConditionalUI
+                                        ? "username webauthn"
+                                        : "username"
+                                }
                                 aria-invalid={hasLoginError}
                             />
                         </Field>
@@ -175,6 +198,52 @@ export default function Login(
                         {msgStr("doLogIn")}
                     </Button>
                 </form>
+            )}
+
+            {/* Conditional passkeys. Keycloak's own script, initialized by
+                `useScript`, reads the button and populates these hidden fields
+                from the WebAuthn credential before posting them back — so the
+                forms have to exist even though nothing here fills them in.
+                `authn_select` carries the credential ids the realm offers. */}
+            {enableWebAuthnConditionalUI && (
+                <>
+                    <form id="webauth" action={url.loginAction} method="post">
+                        <input type="hidden" id="clientDataJSON" name="clientDataJSON" />
+                        <input
+                            type="hidden"
+                            id="authenticatorData"
+                            name="authenticatorData"
+                        />
+                        <input type="hidden" id="signature" name="signature" />
+                        <input type="hidden" id="credentialId" name="credentialId" />
+                        <input type="hidden" id="userHandle" name="userHandle" />
+                        <input type="hidden" id="error" name="error" />
+                    </form>
+
+                    {authenticators !== undefined &&
+                        authenticators.authenticators.length !== 0 && (
+                            <form id="authn_select">
+                                {authenticators.authenticators.map(authenticator => (
+                                    <input
+                                        key={authenticator.credentialId}
+                                        type="hidden"
+                                        name="authn_use_chk"
+                                        readOnly
+                                        value={authenticator.credentialId}
+                                    />
+                                ))}
+                            </form>
+                        )}
+
+                    <Button
+                        className="w-full"
+                        id={webAuthnButtonId}
+                        type="button"
+                        variant="outline"
+                    >
+                        {msgStr("passkey-doAuthenticate")}
+                    </Button>
+                </>
             )}
         </Template>
     );

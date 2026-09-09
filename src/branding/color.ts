@@ -22,7 +22,15 @@ export type Oklch = {
     h: number;
 };
 
-const HEX_COLOR = /^#?[0-9a-f]{6}$/i;
+/**
+ * Must stay identical to `HEX_COLOR` in `brandingConfig.ts`. The editor commits
+ * a colour only when this accepts it, and the serializer keeps a colour only
+ * when that one does — so a value the two disagree about is accepted into the
+ * draft, derives a palette, renders in the preview, and is then silently
+ * replaced by the theme default on publish. The leading `#` is therefore
+ * required here as well; `hexToRgb` still tolerates its absence internally.
+ */
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
 /** sRGB transfer function, and its inverse. */
 function toLinear(channel: number): number {
@@ -35,6 +43,24 @@ function toGamma(channel: number): number {
 
 export function isHexColor(value: string): boolean {
     return HEX_COLOR.test(value);
+}
+
+/**
+ * Canonicalize what someone typed into a colour field.
+ *
+ * `isHexColor` is deliberately strict because it guards what gets stored, and
+ * the serializer applies the same rule — but a person typing `ff0000` means red,
+ * not "revert this to the theme default". Supplying the missing `#` here keeps
+ * the stored form valid without the validator having to loosen.
+ *
+ * Returns `undefined` when the text is not a colour at all, which is what the
+ * editor renders as invalid rather than committing.
+ */
+export function normalizeHexInput(value: string): string | undefined {
+    const trimmed = value.trim();
+    const candidate = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+
+    return isHexColor(candidate) ? candidate.toLowerCase() : undefined;
 }
 
 function hexToRgb(hex: string): [number, number, number] {

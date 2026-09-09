@@ -74,3 +74,36 @@ test("preserves crop position when the image is moved", () => {
 
     expect(crop).toEqual({ x: 0, y: 0, width: 500, height: 500 });
 });
+
+/**
+ * `consoleLogo` and `useLoginLogoInConsole` were added after realms had already
+ * published. A stored config without them has to normalize to "reuse the login
+ * logo", or adding the fields would have changed what those realms show.
+ */
+test("defaults a config published before the console logo existed to reuse", () => {
+    const legacy = { ...TEMPLATE_BRANDING_CONFIG } as Record<string, unknown>;
+    delete legacy.consoleLogo;
+    delete legacy.useLoginLogoInConsole;
+
+    const normalized = normalizeBrandingConfig(legacy, TEMPLATE_BRANDING_CONFIG);
+
+    expect(normalized.useLoginLogoInConsole).toBe(true);
+    expect(normalized.consoleLogo).toEqual({ light: "", dark: "" });
+});
+
+test("keeps a console logo distinct from the login logo", () => {
+    const normalized = normalizeBrandingConfig(
+        {
+            ...TEMPLATE_BRANDING_CONFIG,
+            logo: { light: LIGHT_LOGO, dark: LIGHT_LOGO },
+            consoleLogo: { light: DARK_LOGO, dark: "" },
+            useLoginLogoInConsole: false
+        },
+        TEMPLATE_BRANDING_CONFIG
+    );
+
+    expect(normalized.useLoginLogoInConsole).toBe(false);
+    expect(normalized.consoleLogo.light).toBe(DARK_LOGO);
+    /* An empty appearance still resolves from its sibling. */
+    expect(getBrandingImage(normalized.consoleLogo, "dark")).toBe(DARK_LOGO);
+});

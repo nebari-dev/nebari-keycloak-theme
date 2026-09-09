@@ -85,6 +85,8 @@ export default function KcPage(props: { kcContext: KcContext }) {
                                 {...{ kcContext, i18n, Template }}
                                 classes={undefined}
                                 doUseDefaultCss={false}
+                                UserProfileFormFields={UserProfileFormFields}
+                                doMakeUserConfirmPassword
                             />
                         );
                     case "info.ftl":

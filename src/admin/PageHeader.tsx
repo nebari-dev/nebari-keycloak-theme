@@ -5,10 +5,6 @@
  * $ npx keycloakify own --path "admin/PageHeader.tsx" --revert
  */
 
-/* eslint-disable */
-
-// @ts-nocheck
-
 import { CircleHelpIcon } from "lucide-react";
 import { ProfileMenu, ProfileMenuItem } from "@/components/nebari/ProfileMenu";
 import { useNebariTheme } from "@/hooks/use-nebari-theme";
@@ -19,7 +15,7 @@ import {
   MenuBarNav,
   NavigationMenu,
 } from "@/components/ui/navigation-menu";
-import { useEnvironment, useHelp } from "../shared/keycloak-ui-shared";
+import { label, useEnvironment, useHelp } from "../shared/keycloak-ui-shared";
 import { PageToggleButton } from "../shared/@patternfly/react-core";
 import { BarsIcon } from "../shared/@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
@@ -29,6 +25,7 @@ import { useAccess } from "./context/access/Access";
 import { useRealm } from "./context/realm-context/RealmContext";
 import { toDashboard } from "./dashboard/routes/Dashboard";
 import { usePreviewLogo } from "./realm-settings/themes/LogoContext";
+import { getConsoleLogo } from "../branding/consoleLogo";
 import { joinPath } from "./utils/joinPath";
 import useToggle from "./utils/useToggle";
 
@@ -43,16 +40,22 @@ function loggedInUserName(token: Record<string, unknown>, fallback: string) {
   return [givenName, familyName].filter(Boolean).join(" ") || username;
 }
 
-export const Header = () => {
+type ConsoleTheme = ReturnType<typeof useNebariTheme>;
+
+const LIGHT_THEME: ConsoleTheme = {
+  themeMode: "light",
+  isDarkMode: false,
+  setThemeMode: () => {},
+  canChangeTheme: false,
+};
+
+const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
   const { environment, keycloak } = useEnvironment();
   const { t } = useTranslation();
-  const { realm } = useRealm();
+  const { realm, realmRepresentation } = useRealm();
   const { hasAccess } = useAccess();
   const { enabled: helpEnabled, toggleHelp } = useHelp();
-  // `darkMode === false` is the realm's "Dark Mode" setting turned off.
-  const { themeMode, isDarkMode, setThemeMode, canChangeTheme } = useNebariTheme({
-    allowDark: getKcContext().kcContext.darkMode !== false,
-  });
+  const { themeMode, isDarkMode, setThemeMode, canChangeTheme } = theme;
   const [clearCachesOpen, toggleClearCaches] = useToggle();
 
   const contextLogo = usePreviewLogo();
@@ -64,11 +67,38 @@ export const Header = () => {
   const url = useHref(toDashboard({ realm }));
   const logoUrl = environment.logoUrl ? environment.logoUrl : url;
 
-  const defaultLogo = `${import.meta.env.BASE_URL}logo/nebari-logo-${isDarkMode ? "dark" : "light"}.svg`;
+  /* The masthead mark, most specific source first:
+     1. the live preview while an admin edits in Realm settings -> Themes,
+     2. `logo` from the theme's own theme.properties, which is Keycloak's
+        standard hook and lets a deployment point at its own file without
+        touching this build,
+     3. the artwork the active theme ships, resolved from the same catalog the
+        login pages use, so a theme cannot brand one console and not the other.
+     A theme that ships none — the unbranded `template` — falls through to the
+     realm's display name as a wordmark, rather than borrowing another theme's
+     logo. */
+  /* `t` is typed to the console's own message catalogue, which does not know
+     this theme's custom key — the same reason `themeCustomization.ts` reads
+     `properties` through a cast. The value is validated by
+     `parseThemeBrandingConfig` either way. */
+  const publishedConfig = (t as unknown as (key: string) => string)(
+    "nebariBrandingConfig",
+  );
+
+  const themeLogo = getConsoleLogo({
+    themeName: getKcContext().kcContext.themeName,
+    mode: isDarkMode ? "dark" : "light",
+    baseUrl: import.meta.env.BASE_URL,
+    publishedConfig,
+  });
 
   const resolvedLogo = customLogo
     ? (customLogo.startsWith("/") ? joinPath(environment["resourceUrl"], customLogo) : customLogo)
-    : defaultLogo;
+    : environment.logo
+      ? (/^(https?:)?\/\//.test(environment.logo)
+          ? environment.logo
+          : joinPath(environment["resourceUrl"], environment.logo))
+      : themeLogo;
 
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
@@ -83,13 +113,19 @@ export const Header = () => {
       <PageToggleButton
         className="nebari-admin-nav-toggle"
         variant="plain"
-        aria-label={t("navigation")}
+        aria-label={t("navigation", "Navigation")}
       >
         <BarsIcon />
       </PageToggleButton>
 
       <MenuBarBrand href={logoUrl} aria-label={t("logo")}>
-        <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+        {resolvedLogo ? (
+          <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+        ) : (
+          <span className="font-semibold text-base">
+            {label(t, realmRepresentation?.displayName, realm)}
+          </span>
+        )}
       </MenuBarBrand>
 
       <MenuBarNav aria-label="Keycloak Admin Console">
@@ -109,7 +145,7 @@ export const Header = () => {
           setThemeMode={setThemeMode}
           signOutLabel={t("signOut")}
           themeMode={themeMode}
-          triggerLabel={t("options")}
+          triggerLabel={t("options", "Options")}
         >
           <ProfileMenuItem id="manage-account" onClick={() => keycloak.accountManagement()}>
             {t("manageAccount")}
@@ -136,3 +172,18 @@ export const Header = () => {
     </NavigationMenu>
   );
 };
+
+const ThemeEnabledHeader = () => <HeaderContent theme={useNebariTheme()} />;
+
+/**
+ * Do not mount `useThemePreference` when the realm has disabled Dark Mode.
+ * `colorScheme.ts` has already forced the document light before React starts;
+ * skipping the hook prevents the user's stored preference from competing with
+ * that realm policy and keeps `.dark` under one owner.
+ */
+export const Header = () =>
+  getKcContext().kcContext.darkMode === false ? (
+    <HeaderContent theme={LIGHT_THEME} />
+  ) : (
+    <ThemeEnabledHeader />
+  );

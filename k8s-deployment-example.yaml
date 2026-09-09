@@ -30,6 +30,10 @@ spec:
           - --hostname-strict=false
           - --proxy=edge
         env:
+        # Overrides whether the Admin Console offers the Theme customization
+        # page, whatever the theme was built with. Unset lets the theme decide.
+        # - name: NEBARI_THEME_CUSTOMIZATION
+        #   value: "disabled"
         - name: KEYCLOAK_ADMIN
           value: admin
         - name: KEYCLOAK_ADMIN_PASSWORD

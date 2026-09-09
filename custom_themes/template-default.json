@@ -11,6 +11,11 @@
             "light": "",
             "dark": ""
         },
+        "consoleLogo": {
+            "light": "",
+            "dark": ""
+        },
+        "useLoginLogoInConsole": true,
         "backgroundImage": {
             "light": "",
             "dark": ""

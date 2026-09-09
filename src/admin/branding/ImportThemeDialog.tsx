@@ -19,17 +19,20 @@ import {
 } from "@/components/ui/dialog";
 import type { BrandingConfig } from "../../branding/brandingConfig";
 import {
-    getBundledPresets,
     parseThemeExport,
     type ThemePreset
 } from "../../themes/themePresets";
+import { getBundledPresets } from "../../themes/bundledPresets";
 import type { ThemeDefinition } from "../../themes/themeCatalog";
 import { BrandingPreview } from "./BrandingPreview";
+import type { LoginProvider } from "../../branding/loginProviders";
 
 type ImportThemeDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     theme: ThemeDefinition;
+    /** Passed straight to the preview — see `BrandingPreview`. */
+    identityProviders: LoginProvider[] | undefined;
     /** Hands the chosen config to the editor's draft. Does not publish. */
     onImport: (config: BrandingConfig, presetName: string) => void;
 };
@@ -49,6 +52,7 @@ export function ImportThemeDialog({
     open,
     onOpenChange,
     theme,
+    identityProviders,
     onImport
 }: ImportThemeDialogProps) {
     /* Both the list and its errors come out of one call, held in the same memo —
@@ -221,6 +225,7 @@ export function ImportThemeDialog({
                             {selected ? (
                                 <BrandingPreview
                                     branding={selected.config}
+                                    identityProviders={identityProviders}
                                     mode={previewMode}
                                     themeName={theme.name}
                                 />

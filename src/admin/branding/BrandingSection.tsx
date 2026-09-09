@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { PageSection } from "../../shared/@patternfly/react-core";
 import { useAlerts } from "../../shared/keycloak-ui-shared";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -49,20 +50,30 @@ import {
     getLinkedKeys,
     type DerivedPaletteKey
 } from "../../branding/derivePalette";
-import { isHexColor } from "../../branding/color";
+import { isHexColor, normalizeHexInput } from "../../branding/color";
 import {
     getBrandingImageDimensions,
     type ImageDimensions
 } from "../../branding/imageUpload";
 import {
-    CUSTOM_THEME_NAMES,
     DEFAULT_THEME_NAME,
     cloneThemeDefaults,
     getThemeDefinition,
+    matchThemeName,
     parseThemeBrandingConfig,
     type CustomThemeName
 } from "../../themes/themeCatalog";
 import { serializeThemeExport, themeExportFileName } from "../../themes/themePresets";
+import {
+    publishLocales,
+    readLocaleVariants,
+    selectCanonicalVariant,
+    type LocaleVariant
+} from "../../branding/localeVariants";
+import {
+    getLoginProviders,
+    type LoginProvider
+} from "../../branding/loginProviders";
 import { useAdminClient } from "../admin-client";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { BrandingPreview } from "./BrandingPreview";
@@ -101,8 +112,13 @@ function HexColorInput({
 }) {
     const [text, setText] = useState<string | null>(null);
 
+    /* Only while the field is being edited: a committed value is valid by
+       construction, and `onBlur` clears the draft back to it. */
+    const isInvalid = text !== null && normalizeHexInput(text) === undefined;
+
     return (
         <Input
+            aria-invalid={isInvalid}
             aria-label={label}
             id={id}
             onBlur={() => setText(null)}
@@ -111,7 +127,9 @@ function HexColorInput({
 
                 setText(next);
 
-                if (isHexColor(next)) onCommit(next);
+                const normalized = normalizeHexInput(next);
+
+                if (normalized !== undefined) onCommit(normalized);
             }}
             value={text ?? value}
         />
@@ -140,15 +158,33 @@ const LOGIN_MODE_LABELS: Record<BrandingConfig["loginMode"], string> = {
     "password-and-providers": "Username/password and external providers"
 };
 
+/**
+ * The realm's identity providers as the login page would offer them.
+ *
+ * `undefined` means they could not be read at all, which the preview reports
+ * rather than passing off as "this realm has none": a realm can hold a record
+ * Keycloak itself cannot deserialize, and the editor is still usable without
+ * knowing them.
+ */
+async function readLoginIdentityProviders(
+    adminClient: ReturnType<typeof useAdminClient>["adminClient"],
+    realm: string
+): Promise<LoginProvider[] | undefined> {
+    const providers = await adminClient.identityProviders
+        .find({ realm })
+        .catch(() => undefined);
+
+    return providers === undefined ? undefined : getLoginProviders(providers);
+}
+
 function getConfiguredThemeName(
     loginTheme: string | undefined,
     adminTheme: string | undefined
 ): CustomThemeName {
     for (const candidate of [loginTheme, adminTheme]) {
-        const normalized = candidate?.replace(/_retrocompat$/, "");
-        const themeName = CUSTOM_THEME_NAMES.find(name => name === normalized);
+        const themeName = matchThemeName(candidate);
 
-        if (themeName) return themeName;
+        if (themeName !== undefined) return themeName;
     }
 
     return DEFAULT_THEME_NAME;
@@ -234,6 +270,8 @@ async function saveThemeFile(fileName: string, text: string): Promise<boolean> {
 }
 
 type ImageControlProps = {
+    /** Greyed out and non-interactive; used while the console reuses the login logo. */
+    disabled?: boolean;
     id: string;
     label: string;
     help: string;
@@ -250,7 +288,8 @@ function ImageControl({
     kind,
     value,
     onChange,
-    onError
+    onError,
+    disabled = false
 }: ImageControlProps) {
     const [pendingImage, setPendingImage] = useState<{
         file: File;
@@ -285,7 +324,7 @@ function ImageControl({
                 <div className="branding-image-control">
                     <Input
                         aria-label={`${label} URL`}
-                        disabled={isEmbedded}
+                        disabled={disabled || isEmbedded}
                         id={id}
                         onChange={event => onChange(event.target.value)}
                         placeholder="https://assets.example.com/image.png"
@@ -295,6 +334,7 @@ function ImageControl({
                         with a click handler: it keeps the native picker's keyboard
                         and screen-reader behaviour without a ref. */}
                     <Button
+                        disabled={disabled}
                         render={<label htmlFor={`${id}-file`} />}
                         variant="outline"
                     >
@@ -304,11 +344,12 @@ function ImageControl({
                     <input
                         accept="image/png,image/jpeg,image/webp"
                         className="sr-only"
+                        disabled={disabled}
                         id={`${id}-file`}
                         onChange={handleFile}
                         type="file"
                     />
-                    {value !== "" && (
+                    {value !== "" && !disabled && (
                         <Button onClick={() => onChange("")} variant="ghost">
                             Remove
                         </Button>
@@ -359,33 +400,153 @@ export default function BrandingSection() {
     const [saving, setSaving] = useState(false);
     const [imageError, setImageError] = useState("");
     const [importOpen, setImportOpen] = useState(false);
+    /**
+     * Set when the published config could not be read. The editor is not
+     * rendered while this is set: its inputs would be seeded from the theme
+     * defaults, which look exactly like a realm that has never been branded —
+     * so an admin could adjust and publish those defaults straight over a
+     * configuration that was only temporarily unreadable.
+     */
+    const [loadError, setLoadError] = useState<string>();
+    const [reloadCount, setReloadCount] = useState(0);
+    /** Locales whose stored value disagrees with the one being edited. */
+    const [staleLocales, setStaleLocales] = useState<string[]>([]);
+    /**
+     * The subset of `staleLocales` that could not be read, as opposed to being
+     * empty. Worth separating in the warning: an empty locale was never
+     * published to, while an unreadable one might hold something else.
+     */
+    const [unreadableLocales, setUnreadableLocales] = useState<string[]>([]);
+    /**
+     * The locales the theme in the editor came from. The default locale is not
+     * necessarily among them — that is the whole point of reading them all — so
+     * the drift warning has to name these rather than assume the default.
+     */
+    const [canonicalLocales, setCanonicalLocales] = useState<string[]>([]);
+    /**
+     * Set when more than one locale carries branding and they disagree. There is
+     * no safe way to guess which one the admin meant to keep, and picking wrong
+     * discards a real configuration — so the editor asks instead of choosing.
+     */
+    const [variantChoice, setVariantChoice] = useState<LocaleVariant[]>();
+    /** `undefined` until read, and after a failed read — see `BrandingPreview`. */
+    const [identityProviders, setIdentityProviders] = useState<LoginProvider[]>();
 
     const isDirty = useMemo(
         () => JSON.stringify(draft) !== JSON.stringify(published),
         [draft, published]
     );
 
+    /**
+     * Publishing is also the repair for locale drift, so it cannot be gated on
+     * the draft having changed. Adding a locale after publishing, opening a
+     * realm that is already out of sync, or discarding after a partial publish
+     * all leave the draft equal to the published config while some locales
+     * still need writing — and the warning tells the admin to publish again.
+     */
+    const canPublish = isDirty || staleLocales.length !== 0;
+
     useEffect(() => {
         let active = true;
 
         void (async () => {
             setLoading(true);
+            /* Reset everything derived from the previous realm before reading
+               the next one. The render guards are ordered chooser, then load
+               error, then editor — so a conflict left over from another realm
+               would otherwise be shown for this one. */
+            setLoadError(undefined);
+            setVariantChoice(undefined);
+            setStaleLocales([]);
+            setUnreadableLocales([]);
+            setCanonicalLocales([]);
             try {
-                const messages = await adminClient.realms.getRealmLocalizationTexts({
-                    realm,
-                    selectedLocale: locale
-                });
+                const locales = publishLocales(
+                    locale,
+                    realmRepresentation?.supportedLocales
+                );
+
+                /* Every locale is read before anything is decided. Reading only
+                   the default locale would make a realm whose default has just
+                   changed look unbranded, and the first publish after that
+                   would overwrite the configuration the other locales hold. */
+                const read = await readLocaleVariants(
+                    async selectedLocale =>
+                        (
+                            await adminClient.realms.getRealmLocalizationTexts({
+                                realm,
+                                selectedLocale
+                            })
+                        )[themeDefinition.brandingMessageKey],
+                    locales
+                );
+
+                const selection = selectCanonicalVariant(read, locales);
+
+                /* Nothing published was found, but not every locale could be
+                   read — so this realm may well be branded. Handled exactly
+                   like a failed load, because opening the editor on theme
+                   defaults is what would let a transient outage turn into an
+                   overwrite. */
+                if (selection.kind === "unreadable") {
+                    if (active) {
+                        setLoadError(
+                            `The theme could not be read for ${selection.unreadable.join(
+                                ", "
+                            )}, and no other locale has one — so whether this realm is branded is unknown.`
+                        );
+                    }
+
+                    return;
+                }
+
+                /* Every request this run needs, resolved before anything is
+                   committed. `active` is then checked once, immediately before
+                   the setters — checking it before an await would let a
+                   response for a realm the admin has already navigated away
+                   from write itself into the page. */
+                const providers = await readLoginIdentityProviders(adminClient, realm);
+
+                /* More than one distinct published theme: the admin has to say
+                   which survives, so the editor is not opened at all. */
+                if (selection.kind === "conflict") {
+                    if (active) {
+                        setVariantChoice(selection.variants);
+                        setUnreadableLocales(selection.unreadable);
+                        setIdentityProviders(providers);
+                    }
+
+                    return;
+                }
+
                 const config = parseThemeBrandingConfig(
                     themeDefinition,
-                    messages[themeDefinition.brandingMessageKey]
+                    selection.kind === "canonical" ? selection.variant.value : undefined
                 );
+
                 if (active) {
+                    setVariantChoice(undefined);
                     setDraft(config);
                     setPublished(config);
                     setPreviewMode(config.colorScheme === "dark" ? "dark" : "light");
+                    setStaleLocales(
+                        selection.kind === "canonical" ? selection.stale : []
+                    );
+                    setUnreadableLocales(
+                        selection.kind === "canonical" ? selection.unreadable : []
+                    );
+                    setCanonicalLocales(
+                        selection.kind === "canonical" ? selection.variant.locales : []
+                    );
+                    setIdentityProviders(providers);
                 }
             } catch (error) {
-                if (active) addError("Unable to load theme customization", error);
+                if (active) {
+                    setLoadError(
+                        error instanceof Error ? error.message : "Unknown error"
+                    );
+                    addError("Unable to load theme customization", error);
+                }
             } finally {
                 if (active) setLoading(false);
             }
@@ -394,7 +555,15 @@ export default function BrandingSection() {
         return () => {
             active = false;
         };
-    }, [addError, adminClient, realm, locale, themeDefinition]);
+    }, [
+        addError,
+        adminClient,
+        realm,
+        locale,
+        themeDefinition,
+        realmRepresentation?.supportedLocales,
+        reloadCount
+    ]);
 
     const update = <Key extends keyof BrandingConfig>(
         key: Key,
@@ -404,7 +573,7 @@ export default function BrandingSection() {
     };
 
     const updateImage = (
-        key: "logo" | "backgroundImage",
+        key: "logo" | "consoleLogo" | "backgroundImage",
         mode: "light" | "dark",
         value: string
     ) => {
@@ -504,33 +673,67 @@ export default function BrandingSection() {
         addAlert(`Loaded “${presetName}” into the editor — publish to apply it`);
     };
 
+    /**
+     * Write the draft to every locale.
+     *
+     * One request per locale, in sequence, and the failures are collected
+     * rather than thrown. `Promise.all` rejects on the first failure while the
+     * rest keep going, so a partial write reported a flat error and left the
+     * realm with branding that differed by language — with nothing on this page
+     * saying which locales had taken it.
+     *
+     * There is no multi-locale write to make this atomic, so the recovery is a
+     * retry: the same publish is idempotent, and the editor stays dirty and
+     * names the locales still behind until one succeeds everywhere.
+     */
     const publish = async () => {
         setSaving(true);
         try {
             const value = serializeBrandingConfig(draft, themeDefinition.defaultBranding);
-            const locales = new Set([
-                "en",
-                locale,
-                ...(realmRepresentation?.supportedLocales ?? [])
-            ]);
+            const locales = publishLocales(locale, realmRepresentation?.supportedLocales);
+            const failed: string[] = [];
+            let firstError: unknown;
 
-            await Promise.all(
-                [...locales].map(selectedLocale =>
-                    adminClient.realms.addLocalization(
+            for (const selectedLocale of locales) {
+                try {
+                    await adminClient.realms.addLocalization(
                         {
                             realm,
                             selectedLocale,
                             key: themeDefinition.brandingMessageKey
                         },
                         value
-                    )
-                )
-            );
+                    );
+                } catch (error) {
+                    failed.push(selectedLocale);
+                    firstError ??= error;
+                }
+            }
+
+            if (failed.length !== 0) {
+                /* `published` is deliberately left alone: the draft is still
+                   unpublished somewhere, so the editor stays dirty and Publish
+                   stays enabled for the retry. */
+                setStaleLocales(failed);
+                addError(
+                    `Published to ${locales.length - failed.length} of ${
+                        locales.length
+                    } locales — ${failed.join(", ")} failed and still show the previous theme. Publish again to retry.`,
+                    firstError
+                );
+
+                return;
+            }
 
             const normalized = parseThemeBrandingConfig(themeDefinition, value);
             setDraft(normalized);
             setPublished(normalized);
-            addAlert("Theme customization published");
+            setStaleLocales([]);
+            addAlert(
+                locales.length === 1
+                    ? "Theme customization published"
+                    : `Theme customization published to ${locales.length} locales`
+            );
         } catch (error) {
             addError("Unable to publish theme customization", error);
         } finally {
@@ -542,6 +745,129 @@ export default function BrandingSection() {
         return (
             <PageSection className="branding-loading">
                 <Spinner aria-label="Loading theme customization" />
+            </PageSection>
+        );
+    }
+
+    /* Like the load error below: shown instead of the editor, because every
+       route out of here discards one of the published themes and that is not a
+       choice to make on the admin's behalf. */
+    if (variantChoice !== undefined) {
+        return (
+            <PageSection variant="light">
+                <Alert variant="destructive">
+                    <AlertCircleIcon aria-hidden />
+                    <AlertTitle>This realm has more than one published theme</AlertTitle>
+                    <AlertDescription>
+                        <p>
+                            The theme is stored once per locale, and these locales
+                            disagree — so visitors currently see different branding
+                            depending on their language. Choose the one to keep;
+                            publishing then writes it to every locale.
+                        </p>
+                        {unreadableLocales.length !== 0 && (
+                            <p>
+                                {unreadableLocales.join(", ")} could not be read, so{" "}
+                                {unreadableLocales.length === 1
+                                    ? "it is not shown below and may hold a third theme"
+                                    : "they are not shown below and may hold further themes"}
+                                . Whichever option you keep will be published over{" "}
+                                {unreadableLocales.length === 1 ? "it" : "them"} as
+                                well.
+                            </p>
+                        )}
+                        <div className="branding-variant-choice">
+                            {variantChoice.map(variant => {
+                                const config = parseThemeBrandingConfig(
+                                    themeDefinition,
+                                    variant.value
+                                );
+
+                                return (
+                                    <div
+                                        className="branding-variant-choice__option"
+                                        key={variant.locales.join(",")}
+                                    >
+                                        <BrandingPreview
+                                            branding={config}
+                                            identityProviders={identityProviders}
+                                            mode={
+                                                config.colorScheme === "dark"
+                                                    ? "dark"
+                                                    : "light"
+                                            }
+                                            themeName={themeDefinition.name}
+                                        />
+                                        <Button
+                                            onClick={() => {
+                                                setDraft(config);
+                                                setPublished(config);
+                                                setPreviewMode(
+                                                    config.colorScheme === "dark"
+                                                        ? "dark"
+                                                        : "light"
+                                                );
+                                                setStaleLocales(
+                                                    publishLocales(
+                                                        locale,
+                                                        realmRepresentation?.supportedLocales
+                                                    ).filter(
+                                                        candidate =>
+                                                            !variant.locales.includes(
+                                                                candidate
+                                                            )
+                                                    )
+                                                );
+                                                /* The editor's drift warning
+                                                   names these, so resolving a
+                                                   conflict has to set them or
+                                                   the warning loses its
+                                                   subject. `unreadableLocales`
+                                                   is deliberately left as it
+                                                   is: those locales are still
+                                                   unread and still about to be
+                                                   overwritten. */
+                                                setCanonicalLocales(variant.locales);
+                                                setVariantChoice(undefined);
+                                            }}
+                                            variant="outline"
+                                        >
+                                            Keep the {variant.locales.join(", ")} theme
+                                        </Button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </AlertDescription>
+                </Alert>
+            </PageSection>
+        );
+    }
+
+    /* Deliberately instead of the editor, not alongside it. Seeding the inputs
+       from the theme defaults would be indistinguishable from an unbranded
+       realm, and publishing them would overwrite a configuration that is only
+       unreadable right now. */
+    if (loadError !== undefined) {
+        return (
+            <PageSection variant="light">
+                <Alert variant="destructive">
+                    <AlertCircleIcon aria-hidden />
+                    <AlertTitle>Could not load this realm's theme</AlertTitle>
+                    <AlertDescription>
+                        <p>{loadError}</p>
+                        <p>
+                            The editor stays closed until the published theme can be
+                            read, so that nothing overwrites it by accident.
+                        </p>
+                        <Button
+                            onClick={() => setReloadCount(count => count + 1)}
+                            variant="outline"
+                        >
+                            Try again
+                        </Button>
+                    </AlertDescription>
+                </Alert>
             </PageSection>
         );
     }
@@ -564,8 +890,14 @@ export default function BrandingSection() {
                     >
                         Discard changes
                     </Button>
-                    <Button disabled={!isDirty || saving} loading={saving} onClick={publish}>
-                        Publish theme
+                    <Button
+                        disabled={!canPublish || saving}
+                        loading={saving}
+                        onClick={publish}
+                    >
+                        {isDirty || staleLocales.length === 0
+                            ? "Publish theme"
+                            : "Publish to all locales"}
                     </Button>
                     <DropdownMenu>
                         {/* Same override as `ProfileMenu`: the registry's trigger
@@ -604,6 +936,44 @@ export default function BrandingSection() {
             </PageSection>
 
             <PageSection className="branding-page-content">
+                {staleLocales.length !== 0 && (
+                    <Alert variant="destructive">
+                        <AlertCircleIcon aria-hidden />
+                        <AlertTitle>Branding differs between locales</AlertTitle>
+                        <AlertDescription>
+                            <p>
+                                {/* Names the locales the editor's theme actually
+                                    came from, rather than assuming the realm's
+                                    default locale is among them — it need not be,
+                                    which is what made an earlier version of this
+                                    message say "de does not have the theme that
+                                    de has". */}
+                                The theme in this editor is the one published for{" "}
+                                {canonicalLocales.join(", ") || "this realm"}.{" "}
+                                {staleLocales.join(", ")}{" "}
+                                {staleLocales.length === 1 ? "does" : "do"} not have
+                                it, so a visitor in{" "}
+                                {staleLocales.length === 1
+                                    ? "that language"
+                                    : "those languages"}{" "}
+                                sees something different. This happens when a locale
+                                is added to the realm after the last publish, or when
+                                a publish only partly succeeded. Publishing again
+                                writes every locale.
+                            </p>
+                            {unreadableLocales.length !== 0 && (
+                                <p>
+                                    {unreadableLocales.join(", ")} could not be read
+                                    at all rather than being empty, so{" "}
+                                    {unreadableLocales.length === 1 ? "it" : "they"}{" "}
+                                    may hold a different theme. Publishing replaces
+                                    whatever is there.
+                                </p>
+                            )}
+                        </AlertDescription>
+                    </Alert>
+                )}
+
                 <Alert>
                     <InfoIcon aria-hidden />
                     <AlertTitle>Experimental image storage</AlertTitle>
@@ -649,17 +1019,17 @@ export default function BrandingSection() {
                                 </Field>
                                 <div className="branding-image-set">
                                     <div className="branding-image-set__header">
-                                        <h3>Logos</h3>
+                                        <h3>Login card logos</h3>
                                         <p>
-                                            Provide artwork for each card appearance so
-                                            light and dark wordmarks remain visible.
+                                            One per appearance, so a wordmark stays
+                                            visible on either card.
                                         </p>
                                     </div>
                                     <ImageControl
                                         id="branding-logo-light"
                                         kind="logo"
                                         label="Light appearance logo"
-                                        help="Shown on light cards. Use artwork with enough dark contrast."
+                                        help="Needs enough dark contrast to read on a light card."
                                         onChange={value =>
                                             updateImage("logo", "light", value)
                                         }
@@ -670,12 +1040,61 @@ export default function BrandingSection() {
                                         id="branding-logo-dark"
                                         kind="logo"
                                         label="Dark appearance logo"
-                                        help="Shown on dark cards. Leave empty to reuse the light appearance logo."
+                                        help="Leave empty to reuse the light logo."
                                         onChange={value =>
                                             updateImage("logo", "dark", value)
                                         }
                                         onError={setImageError}
                                         value={draft.logo.dark}
+                                    />
+                                </div>
+
+                                <div className="branding-image-set">
+                                    <div className="branding-image-set__header">
+                                        <h3>Console header logos</h3>
+                                        <p>
+                                            Shown in the Admin and Account console
+                                            mastheads — a shorter, wider slot than the
+                                            login card.
+                                        </p>
+                                    </div>
+                                    <div className="branding-reuse-toggle">
+                                        <Checkbox
+                                            checked={draft.useLoginLogoInConsole}
+                                            id="branding-reuse-login-logo"
+                                            onCheckedChange={checked =>
+                                                update(
+                                                    "useLoginLogoInConsole",
+                                                    checked === true
+                                                )
+                                            }
+                                        >
+                                            Use the login card logos
+                                        </Checkbox>
+                                    </div>
+                                    <ImageControl
+                                        disabled={draft.useLoginLogoInConsole}
+                                        id="branding-console-logo-light"
+                                        kind="logo"
+                                        label="Light console logo"
+                                        help="Short and wide reads best here."
+                                        onChange={value =>
+                                            updateImage("consoleLogo", "light", value)
+                                        }
+                                        onError={setImageError}
+                                        value={draft.consoleLogo.light}
+                                    />
+                                    <ImageControl
+                                        disabled={draft.useLoginLogoInConsole}
+                                        id="branding-console-logo-dark"
+                                        kind="logo"
+                                        label="Dark console logo"
+                                        help="Leave empty to reuse the light console logo."
+                                        onChange={value =>
+                                            updateImage("consoleLogo", "dark", value)
+                                        }
+                                        onError={setImageError}
+                                        value={draft.consoleLogo.dark}
                                     />
                                 </div>
 
@@ -933,6 +1352,7 @@ export default function BrandingSection() {
                         </div>
                         <BrandingPreview
                             branding={draft}
+                            identityProviders={identityProviders}
                             mode={previewMode}
                             themeName={themeDefinition.name}
                         />
@@ -941,6 +1361,7 @@ export default function BrandingSection() {
             </PageSection>
 
             <ImportThemeDialog
+                identityProviders={identityProviders}
                 onImport={importTheme}
                 onOpenChange={setImportOpen}
                 open={importOpen}
