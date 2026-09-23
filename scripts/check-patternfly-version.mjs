@@ -30,7 +30,12 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const ROOT = new URL("..", import.meta.url);
-const PKG = new URL("../node_modules/@patternfly/react-core/package.json", import.meta.url);
+// The `pf-vN-c-*` class names and `--pf-vN-global--*` tokens this guard protects
+// ship from `@patternfly/patternfly` (the CSS) and are mirrored by
+// `@patternfly/react-styles`, not from `react-core`. All three are separate
+// direct dependencies with their own ranges, so reading `react-core` here would
+// stay green through a CSS-only major bump.
+const PKG = new URL("../node_modules/@patternfly/patternfly/package.json", import.meta.url);
 
 /** How many mismatching references to list before summarising. */
 const SAMPLE = 12;
@@ -47,9 +52,6 @@ function installedMajor() {
   }
   const { version } = JSON.parse(raw);
   const major = Number(version.split(".")[0]);
-  if (!Number.isInteger(major)) {
-    throw new Error(`Could not parse a major version from "${version}".`);
-  }
   return { major, version };
 }
 

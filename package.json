@@ -13,7 +13,7 @@
     "check:patternfly-version": "node scripts/check-patternfly-version.mjs",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "typecheck": "npm run check && tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test:screenshots": "playwright test",
     "test:screenshots:update": "playwright test --update-snapshots=all"
   },

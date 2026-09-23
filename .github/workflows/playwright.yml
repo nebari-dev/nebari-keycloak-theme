@@ -26,6 +26,12 @@ jobs:
           cache: npm
       - run: npm ci
 
+      # The theme owns files `keycloakify sync-extensions` will not refresh, so
+      # upstream changes to them go missing silently. These guards turn that
+      # into a build error. They are not type errors, hence their own step.
+      - name: Theme guards
+        run: npm run check
+
       # Playwright transpiles without type checking, so the visual tests alone
       # would not catch a broken build.
       - name: Type check

@@ -39,9 +39,21 @@ const NEBARI_ONLY = new Set([
   // "/software-packs",  // https://github.com/nebari-dev/nebari-keycloak-theme/issues/14
 ]);
 
-/** Every `<LeftNav …/>` render site, with its `path` when it is a literal. */
+/**
+ * Every `<LeftNav …/>` render site, with its `path` when it is a literal.
+ *
+ * Comments are stripped first. A commented-out render site otherwise satisfies
+ * both the path set and the site count, so the guard passes while the section
+ * is missing from the console — which is the failure this script exists to
+ * catch, and commenting the entry out is the obvious move when someone hits the
+ * error without a Nebari-styled replacement ready.
+ */
 function navSites(source) {
-  return [...source.matchAll(/<LeftNav\b[\s\S]*?\/>/g)].map((match) => {
+  const code = source
+    .replace(/\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^[ \t]*\/\/.*$/gm, "");
+  return [...code.matchAll(/<LeftNav\b[\s\S]*?\/>/g)].map((match) => {
     const path = match[0].match(/\bpath="([^"]+)"/);
     return { path: path?.[1] };
   });
