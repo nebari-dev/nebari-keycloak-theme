@@ -1,17 +1,18 @@
 /**
- * This file has been claimed for ownership from @keycloakify/keycloak-ui-shared version 260502.0.0.
- * To relinquish ownership and restore this file to its original content, run the following command:
+ * WARNING: Before modifying this file, run the following command:
  * 
- * $ npx keycloakify own --path "shared/keycloak-ui-shared/masthead/Masthead.tsx" --revert
+ * $ npx keycloakify own --path "shared/keycloak-ui-shared/masthead/Masthead.tsx"
+ * 
+ * This file is provided by @keycloakify/keycloak-ui-shared version 260502.0.0.
+ * It was copied into your repository by the postinstall script: `keycloakify sync-extensions`.
  */
 
 /* eslint-disable */
 
 // @ts-nocheck
 
-import { ProfileMenu, ProfileMenuItem } from "@/components/nebari/ProfileMenu";
-import type { ThemeMode } from "@/hooks/use-nebari-theme";
 import {
+  Avatar,
   AvatarProps,
   DropdownItem,
   Masthead,
@@ -30,6 +31,7 @@ import { TFunction } from "i18next";
 import type { Keycloak, KeycloakTokenParsed } from "oidc-spa/keycloak-js";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { DefaultAvatar } from "./DefaultAvatar";
 import { KeycloakDropdown } from "./KeycloakDropdown";
 
 function loggedInUserName(
@@ -66,14 +68,6 @@ type KeycloakMastheadProps = MastheadMainProps & {
   dropdownItems?: ReactNode[];
   toolbarItems?: ReactNode[];
   toolbar?: ReactNode;
-  /**
-   * Theme state from `useNebariTheme`. It is threaded in rather than read here
-   * because `useThemePreference` must be mounted once per document, and the
-   * console's own header already needs `isDarkMode` to pick its logo.
-   */
-  themeMode: ThemeMode;
-  setThemeMode: (mode: ThemeMode) => void;
-  canChangeTheme?: boolean;
 };
 
 const KeycloakMasthead = ({
@@ -89,26 +83,29 @@ const KeycloakMasthead = ({
   dropdownItems = [],
   toolbarItems,
   toolbar,
-  themeMode,
-  setThemeMode,
-  canChangeTheme,
   ...rest
 }: KeycloakMastheadProps) => {
   const { t } = useTranslation();
+  const extraItems = [];
+  if (hasManageAccount) {
+    extraItems.push(
+      <DropdownItem
+        key="manageAccount"
+        onClick={() => keycloak.accountManagement()}
+      >
+        {t("manageAccount")}
+      </DropdownItem>,
+    );
+  }
+  if (hasLogout) {
+    extraItems.push(
+      <DropdownItem key="signOut" onClick={() => keycloak.logout()}>
+        {t("signOut")}
+      </DropdownItem>,
+    );
+  }
 
-  const picture = keycloak.idTokenParsed?.picture ?? avatar?.src;
-  const email = keycloak.idTokenParsed?.email;
-  const userName = loggedInUserName(keycloak.idTokenParsed, t);
-
-  /**
-   * Upstream rendered three adjacent controls here: a username dropdown, a
-   * kebab for mobile, and a standalone avatar that was not even clickable. The
-   * design-system header has a single account control, so the desktop dropdown
-   * and the avatar are now one `ProfileMenu` trigger — the same component the
-   * Admin Console header uses, which is what keeps the two consoles reading as
-   * one product. The kebab stays for narrow viewports, where there is no room
-   * for the name.
-   */
+  const picture = keycloak.idTokenParsed?.picture;
   return (
     <Masthead {...rest}>
       <MastheadToggle>
@@ -129,58 +126,46 @@ const KeycloakMasthead = ({
               </ToolbarItem>
             ))}
             <ToolbarItem
-              align={{ default: "alignRight" }}
-              visibility={{ default: "hidden", md: "visible" }}
+              visibility={{
+                default: "hidden",
+                md: "visible",
+              }} /** this user dropdown is hidden on mobile sizes */
             >
-              <ProfileMenu
-                canChangeTheme={canChangeTheme}
+              <KeycloakDropdown
                 data-testid="options"
-                email={email}
-                name={userName}
-                onSignOut={hasLogout ? () => keycloak.logout() : undefined}
-                picture={picture}
-                setThemeMode={setThemeMode}
-                showName={hasUsername}
-                signOutLabel={t("signOut")}
-                themeMode={themeMode}
-                triggerLabel={t("options")}
-              >
-                {hasManageAccount && (
-                  <ProfileMenuItem onClick={() => keycloak.accountManagement()}>
-                    {t("manageAccount")}
-                  </ProfileMenuItem>
-                )}
-                {dropdownItems}
-              </ProfileMenu>
+                dropDownItems={[...dropdownItems, extraItems]}
+                title={
+                  hasUsername
+                    ? loggedInUserName(keycloak.idTokenParsed, t)
+                    : undefined
+                }
+              />
             </ToolbarItem>
             <ToolbarItem
-              align={{ default: "alignRight" }}
-              visibility={{ md: "hidden" }}
+              align={{ default: "alignLeft" }}
+              visibility={{
+                md: "hidden",
+              }}
             >
               <KeycloakDropdown
                 data-testid="options-kebab"
                 isKebab
                 dropDownItems={[
                   ...(kebabDropdownItems || dropdownItems),
-                  ...(hasManageAccount
-                    ? [
-                        <DropdownItem
-                          key="manageAccount"
-                          onClick={() => keycloak.accountManagement()}
-                        >
-                          {t("manageAccount")}
-                        </DropdownItem>
-                      ]
-                    : []),
-                  ...(hasLogout
-                    ? [
-                        <DropdownItem key="signOut" onClick={() => keycloak.logout()}>
-                          {t("signOut")}
-                        </DropdownItem>
-                      ]
-                    : [])
+                  extraItems,
                 ]}
               />
+            </ToolbarItem>
+            <ToolbarItem
+              variant="overflow-menu"
+              align={{ default: "alignRight" }}
+              className="pf-v5-u-m-0-on-lg"
+            >
+              {picture || avatar?.src ? (
+                <Avatar {...{ src: picture, alt: t("avatar"), ...avatar }} />
+              ) : (
+                <DefaultAvatar {...avatar} />
+              )}
             </ToolbarItem>
           </ToolbarContent>
         </Toolbar>

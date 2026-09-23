@@ -1,8 +1,10 @@
 /**
- * This file has been claimed for ownership from @keycloakify/keycloak-admin-ui version 260502.0.0.
- * To relinquish ownership and restore this file to its original content, run the following command:
+ * WARNING: Before modifying this file, run the following command:
  * 
- * $ npx keycloakify own --path "admin/components/users/UserDataTable.tsx" --revert
+ * $ npx keycloakify own --path "admin/components/users/UserDataTable.tsx"
+ * 
+ * This file is provided by @keycloakify/keycloak-admin-ui version 260502.0.0.
+ * It was copied into your repository by the postinstall script: `keycloakify sync-extensions`.
  */
 
 /* eslint-disable */
@@ -184,26 +186,21 @@ export function UserDataTable() {
     if (activeFilters.exact) params.exact = true;
 
     if (!listUsers && !(params.search || params.q)) {
-      return { rows: [], total: 0 };
+      return [];
     }
 
     try {
-      const { first: _first, max: _max, ...countParams } = params;
-      const [rows, total] = await Promise.all([
-        findUsers(adminClient, {
-          briefRepresentation: true,
-          ...params,
-        }),
-        adminClient.users.count(countParams),
-      ]);
-      return { rows, total };
+      return await findUsers(adminClient, {
+        briefRepresentation: true,
+        ...params,
+      });
     } catch (error) {
       if (uiRealmInfo.userProfileProvidersEnabled) {
         addError("noUsersFoundErrorStorage", error);
       } else {
         addError("noUsersFoundError", error);
       }
-      return { rows: [], total: 0 };
+      return [];
     }
   };
 
@@ -315,10 +312,9 @@ export function UserDataTable() {
     );
   };
 
-  const toolbar = (section: "all" | "search" | "actions" = "all") => {
+  const toolbar = () => {
     return (
       <UserDataTableToolbarItems
-        section={section}
         searchDropdownOpen={searchDropdownOpen}
         setSearchDropdownOpen={setSearchDropdownOpen}
         realm={realm}
@@ -397,8 +393,7 @@ export function UserDataTable() {
             />
           )
         }
-        toolbarLeadingItem={toolbar("search")}
-        toolbarItem={toolbar("actions")}
+        toolbarItem={toolbar()}
         subToolbar={subtoolbar()}
         actionResolver={(rowData: IRowData) => [
           {

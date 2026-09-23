@@ -5,10 +5,6 @@
  * $ npx keycloakify own --path "admin/PageHeader.tsx" --revert
  */
 
-/* eslint-disable */
-
-// @ts-nocheck
-
 import { CircleHelpIcon } from "lucide-react";
 import { ProfileMenu, ProfileMenuItem } from "@/components/nebari/ProfileMenu";
 import { useNebariTheme } from "@/hooks/use-nebari-theme";
@@ -43,16 +39,22 @@ function loggedInUserName(token: Record<string, unknown>, fallback: string) {
   return [givenName, familyName].filter(Boolean).join(" ") || username;
 }
 
-export const Header = () => {
+type ConsoleTheme = ReturnType<typeof useNebariTheme>;
+
+const LIGHT_THEME: ConsoleTheme = {
+  themeMode: "light",
+  isDarkMode: false,
+  setThemeMode: () => {},
+  canChangeTheme: false,
+};
+
+const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
   const { environment, keycloak } = useEnvironment();
   const { t } = useTranslation();
   const { realm } = useRealm();
   const { hasAccess } = useAccess();
   const { enabled: helpEnabled, toggleHelp } = useHelp();
-  // `darkMode === false` is the realm's "Dark Mode" setting turned off.
-  const { themeMode, isDarkMode, setThemeMode, canChangeTheme } = useNebariTheme({
-    allowDark: getKcContext().kcContext.darkMode !== false,
-  });
+  const { themeMode, isDarkMode, setThemeMode, canChangeTheme } = theme;
   const [clearCachesOpen, toggleClearCaches] = useToggle();
 
   const contextLogo = usePreviewLogo();
@@ -83,7 +85,7 @@ export const Header = () => {
       <PageToggleButton
         className="nebari-admin-nav-toggle"
         variant="plain"
-        aria-label={t("navigation")}
+        aria-label={t("navigation", "Navigation")}
       >
         <BarsIcon />
       </PageToggleButton>
@@ -109,7 +111,7 @@ export const Header = () => {
           setThemeMode={setThemeMode}
           signOutLabel={t("signOut")}
           themeMode={themeMode}
-          triggerLabel={t("options")}
+          triggerLabel={t("options", "Options")}
         >
           <ProfileMenuItem id="manage-account" onClick={() => keycloak.accountManagement()}>
             {t("manageAccount")}
@@ -136,3 +138,18 @@ export const Header = () => {
     </NavigationMenu>
   );
 };
+
+const ThemeEnabledHeader = () => <HeaderContent theme={useNebariTheme()} />;
+
+/**
+ * Do not mount `useThemePreference` when the realm has disabled Dark Mode.
+ * `colorScheme.ts` has already forced the document light before React starts;
+ * skipping the hook prevents the user's stored preference from competing with
+ * that realm policy and keeps `.dark` under one owner.
+ */
+export const Header = () =>
+  getKcContext().kcContext.darkMode === false ? (
+    <HeaderContent theme={LIGHT_THEME} />
+  ) : (
+    <ThemeEnabledHeader />
+  );

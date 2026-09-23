@@ -3,11 +3,12 @@
  * To relinquish ownership and restore this file to its original content, run the following command:
  *
  * $ npx keycloakify own --path "admin/PageNav.tsx" --revert
+ *
+ * This is the one navigation ownership seam needed by the planned Software
+ * Packs page: https://github.com/nebari-dev/nebari-keycloak-theme/issues/14
+ * `npm run check:page-nav-sync` prevents new upstream sections from silently
+ * disappearing from this Nebari rendering.
  */
-
-/* eslint-disable */
-
-// @ts-nocheck
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -60,8 +61,12 @@ const menuItemFocus = "rounded-md focus-visible:ring-ring focus-visible:ring-off
  */
 const ResponsiveSidebar = (props: ComponentProps<typeof Sidebar>) => {
     const { isSidebarOpen = true } = useContext(PageSidebarContext);
+    /* `inert` only reached React's DOM typings in 19; on 18 it is forwarded as a
+       plain attribute, which is all the browser needs. Spread rather than
+       written as a JSX prop so the cast stays on this one attribute. */
+    const inert = isSidebarOpen ? undefined : ({ inert: "" } as { inert: "" });
 
-    return <Sidebar {...props} inert={isSidebarOpen ? undefined : ""} />;
+    return <Sidebar {...props} {...inert} />;
 };
 
 /**
@@ -143,7 +148,7 @@ export const PageNav = () => {
          * components; see page-nav.css for the small layout bridge. */
         <PageSidebar className="keycloak__page_nav__shell" theme="light">
             <SidebarProvider>
-                <ResponsiveSidebar aria-label={t("navigation")} className="w-full rounded-none">
+                <ResponsiveSidebar aria-label={t("navigation", "Navigation")} className="w-full rounded-none">
                     <SidebarHeader className="border-sidebar-border border-b px-4 py-3">
                         <h2 className="flex min-w-0 flex-1 items-center gap-2 text-sm">
                             <span

@@ -49,16 +49,59 @@ npm run build-keycloak-theme
 docker compose up -d --build keycloak
 ```
 
-Then open http://localhost:8080/admin/master/console/ (admin / admin, from
-`docker-compose.yml`). `start-dev` disables Keycloak's theme cache, so a fresh
-image is all that is needed. `--build` is the part that is easy to forget: without
-it the container starts from the previously baked JAR and nothing appears to
-change.
+`start-dev` disables Keycloak's theme cache, so a fresh image is all that is
+needed. `--build` is the part that is easy to forget: without it the container
+starts from the previously baked JAR and nothing appears to change.
 
-The theme has to be selected per realm, under **Realm settings → Themes**
-(*Login theme*, *Admin console theme*, *Account theme*). `realm-export.json` sets
-only the login theme, so a realm imported with `--import-realm` will not pick up
-the console themes until they are set there too.
+A theme is selected per realm, and only the imported `nebari` realm selects this
+one — `master` still runs the stock consoles. So open the themed consoles on
+`nebari`, each with its own account:
+
+| Console | URL | Sign in as |
+| --- | --- | --- |
+| Admin | http://localhost:8080/admin/nebari/console/ | `nebari-admin` / `nebari-admin` |
+| Account | http://localhost:8080/realms/nebari/account/ | `demo` / `demo` |
+
+`admin` / `admin` from `docker-compose.yml` is the *master* realm's bootstrap
+admin. It can administer the `nebari` realm, but only through
+http://localhost:8080/admin/master/console/, which renders in master's own
+(stock) theme — a Keycloak session belongs to the realm it was created in. That
+is why `realm-export.json` also seeds `nebari-admin`, a user in the `nebari`
+realm holding the built-in `realm-management` → `realm-admin` role: signing in as
+that user is what renders the themed Admin Console with every section present.
+
+> `realm-export.json` is development-only. `docker-compose.yml` mounts it for
+> `--import-realm`; the `Dockerfile` copies **only** the theme JAR, so neither
+> these credentials nor this realm reach the published image.
+
+`realm-export.json` sets all three themes (*Login theme*, *Admin console theme*,
+*Account theme*) to `nebari`. Any other realm has to select them by hand under
+**Realm settings → Themes**.
+
+### Upgrade guards
+
+`npm run check` runs as part of both `npm run typecheck` and `npm run build`, and
+covers the two ways this theme can break *silently* on a Keycloak bump — neither
+of which `tsc` can see:
+
+- **`check:page-nav-sync`** — the Admin navigation is the single owned routing
+  seam, reserved for the planned
+  [Software Packs page](https://github.com/nebari-dev/nebari-keycloak-theme/issues/14).
+  Owned files are the ones `keycloakify sync-extensions` will not refresh, so a
+  console section Keycloak adds upstream would simply never appear here. The
+  check compares the static `<LeftNav>` destinations *and* the number of render
+  sites (which catches a section added with a computed path), and fails on a
+  dropped section or on a destination not declared in the script's `NEBARI_ONLY`
+  allowlist.
+- **`check:patternfly-version`** — around 400 selectors in this theme name
+  PatternFly's classes directly (`.pf-v5-c-table`, `--pf-v5-global--*`). When
+  Keycloak moves to PatternFly 6 those all become `pf-v6-*` and every selector
+  stops matching, with no error anywhere. The check compares the *installed*
+  PatternFly major against every `pf-vN-` reference in tracked files and fails on
+  a mismatch. Treat that failure as a port, not a version bump.
+
+Neither guard covers the Admin or Account console visually — the screenshot
+baselines below are login pages only. That gap is why both of these exist.
 
 ## Visual Tests
 
@@ -273,18 +316,25 @@ name is no longer a separate pointer target, keyboard stop or visually styled
 link. Instead, the row has one labelled keyboard stop with the standard rounded
 purple focus ring, and Enter follows the underlying semantic link. Checkboxes
 and inline controls retain independent behaviour. Search precedes the filter
-field selector, so changing that selector cannot shift the search input. The
-Users screen explicitly assigns that search/filter group to the leading toolbar
-slot while its create and bulk-action controls remain right-aligned. The Users
-toolbar/table files and Client scopes list are explicitly claimed from
-Keycloakify, so `sync-extensions` and subsequent theme builds preserve these
-compositions rather than restoring the upstream toolbar order.
-Per-row kebab menus are hidden by default; exceptional screens can explicitly
-opt back in when an operation cannot be represented elsewhere.
-The compatibility loader can return `{ rows, total }` when a Keycloak endpoint
-provides a count. The Users and Client scopes lists do so, allowing the
-Nebari-styled pager to show `Page X of N` and working first, previous, next and
-last-page controls. For endpoints without a count, next-page availability still
+field selector, so changing that selector cannot shift the search input.
+
+Per-row kebab menus follow upstream: the menu renders whenever a screen supplies
+`actions` or `actionResolver`, which 32 Admin Console screens do. `showRowActions`
+exists only as an opt-*out* for a screen that replaces the menu with something
+else. Because the menu renders through a portal, and React bubbles portal events
+up the *React* tree rather than the DOM tree, `RowActions` stops propagation on
+each item — otherwise the click reaches the row and follows its primary link
+instead of running the action.
+
+`UserDataTable`, `UserDataTableToolbarItems` and `ClientScopesSection` were
+previously claimed from Keycloakify to give two screens a server-side page count
+and a custom toolbar order. They have been handed back: three forks maintained
+across every Keycloak upgrade was too high a price for two of 48 screens, and
+`src/components/patternfly/README.md` argues for the shim over ownership for
+exactly this reason. Those screens now use the upstream composition.
+
+The compatibility loader still accepts `{ rows, total }` for a Keycloak endpoint
+that can supply a count, but no caller uses it today — next-page availability
 comes from Keycloak's existing `page size + 1` request, the total is inferred on
 the terminal page, and the last-page control stays disabled until it is known.
 
@@ -385,7 +435,11 @@ Two consequences worth knowing before adding CSS:
 - **`display: block` on `svg`** comes from Tailwind's preflight and breaks
   PatternFly's inline icon layout, which is why icons wrapped onto their own line
   and inflated control heights. `src/admin/index.css` restores inline icons
-  inside PatternFly.
+  inside PatternFly — declared inside `@layer components`, which is load-bearing:
+  that file is otherwise unlayered, and an unlayered rule outranks *every* named
+  layer however weak its selector, so it also beat Tailwind's `hidden` utility and
+  pinned a permanent error icon onto every valid field. Adding a rule to that file
+  means deciding whether it should sit above or below the utilities.
 
 ### Header
 
@@ -396,10 +450,19 @@ Light/Dark/System picker inside it as a `menuitemradio` group. The header is
 styled only through app-defined `--header-*` tokens in `src/theme.css`; the
 registry does not ship them.
 
-Theme state comes from `useNebariTheme` (`src/hooks/use-nebari-theme.ts`), which
-mirrors one preference onto both theming systems — Nebari's `.dark` /
-`[data-theme]` and PatternFly's `.pf-v5-theme-dark`. It must be mounted **once
-per document**, so a console calls it in its header and passes `themeMode` down.
+Theme state comes from `useNebariTheme` (`src/hooks/use-nebari-theme.ts`). The
+`.dark` class has exactly one owner — `useThemePreference`, the registry hook —
+and `useNebariTheme` only mirrors the resolved state onto PatternFly's
+`.pf-v5-theme-dark` plus `[data-theme]` and `color-scheme`. It used to toggle
+`.dark` as well, which worked only because of hook declaration order. It must be
+mounted **once per document**, so a console calls it in its header and passes
+`themeMode` down.
+
+A realm with Dark Mode switched off (Realm settings → Themes) does not mount the
+hook at all: the header renders a static light theme, leaving `colorScheme.ts` —
+which runs before React and is paired with a `public/keycloak-theme/*/early-color-scheme.js`
+that reads the same storage key before first paint — the single owner of the
+forced-light state.
 
 ### Known gaps
 

@@ -13,9 +13,14 @@
 .keycloak__page_nav__shell {
   --pf-v5-c-page__sidebar--Transition: all 100ms var(--ease-standard);
   --pf-v5-c-page__sidebar--Width: 16rem;
+  /* PatternFly paints the sidebar with `background-color:
+     var(--pf-v5-c-page__sidebar--BackgroundColor)`, so setting that variable is
+     the supported override and lands at the same specificity as the other three
+     above. The previous `background: var(--sidebar) !important` was fighting
+     PatternFly's own declaration from outside its variable system. */
+  --pf-v5-c-page__sidebar--BackgroundColor: var(--sidebar);
   overflow: hidden;
   border-right: 1px solid var(--sidebar-border);
-  background: var(--sidebar) !important;
   color: var(--sidebar-foreground);
   box-shadow: none;
 }

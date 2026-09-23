@@ -488,17 +488,24 @@ samp {
     color: var(--text-primary);
 }
 
-/* Link buttons — prevent underline override */
+/* Link buttons keep button semantics, not link semantics.
+ *
+ * What they have to beat is the login-wrapper anchor rule further down, whose
+ * `:hover` sets `text-decoration: underline`. That rule is deliberately
+ * specificity-free — `:where(.nebari-login-wrapper) a:where(:not([data-slot]))`
+ * scores (0,0,1) — while these selectors score (0,1,1), so plain specificity
+ * settles it in source-order-independent fashion. `!important` was belt and
+ * braces and made the next override need `!important` too. */
 a.nebari-button,
 a.nebari-button-primary,
 a.nebari-button-secondary {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 a.nebari-button:hover,
 a.nebari-button-primary:hover,
 a.nebari-button-secondary:hover {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 /* Full-width button modifier */
@@ -551,15 +558,21 @@ a.nebari-button-secondary:hover {
  * `:not([data-slot])` excludes design-system components for the same reason
  * inside the login pages: a `Button` rendered as an `<a>` (a "back to
  * application" link, say) would otherwise take this colour instead of its own
- * `text-primary-foreground`, and its label would disappear into the fill. */
-:where(.nebari-login-wrapper) a:not([data-slot]) {
+ * `text-primary-foreground`, and its label would disappear into the fill.
+ *
+ * It is wrapped in `:where()` so it contributes no specificity. A bare
+ * `:not([data-slot])` counts as an attribute selector, which pushed this rule to
+ * (0,1,1) and let it beat single-class rules on plain anchors — the social
+ * sign-in buttons turned purple. `:where()` keeps the exclusion and puts the
+ * rule back at (0,0,1), below `.nebari-social-button` and friends. */
+:where(.nebari-login-wrapper) a:where(:not([data-slot])) {
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.15s;
 }
 
-:where(.nebari-login-wrapper) a:not([data-slot]):hover {
+:where(.nebari-login-wrapper) a:where(:not([data-slot])):hover {
     color: var(--accent-dark);
     text-decoration: underline;
 }
@@ -800,7 +813,9 @@ textarea { font-family: var(--font-sans); }
  * of form ids, with the pages not on it falling back to per-group margins — the
  * reason field spacing differed between, say, sign-in and register. Every login
  * page renders inside `.nebari-login-wrapper`, so the gap is stated once and the
- * `Field` components stack against it. */
+ * `Field` components stack against it. The update-profile visual baseline is
+ * intentionally 80px taller as a result: its four previously collapsed
+ * inter-field gaps and action gap now use this same 20px rhythm. */
 .nebari-login-wrapper form { display: flex; flex-direction: column; gap: 20px; }
 
 .nebari-form-group,
@@ -971,13 +986,19 @@ textarea { font-family: var(--font-sans); }
     color: #262628;
 }
 
-/* Keep link-style primary buttons legible in every interaction state. */
+/* Keep link-style primary buttons legible in every interaction state.
+ *
+ * Two classes plus an element — (0,2,1) — which already outranks both the
+ * browser's `a:visited` default and the (0,0,1) login-wrapper anchor rule, so no
+ * `!important` is needed. It mattered that this one dropped it: while it was
+ * important, the dark-theme override below had to be important purely to beat
+ * it, and the two were an arms race rather than a cascade. */
 a.nebari-button.nebari-button-primary,
 a.nebari-button.nebari-button-primary:hover,
 a.nebari-button.nebari-button-primary:focus,
 a.nebari-button.nebari-button-primary:active,
 a.nebari-button.nebari-button-primary:visited {
-    color: #fff !important;
+    color: #fff;
 }
 
 /* Figma: NIC Landing Page / Login (Dark), node 366:1291.
@@ -1064,7 +1085,7 @@ a.nebari-button.nebari-button-primary:visited {
 [data-theme="dark"] a.nebari-button.nebari-button-primary:hover,
 [data-theme="dark"] a.nebari-button.nebari-button-primary:focus,
 [data-theme="dark"] a.nebari-button.nebari-button-primary:active,
-[data-theme="dark"] a.nebari-button.nebari-button-primary:visited { color: #111114 !important; }
+[data-theme="dark"] a.nebari-button.nebari-button-primary:visited { color: #111114; }
 
 [data-theme="dark"] .nebari-button-secondary,
 [data-theme="dark"] .nebari-social-button {

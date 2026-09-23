@@ -5,10 +5,6 @@
  * $ npx keycloakify own --path "shared/keycloak-ui-shared/controls/table/PaginatingTableToolbar.tsx" --revert
  */
 
-/* eslint-disable */
-
-// @ts-nocheck
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon, XIcon } from "lucide-react";

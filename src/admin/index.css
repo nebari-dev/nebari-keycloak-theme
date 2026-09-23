@@ -258,10 +258,55 @@ a:not([data-slot]):hover {
  * Icons inside PatternFly therefore go back to being inline boxes. This is safe
  * for the design system: its components are flex containers, which blockify
  * their children whatever `display` says. The spinner is excluded — it is a
- * block-level svg by design. */
-:where([class*="pf-v5-c-"]) svg:not(.pf-v5-c-spinner) {
-  display: inline-block;
-  vertical-align: middle;
+ * block-level svg by design.
+ *
+ * The `@layer components` wrapper is load-bearing. This file is otherwise
+ * unlayered, and unlayered CSS outranks *every* named layer no matter how weak
+ * its selector — so this rule was also beating Tailwind's `@layer utilities`.
+ * `Input` hides its invalid-state `triangle-alert` with `hidden`, and every text
+ * field in the console sits inside a `.pf-v5-c-form__group`, so `display:
+ * inline-block` won and a red error icon sat permanently on valid fields.
+ * Declaring the rule in `components` keeps it above `patternfly` and above
+ * Tailwind's preflight in `base` — the two things it needs to beat — while
+ * letting a design-system component's own utilities win. */
+@layer components {
+  :where([class*="pf-v5-c-"]) svg:not(.pf-v5-c-spinner) {
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+/* Dashboard hero mark
+ *
+ * The same Tailwind-preflight blockification, one element over. PatternFly's
+ * `EmptyState` centres its children with `text-align: center`, which does
+ * nothing to a block box — and preflight makes `img` block — so the landing-page
+ * mark sat flush left while the headings beneath it were centred. Auto inline
+ * margins centre it whichever `display` it ends up with.
+ *
+ * The artwork itself is swapped by owning the asset, `admin/assets/icon.svg` —
+ * relinquish with `npx keycloakify own --path "admin/assets/icon.svg" --revert`.
+ * Upstream's `Dashboard.tsx` stays vendored: it renders the mark as `<Brand
+ * src={iconSvgUrl}>`, and an SVG never gains upstream behaviour, whereas
+ * Dashboard.tsx changes whenever Keycloak touches the welcome tab. Claiming the
+ * component would buy the same pixels for a real merge cost. (The asset carries
+ * no comment of its own because an XML comment cannot contain `--`, which the
+ * revert command needs.)
+ *
+ * The mark is the nine coloured paths of the Nebari lockup with the black
+ * wordmark dropped; that glyph is byte-identical in the light and dark lockups,
+ * so it needs no theme variant, and the wordmark would only repeat the realm
+ * heading directly beneath it.
+ *
+ * `max-width` is restated because the vendored `dashboard.css` sizes the icon
+ * for Keycloak's hexagon; the Nebari mark is square, so it needs less width to
+ * read at the same visual weight. The two-class selector wins over that file
+ * deterministically — both stylesheets are unlayered, so equal specificity would
+ * leave it to load order. */
+.pf-v5-c-empty-state .keycloak__dashboard_icon {
+  display: block;
+  margin-inline: auto;
+  max-width: 96px;
 }
 
 /* --------------------------------------------------------------------------

@@ -20,39 +20,30 @@ const THEME_STORAGE_KEY = "nebari-admin-theme";
  * `useThemePreference` must be mounted once per document — several instances
  * would compete over the `<html>` class — so a console calls this hook in its
  * header and passes `themeMode` / `setThemeMode` down to whatever renders the
- * theme picker.
+ * theme picker. A realm with Dark Mode disabled does not mount this hook at all;
+ * its `colorScheme.ts` manager owns the forced-light state instead.
  */
-type UseNebariThemeOptions = {
-    /**
-     * `false` when the realm has Dark Mode switched off (Realm settings →
-     * Themes). `colorScheme.ts` forces light for that case before hydration, and
-     * without this flag the hook's effect would immediately re-apply the user's
-     * stored preference and undo it.
-     */
-    allowDark?: boolean;
-};
-
-export function useNebariTheme({ allowDark = true }: UseNebariThemeOptions = {}) {
+export function useNebariTheme() {
     const { themeMode, isDarkMode, setThemeMode } = useThemePreference({
         storageKey: THEME_STORAGE_KEY
     });
 
-    const resolvedIsDark = allowDark && isDarkMode;
-
+    /* `useThemePreference` is the sole owner of Nebari's `.dark` class. This
+       effect only mirrors the resolved state to PatternFly and to the document
+       metadata used by the console styles, so correctness no longer depends on
+       two effects running in declaration order. */
     useEffect(() => {
         const root = document.documentElement;
-        root.classList.toggle("pf-v5-theme-dark", resolvedIsDark);
-        root.classList.toggle("dark", resolvedIsDark);
-        root.dataset.theme = resolvedIsDark ? "dark" : "light";
-        root.style.colorScheme = resolvedIsDark ? "dark" : "light";
-    }, [resolvedIsDark]);
+        root.classList.toggle("pf-v5-theme-dark", isDarkMode);
+        root.dataset.theme = isDarkMode ? "dark" : "light";
+        root.style.colorScheme = isDarkMode ? "dark" : "light";
+    }, [isDarkMode]);
 
     return {
-        themeMode: allowDark ? themeMode : ("light" as ThemeMode),
-        isDarkMode: resolvedIsDark,
+        themeMode,
+        isDarkMode,
         setThemeMode,
-        /** Whether the theme can be changed at all; drives the picker's presence. */
-        canChangeTheme: allowDark
+        canChangeTheme: true
     };
 }
 
