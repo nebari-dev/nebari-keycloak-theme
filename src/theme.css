@@ -1234,11 +1234,15 @@ html[data-kc-theme="openteams"]:not([data-kc-theme-type="account"]) {
     color-scheme: dark;
     --font-sans: "Inter Tight Variable", "Inter Tight", sans-serif;
     --Font-Sans: var(--font-sans);
-    --background: #000f3a;
+    --background: #022791;
     --foreground: #ffffff;
-    --card: rgba(2, 39, 145, .42);
+    /* Surfaces are white scrims over the ground, the same material the login
+       card is made of, rather than a second blue mixed by hand. `--popover` has
+       to be opaque because dropdowns overlay page content, so it carries the
+       composite of a .14 scrim over #022791 rather than the scrim itself. */
+    --card: rgba(255, 255, 255, .10);
     --card-foreground: #ffffff;
-    --popover: #00184f;
+    --popover: #2545a0;
     --popover-foreground: #ffffff;
     --primary: #4d75fe;
     --primary-foreground: #ffffff;
@@ -1256,9 +1260,9 @@ html[data-kc-theme="openteams"]:not([data-kc-theme-type="account"]) {
     --input: rgba(255, 255, 255, .34);
     --border-strong: rgba(255, 255, 255, .55);
     --ring: #4d75fe;
-    --bg-primary: #000f3a;
-    --bg-secondary: #00184f;
-    --bg-elevated: rgba(2, 39, 145, .55);
+    --bg-primary: #022791;
+    --bg-secondary: #2545a0;
+    --bg-elevated: rgba(255, 255, 255, .14);
     --bg-hover: rgba(77, 117, 254, .18);
     --text-primary: #ffffff;
     --text-secondary: #dce4ff;
@@ -1271,19 +1275,22 @@ html[data-kc-theme="openteams"]:not([data-kc-theme-type="account"]) {
     --nebari-purple-dark: #6487ff;
     --nebari-purple-light: rgba(77, 117, 254, .15);
     --nebari-red: #ff8a69;
-    --login-backdrop: #000f3a;
+    --login-backdrop: #022791;
 
     /* The Admin and Account console chrome reads its own token set, separate
        from the palette above. Without these the masthead and sidebar keep the
        light `:root` values while everything else turns navy — which is what
        made the sidebar white-on-white. Values mirror the palette: the deep-blue
        surface for chrome, electric blue for selection, coral for sign-out. */
-    --header-background: #00184f;
+    /* #113498 is a .06 white scrim over #022791, resolved to a solid. Solid and
+       not the scrim itself: the masthead and sidebar are fixed chrome, and a
+       translucent one would show whatever scrolls behind it. */
+    --header-background: #113498;
     --header-border: rgba(255, 255, 255, .24);
     --header-foreground: #ffffff;
     --header-action-hover: rgba(77, 117, 254, .18);
     --sign-out-foreground: #ff8a69;
-    --sidebar: #00184f;
+    --sidebar: #113498;
     --sidebar-foreground: #ffffff;
     --sidebar-primary: #4d75fe;
     --sidebar-primary-foreground: #ffffff;
@@ -1302,95 +1309,181 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] textarea {
 }
 
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] body {
-    background: #000f3a;
+    background: #022791;
     color: #ffffff;
 }
 
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper {
     padding: 32px;
-    background-color: #000f3a;
+    background-color: #022791;
     background-image: none;
 }
 
-/* The landing page's hero is a flat midnight ground lit from one side by a
- * single soft blue bloom, and it does not move. This is that: one off-centre
- * glow, no drift animation, so the page reads as the same surface. */
-html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper::before {
-    top: 50%;
-    left: 50%;
-    width: 140vmax;
-    height: 140vmax;
-    margin: -70vmax 0 0 -70vmax;
-    background-image:
-        radial-gradient(46vmax 36vmax at 70% 38%, rgba(2, 39, 145, .5) 0%, rgba(2, 39, 145, .16) 58%, transparent 100%),
-        radial-gradient(30vmax 24vmax at 28% 76%, rgba(77, 117, 254, .08) 0%, transparent 100%);
-    animation: none;
-}
-
+/* One flat ground, nothing painted on it. The card is the only figure on the
+ * page, and it separates from the ground by being a lighter translucent white
+ * rather than by sitting in a pool of light — so the bloom the Nebari variant
+ * inherits, and the faint grid over it, are both switched off here. Both are
+ * `::before`/`::after` on the shared wrapper, so they have to be suppressed
+ * rather than simply not declared. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper::before,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    opacity: .16;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: linear-gradient(to bottom, transparent, #000 24%, #000 76%, transparent);
+    content: none;
 }
 
-/* The landing page states a panel plainly: a barely-lighter navy fill, one hairline
- * blue rule, and a small radius. Deliberately not a glass card — no gradient border,
- * no blur — because nothing on openteams.com is built that way. */
+/* A white scrim over the blue ground rather than a fill of its own: #ffffff24
+ * is the design's value, and because it is an alpha the card stays a lightened
+ * version of whatever is behind it instead of a colour that has to be kept in
+ * step with the ground by hand.
+ *
+ * `backdrop-filter` is specified at 24px and set here, but note it has nothing
+ * to do while the ground is flat — there is no detail behind the card to
+ * soften. It earns its keep only if something is ever painted back there.
+ * `-webkit-` is still required for Safari.
+ *
+ * The 24px padding and the 24px `gap` between the card's rows are the same
+ * step, so the text block is inset by exactly the distance that separates its
+ * rows. `Template.tsx` sets Tailwind's `gap-0 py-0` on this element; these
+ * rules are unlayered and so outrank both utilities. */
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-card {
-    width: min(440px, 100%);
-    padding: 38px;
+    width: min(480px, 100%);
+    padding: 24px;
+    gap: 24px;
     overflow: visible;
-    background: rgba(2, 39, 145, .22);
-    border: 1px solid rgba(77, 117, 254, .38);
-    border-radius: 8px;
-    box-shadow: 0 32px 64px rgba(0, 5, 20, .38);
+    background: #ffffff24;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 16px;
+    box-shadow: none;
 }
 
-html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-logo-header {
-    margin-bottom: 28px;
-}
-
-/* The official horizontal wordmark, sized to the ~177x34 it occupies in the
- * site header. Its viewBox is cropped to the artwork, so height alone drives
- * the width and there is no invisible padding to account for. */
-.openteams-logo {
-    display: block;
-    width: auto;
-    height: 34px;
-}
-
+/* The per-row margins the Nebari variant uses are dropped: with the card now on
+ * a `gap`, each one would stack on top of it and the rhythm would drift back
+ * out of the 24px step. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-logo-header,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-header {
-    margin-bottom: 26px;
+    margin-bottom: 0;
 }
 
-/* Landing-page headings are Inter Tight 600 pulled in tight, not 700. */
-html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-header .nebari-title {
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-section {
+    margin-top: 0;
+}
+
+/* The Collab lockup: the shipped symbol, then the name as text.
+ *
+ * The symbol's source is square with the artwork bled to its edges, so the box
+ * is square too and `height` alone sizes it. The wordmark is Inter Tight 600 to
+ * match the headings, at a size and tracking chosen so its cap height lines up
+ * with the symbol rather than the two being set to the same nominal px.
+ *
+ * `align-items: center` is optical, not geometric: the symbol's mass sits below
+ * its own centre, so centring the boxes is what makes the pair look level. */
+.collab-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* The symbol arrives upside down and infinitely small, then unwinds to upright
+ * at full size. CSS interpolates `rotate(180deg)` down to `rotate(0deg)` through
+ * decreasing angles, and decreasing is anticlockwise — writing the start as
+ * -180deg would spin it the other way for an identical starting pose.
+ *
+ * It runs once, on mount, because that is all a CSS animation does: there is no
+ * loop, no hover trigger, and nothing re-triggers it while the page is up. Each
+ * login page is its own document load, so it plays as the page appears and not
+ * again. The `both` fill keeps the first frame painted during the delay instead
+ * of flashing the symbol upright before the animation takes hold. */
+@keyframes collab-logo-intro {
+    from {
+        opacity: 0;
+        transform: rotate(180deg) scale(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+/* Both numbers here are measured off the design rather than picked, and both
+ * are expressed against the card: the symbol is 11.3% of its width and the
+ * wordmark's cap height 4.85%. At the 480px card that is 54px and a 32px font
+ * (this face puts its cap at 0.731 of the font size). They were 48px and 26px,
+ * set when the card was 440px; widening the card left them reading small
+ * against it, and this puts them back on the ratio. */
+.collab-logo-symbol {
+    display: block;
+    width: 54px;
+    height: 54px;
+    animation: collab-logo-intro .85s cubic-bezier(.16, .84, .32, 1) .06s both;
+}
+
+/* The wordmark does not animate: it is painted from the first frame and stays
+ * put while the symbol unwinds into place beside it. Nothing reflows as the
+ * symbol grows, because `scale` is a transform — its 48px box is already laid
+ * out at full size, so the name never shifts. */
+.collab-logo-wordmark {
     color: #ffffff;
     font-family: var(--font-sans);
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 600;
-    line-height: 1.15;
+    line-height: 1;
     letter-spacing: -.4px;
 }
 
-/* The site runs a blue-to-coral gradient through the second line of every
- * headline. A login title is one line, so the gradient is carried by the rule
- * beneath it instead — square-ended, like the coral dash that marks the site's
- * eyebrow labels. */
-html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-header .nebari-title::after {
-    content: "";
-    display: block;
-    width: 56px;
-    height: 2px;
-    margin-top: 14px;
-    background: linear-gradient(90deg, #4d75fe 0%, #ff8a69 100%);
+@media (prefers-reduced-motion: reduce) {
+    .collab-logo-symbol {
+        animation: none;
+    }
+}
+
+/* The lockup again in the Admin Console masthead, which is 56px tall and already
+   carries a nav label and a profile menu — so it is sized to the chrome rather
+   than to the login card, and it does not spin. An entrance animation belongs on
+   a page someone arrives at, not on the frame of a tool they work inside. */
+.collab-logo--masthead {
+    gap: 8px;
+}
+
+.collab-logo--masthead .collab-logo-symbol {
+    width: 32px;
+    height: 32px;
+    animation: none;
+}
+
+.collab-logo--masthead .collab-logo-wordmark {
+    font-size: 19px;
+}
+
+/* The Admin Console dashboard's hero mark.
+ *
+ * Upstream's `Dashboard.tsx` is vendored and renders `<Brand src={iconSvgUrl}>`
+ * from `admin/assets/icon.svg` — one file for every theme, because the bundle is
+ * compiled once and only the packaging is per-theme. Left alone, a Collab-branded
+ * console greets the user with the Nebari mark. `content` on a replaced element
+ * swaps the rendered image without claiming the component, and `--brand-symbol`
+ * comes from `src/main.tsx`, so the path still lives only in `branding.ts`.
+ *
+ * The symbol is square where Nebari's mark is wide, so the width from
+ * `src/admin/index.css` is restated to keep the same visual weight. */
+html[data-kc-theme="openteams"][data-kc-theme-type="admin"] .keycloak__dashboard_icon {
+    content: var(--brand-symbol);
+    width: 72px;
+    max-width: 72px;
+    height: auto;
+}
+
+/* Landing-page headings are Inter Tight 600 pulled in tight, not 700. 21px is
+ * measured: the design's title puts ink 4.08% of the card's width tall, and at
+ * a 480px card that is what 21px renders. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-header .nebari-title {
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -.4px;
 }
 
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-subtitle,
@@ -1411,7 +1504,7 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-label-wrappe
 }
 
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-wrapper form {
-    gap: 22px;
+    gap: 24px;
 }
 
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-input,
@@ -1426,9 +1519,9 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] textarea {
     padding: 11px 16px;
     /* Square-ish, to sit with the panel rather than echo the pill buttons —
      * on the site only calls to action are pill-shaped. */
-    border: 1px solid rgba(77, 117, 254, .42);
-    border-radius: 6px;
-    background: rgba(0, 15, 58, .55);
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .10);
     color: #ffffff;
     font-family: var(--font-sans);
     font-size: 15px;
@@ -1442,14 +1535,16 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] input::placeholder {
 
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="input"]:hover,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-input:hover {
-    border-color: rgba(77, 117, 254, .75);
+    border-color: rgba(255, 255, 255, .34);
+    background: rgba(255, 255, 255, .14);
 }
 
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="input"]:focus,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-input:focus {
     border-width: 1px;
     border-color: #4d75fe;
-    box-shadow: 0 0 0 3px rgba(77, 117, 254, .22);
+    background: rgba(255, 255, 255, .14);
+    box-shadow: 0 0 0 3px rgba(77, 117, 254, .3);
 }
 
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="input-end-adornment"] [data-slot="button"] {
@@ -1481,16 +1576,19 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] #kc-login,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-primary,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] button[type="submit"],
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] input[type="submit"] {
-    /* The site's call to action: a flat pill in Inter Tight 500 at 16/0.3px.
-     * No lift or glow — every button on openteams.com is flat. */
-    min-height: 48px;
-    padding: 13px 30px;
-    border: 1px solid #4d75fe;
-    border-radius: 999px;
-    background: #4d75fe;
+    /* Inter Tight 500 at 16/0.3px, flat — no lift or glow, 6px radius measured
+     * off the design. At rest this is the palette's deep blue, the same value
+     * as the page ground, so the button reads as a window back through the card
+     * rather than as a slab sitting on it. That leaves the darker end of the
+     * palette free for the hover state, which is where the weight belongs. */
+    min-height: 44px;
+    padding: 11px 30px;
+    border: 1px solid #022791;
+    border-radius: 6px;
+    background: #022791;
     color: #ffffff;
     font-family: var(--font-sans);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     letter-spacing: .3px;
     line-height: 22px;
@@ -1501,18 +1599,86 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] #kc-login:hover,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-primary:hover,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] button[type="submit"]:hover,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] input[type="submit"]:hover {
-    border-color: #6c8cff;
-    background: #6c8cff;
+    border-color: #00040f;
+    background: #00040f;
     color: #ffffff;
     text-decoration: none;
+}
+
+/* The arrow is a pseudo-element, so it costs no markup and no change to the
+ * shared Template. The button is already `inline-flex` with a `gap-2`, which
+ * spaces the arrow from the label for free — but that gap applies even at zero
+ * width, so at rest a matching negative margin cancels it and the label stays
+ * centred. On hover both relax together and the label slides left as the arrow
+ * arrives, which is what makes it read as one movement rather than two.
+ *
+ * `input[type="submit"]` is deliberately absent below: it is a replaced element
+ * and cannot carry `::after`. Every page here renders a real `<button>`; the
+ * rule above keeps the input form painted to match, it just gets no arrow. */
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] #kc-login::after,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-primary::after,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] button[type="submit"]::after {
+    /* A drawn arrow, not the "\2192" glyph. That glyph puts only 10x5px of ink on
+     * screen at this font size, and scaling it up to read at all stretches it
+     * into a hairline with a pinprick head, because it is cut to sit in a line
+     * of 16px text. An SVG is sized and weighted independently: `--arrow-w` is
+     * the one number to turn, and the stroke scales with it, so the line stays
+     * about as heavy as the label's stems whatever the size.
+     *
+     * The viewBox is square on purpose. The design's arrow is as tall as it is
+     * wide — a short shaft behind a full-height chevron, not a long rule with a
+     * tip on it — and it measures ~12x12 against an 11px cap height, which is
+     * what an 18px box with this path puts on screen. */
+    --arrow-w: 18px;
+
+    content: "";
+    display: block;
+    width: 0;
+    height: var(--arrow-w);
+    margin-left: -8px;
+    overflow: hidden;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") left center / var(--arrow-w) auto no-repeat;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition:
+        width .2s cubic-bezier(.2, .7, .3, 1),
+        margin-left .2s cubic-bezier(.2, .7, .3, 1),
+        opacity .16s ease-out,
+        transform .2s cubic-bezier(.2, .7, .3, 1);
+}
+
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] #kc-login:hover::after,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] #kc-login:focus-visible::after,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-primary:hover::after,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-primary:focus-visible::after,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] button[type="submit"]:hover::after,
+html[data-kc-theme="openteams"][data-kc-theme-type="login"] button[type="submit"]:focus-visible::after {
+    width: var(--arrow-w);
+    margin-left: 0;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Keyboard users get the arrow on focus as well as hover. Nobody gets it as a
+ * slide if they have asked for less motion — it simply is or is not there. */
+@media (prefers-reduced-motion: reduce) {
+    html[data-kc-theme="openteams"][data-kc-theme-type="login"] #kc-login::after,
+    html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-primary::after,
+    html[data-kc-theme="openteams"][data-kc-theme-type="login"] button[type="submit"]::after {
+        transition: none;
+    }
 }
 
 /* The hero's secondary call to action: an outlined pill on the midnight ground,
  * hairline white rather than blue, so it reads as the quieter of the two. */
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-button-secondary,
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-button {
-    min-height: 46px;
-    padding: 12px 24px;
+    /* Levelled with the primary button above. Left as they were they would have
+       been taller than the call to action once it came down to 44px. The
+       padding has to come down with the `min-height`: the content box plus
+       padding already exceeded it, so `min-height` alone changed nothing. */
+    min-height: 44px;
+    padding: 11px 24px;
     border: 1px solid rgba(255, 255, 255, .5);
     border-radius: 999px;
     background: transparent;
@@ -1531,10 +1697,6 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-butto
     text-decoration: none;
 }
 
-html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-section {
-    margin-top: 16px;
-}
-
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-providers {
     gap: 12px;
 }
@@ -1543,7 +1705,12 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-social-icon 
     filter: invert(1);
 }
 
+/* 14px rather than the shared 16px: measured off the design, where the control
+ * is 3.0% of the card's width against this theme's 3.6%. `size-4` is a Tailwind
+ * utility on the element, so both axes have to be restated to beat it. */
 html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="checkbox-control"] {
+    width: 14px;
+    height: 14px;
     border-color: rgba(255, 255, 255, .58);
 }
 
@@ -1557,11 +1724,16 @@ html[data-kc-theme="openteams"][data-kc-theme-type="login"] [data-slot="alert"] 
     }
 
     html[data-kc-theme="openteams"][data-kc-theme-type="login"] .nebari-login-card {
-        padding: 28px 24px;
+        padding: 24px;
     }
 
-    .openteams-logo {
-        height: 28px;
+    .collab-logo-symbol {
+        width: 47px;
+        height: 47px;
+    }
+
+    .collab-logo-wordmark {
+        font-size: 28px;
     }
 }
 

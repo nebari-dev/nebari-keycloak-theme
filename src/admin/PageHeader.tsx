@@ -26,7 +26,7 @@ import { useRealm } from "./context/realm-context/RealmContext";
 import { toDashboard } from "./dashboard/routes/Dashboard";
 import { usePreviewLogo } from "./realm-settings/themes/LogoContext";
 import { joinPath } from "./utils/joinPath";
-import { getBrandLogo } from "@/lib/branding";
+import { getActiveThemeName, getBrandLogo } from "@/lib/branding";
 import useToggle from "./utils/useToggle";
 
 function loggedInUserName(token: Record<string, unknown>, fallback: string) {
@@ -75,6 +75,8 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
     ? (customLogo.startsWith("/") ? joinPath(environment["resourceUrl"], customLogo) : customLogo)
     : defaultLogo;
 
+  const isCollabBrand = getActiveThemeName() === "openteams" && !customLogo;
+
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
   const username = loggedInUserName(token, t("unknownUser"));
@@ -94,7 +96,21 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
       </PageToggleButton>
 
       <MenuBarBrand href={logoUrl} aria-label={t("logo")}>
-        <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+        {/* Collab publishes no light-on-dark wordmark, so the masthead assembles
+            the lockup the way the login page does — symbol as an image, name as
+            text, one `role="img"` over the pair. A realm-configured logo wins
+            over it: that is someone deliberately overriding the branding, and it
+            arrives as a single image with no wordmark to pair. */}
+        {isCollabBrand ? (
+          <span className="collab-logo collab-logo--masthead" role="img" aria-label="Collab">
+            <img src={resolvedLogo} alt="" className="collab-logo-symbol" />
+            <span className="collab-logo-wordmark" aria-hidden="true">
+              Collab
+            </span>
+          </span>
+        ) : (
+          <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+        )}
       </MenuBarBrand>
 
       <MenuBarNav aria-label="Keycloak Admin Console">

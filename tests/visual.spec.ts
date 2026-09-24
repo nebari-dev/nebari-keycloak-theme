@@ -19,7 +19,7 @@ for (const preview of previews) {
         const theme = page.locator(".nebari-login-card");
         await expect(theme).toBeVisible();
         await expect(page.locator(".nebari-logo-light")).toHaveCount(1);
-        await expect(page.locator(".openteams-logo")).toHaveCount(0);
+        await expect(page.locator(".collab-logo")).toHaveCount(0);
         await expect(theme).toHaveScreenshot(`${preview}.png`, { animations: "disabled" });
     });
 }
@@ -34,7 +34,7 @@ for (const preview of previews) {
             "openteams"
         );
         await expect(page.locator(".nebari-login-card")).toBeVisible();
-        await expect(page.getByRole("img", { name: "OpenTeams" })).toBeVisible();
+        await expect(page.getByRole("img", { name: "Collab" })).toBeVisible();
         await expect(page.locator(".nebari-logo")).toHaveCount(0);
         expect(
             await page.evaluate(

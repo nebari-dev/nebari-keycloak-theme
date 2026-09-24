@@ -16,14 +16,19 @@ const themeLogos: Record<string, { light: string; dark: string }> = {
         light: "logo/nebari-logo-light.svg",
         dark: "logo/nebari-logo-dark.svg"
     },
-    // The OpenTeams wordmark is white-only, and the theme pins itself to a
-    // midnight ground in every console (see the `color-scheme: dark` in
-    // src/theme.css), so there is no light-background variant to switch to.
-    // Pointing both entries at it also keeps the mark visible if a console's
-    // JS dark-mode flag ever disagrees with what the CSS actually painted.
+    // The `openteams` theme brands as OpenTeams Collab, and the symbol is the
+    // only part of that mark available as an asset: Collab ships its wordmark
+    // solely as navy artwork for light grounds. Rather than flatten the shipped
+    // lockup to monochrome — what the Collab desktop app does on dark surfaces
+    // — the login page sets "Collab" as live text beside this symbol, so the
+    // symbol keeps its four brand colours. See `Template.tsx`.
+    //
+    // Those colours read on any ground, so both entries point at the one file.
+    // That also keeps the mark visible if a console's JS dark-mode flag ever
+    // disagrees with what the CSS actually painted.
     openteams: {
-        light: "logo/openteams-logo.svg",
-        dark: "logo/openteams-logo.svg"
+        light: "logo/collab-symbol.png",
+        dark: "logo/collab-symbol.png"
     }
 };
 

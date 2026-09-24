@@ -50,7 +50,17 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
             <Card className="nebari-login-card gap-0 py-0">
                 <div className="nebari-logo-header">
                     {isOpenTeamsTheme ? (
-                        <img src={brandLogos.dark} alt="OpenTeams" className="openteams-logo" />
+                        /* Collab publishes no light-on-dark wordmark, so the lockup is
+                           assembled here: the full-colour symbol as an image, the name
+                           as text. One `role="img"` over the pair gives it a single
+                           accessible name — otherwise a screen reader announces the
+                           symbol and the word separately, as two things. */
+                        <div className="collab-logo" role="img" aria-label="Collab">
+                            <img src={brandLogos.dark} alt="" className="collab-logo-symbol" />
+                            <span className="collab-logo-wordmark" aria-hidden="true">
+                                Collab
+                            </span>
+                        </div>
                     ) : (
                         <>
                             <img
