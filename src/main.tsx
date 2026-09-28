@@ -1,7 +1,7 @@
 // src/main.tsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { getBrandLogos } from "@/lib/branding";
+import { getBrandLogos, getConfiguredBrand, isBrandName } from "@/lib/branding";
 import type { KcContext } from "./kc.gen";
 import { KcPage } from "./kc.gen";
 import { getKcContextMockForPreview } from "./login/KcContext";
@@ -37,29 +37,35 @@ if (document.documentElement.dataset.theme === undefined) {
 // only when running the standalone Vite app, including visual tests.
 const searchParams = new URLSearchParams(window.location.search);
 const injectedKcContext = window.kcContext as KcContext | undefined;
-const previewThemeName = searchParams.get("theme");
 const kcContext: KcContext =
     injectedKcContext ?? {
         ...getKcContextMockForPreview(searchParams.get("preview")),
-        themeName: previewThemeName ?? "openteams"
+        themeName: "nebari"
     };
 
-document.documentElement.dataset.kcTheme = kcContext.themeName;
+/* Which mark the pages carry. `VITE_BRAND` decides it at build time; the
+   `?brand=` query is a dev-preview override so either mark can be looked at
+   without rebuilding, and Keycloak never sends that query string. Stamping it on
+   <html> is what lets CSS and the console mastheads — which have no build-time
+   import of their own — see the choice. See `src/lib/branding.ts`. */
+const previewBrand = injectedKcContext === undefined ? searchParams.get("brand") : null;
+document.documentElement.dataset.brand = isBrandName(previewBrand)
+    ? previewBrand
+    : getConfiguredBrand();
 /* The Admin Console's dashboard renders its hero mark from `admin/assets/icon.svg`,
    imported as a module URL inside upstream's vendored `Dashboard.tsx`. One `vite
-   build` serves every theme (see `scripts/build-keycloak-themes.mjs`), so that
-   import resolves to the same file whichever theme is packaged, and the mark
-   cannot be swapped at build time. Publishing the active theme's symbol as a
-   custom property lets CSS substitute it per theme, and keeps `branding.ts` the
-   only place a logo path is written down. */
+   build` serves every brand, so that import resolves to the same file whichever
+   brand is packaged, and the mark cannot be swapped by the bundler. Publishing
+   the active brand's symbol as a custom property lets CSS substitute it, and
+   keeps `branding.ts` the only place a logo path is written down. */
 document.documentElement.style.setProperty(
     "--brand-symbol",
-    `url("${getBrandLogos(kcContext.themeName).dark}")`
+    `url("${getBrandLogos().dark}")`
 );
-/* The theme *type* as well as its name. A theme's login styling has to be
-   scoped to the login pages: this attribute is set for every theme type, so
-   scoping on the name alone let the OpenTeams login card's input sizing,
-   fonts and tokens apply to the Admin and Account consoles too. */
+/* The theme type, so a rule can be scoped to one console. `data-brand` alone is
+   not enough — it is set for every theme type, because the login page and both
+   console mastheads all need to read it — and the Admin dashboard's hero-mark
+   substitution in `theme.css` must not leak onto the login page. */
 document.documentElement.dataset.kcThemeType = kcContext.themeType;
 
 createRoot(document.getElementById("root")!).render(

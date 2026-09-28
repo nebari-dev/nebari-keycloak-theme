@@ -37,6 +37,8 @@ coverage/
 .nyc_output/
 playwright-report/
 test-results/
+test-results-capture/
+theme-screenshots/
 
 # Temporary
 tmp/

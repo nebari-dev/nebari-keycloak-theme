@@ -1,13 +1,14 @@
-# Nebari and OpenTeams Keycloak Themes
+# Nebari Keycloak Theme
 
-Custom Keycloak themes for Nebari and OpenTeams using
-[Keycloakify](https://www.keycloakify.dev/). Both variants share the same page
-and Nebari design-system components while keeping their branding isolated.
+A custom Keycloak theme for Nebari using
+[Keycloakify](https://www.keycloakify.dev/), built from the Nebari design-system
+components. The OpenTeams Collab branding ships in the same theme behind a build
+flag — see [Branding](#branding).
 
 ## Features
 
 - ✨ Custom Nebari branding with color scheme
-- 🌐 OpenTeams variant with its navy, blue, coral, and amber palette
+- 🌐 OpenTeams Collab branding behind a one-variable build flag
 - 🔤 Self-hosted Geist and Inter Tight variable fonts
 - 🎨 Light and dark theme support
 - 📱 Fully responsive design
@@ -34,19 +35,18 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 to see the OpenTeams theme in your browser.
-The standalone development preview defaults to `openteams`; add
-`theme=nebari` to preview the original Nebari variant.
+Open http://localhost:5173 to see the theme in your browser.
 
 Any login page can be previewed standalone with the `preview` query parameter,
 which feeds a mock `kcContext` to the app — for example
 http://localhost:5173/?preview=register. The available names are listed in
 `getKcContextMockForPreview` in [src/login/KcContext.ts](src/login/KcContext.ts).
 
-Preview the OpenTeams variant by adding `theme=openteams`:
+Preview the OpenTeams Collab branding by adding `brand=openteams`, which needs
+no rebuild:
 
 ```text
-http://localhost:5173/?preview=login-providers&theme=openteams
+http://localhost:5173/?preview=login-providers&brand=openteams
 ```
 
 ## Visual Tests
@@ -73,9 +73,18 @@ docker run --rm -v "$PWD":/work -w /work --ipc=host \
   npm run test:screenshots:update
 ```
 
-Every CI run also uploads a `theme-screenshots` artifact with the screenshots
-that branch actually produced, so reviewers can see the theme without checking
-it out.
+Every pull request captures each login preview plus a full-page render. The
+brand flag gets an assertion rather than its own baselines: it swaps the mark and
+nothing else, so a second set of captures would only re-photograph the same
+layout with a different logo in it.
+
+Every CI run also uploads a `theme-screenshots` artifact containing fresh renders
+from that branch, including when baseline comparison fails. These captures go to
+`theme-screenshots/`, separately from the committed baselines and the
+`playwright-report` diff artifact. Open the PR's **Playwright screenshots** check,
+then download **theme-screenshots** from the run's artifacts to review the current
+login screens. Intentional design changes still require updated baselines to be
+committed; CI does not accept them automatically.
 
 Any login page can be previewed standalone with the `preview` query parameter,
 which feeds a mock `kcContext` to the app — for example
@@ -172,70 +181,84 @@ docker run --rm -v "$PWD":/work -w /work --ipc=host \
   npm run test:screenshots:update
 ```
 
-Every CI run also uploads a `theme-screenshots` artifact with the screenshots
-that branch actually produced, so reviewers can see the theme without checking
-it out.
+Every pull request captures each login preview plus a full-page render. The
+brand flag gets an assertion rather than its own baselines: it swaps the mark and
+nothing else, so a second set of captures would only re-photograph the same
+layout with a different logo in it.
+
+Every CI run also uploads a `theme-screenshots` artifact containing fresh renders
+from that branch, including when baseline comparison fails. These captures go to
+`theme-screenshots/`, separately from the committed baselines and the
+`playwright-report` diff artifact. Open the PR's **Playwright screenshots** check,
+then download **theme-screenshots** from the run's artifacts to review the current
+login screens. Intentional design changes still require updated baselines to be
+committed; CI does not accept them automatically.
 
 ## Building the Theme
 
 ```bash
-# Build every theme
+# Build the theme
 npm run build-keycloak-theme
 
-# Build one theme (repeatable, and accepts a comma-separated list)
-npm run build-keycloak-theme -- --theme openteams
-npm run build-keycloak-theme -- --theme nebari,openteams
+# Build the OpenTeams Collab-branded variant instead
+VITE_BRAND=openteams npm run build-keycloak-theme
 
 # What can I build?
 npm run build-keycloak-theme -- --list
 ```
 
-Note the `--` before the flags: without it npm keeps them for itself instead of
+Note the `--` before any flags: without it npm keeps them for itself instead of
 passing them to the script.
 
-**Every JAR contains exactly one theme.** A consumer installs only the theme they
-want, and never has to take the others along with it. The build asserts this on
-every run — it opens each JAR and fails if it finds more than one `theme/<name>/`
-directory, or if `META-INF/keycloak-themes.json` advertises more than one theme —
-so the guarantee cannot quietly regress.
+**Every JAR contains exactly one theme.** The build asserts this on every run —
+it opens each JAR and fails if it finds more than one `theme/<name>/` directory,
+or if `META-INF/keycloak-themes.json` advertises more than one theme — so the
+guarantee cannot quietly regress.
 
-A full build produces four JARs in `dist_keycloak/`, two per theme:
+A build produces two JARs in `dist_keycloak/`:
 
-| Theme | File | Target |
-| --- | --- | --- |
-| Nebari | `nebari-keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
-| Nebari | `nebari-keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
-| OpenTeams | `openteams-keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
-| OpenTeams | `openteams-keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
+| File | Target |
+| --- | --- |
+| `nebari-keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
+| `nebari-keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
 
-Building a subset rewrites only that theme's JARs; anything already in
-`dist_keycloak/` for the themes you did not select is left in place. If the build
-fails part way through, the directory is restored to what it was.
+If the build fails part way through, the directory is restored to what it was.
 
-### Adding a theme
+## Branding
 
-Add the name to [themes.json](themes.json) — `vite.config.ts` and the packaging
-script both read it, so there is no second list to keep in step. Then scope the
-new theme's styles under `html[data-kc-theme="<name>"]` in
-[src/theme.css](src/theme.css), and add an upload step for it in
-[publish-keycloak-image.yml](.github/workflows/publish-keycloak-image.yml) — that
-workflow still names each theme's release artifact explicitly.
+Which logo the pages carry is a build flag, not a theme. OpenTeams Collab and
+Nebari differed in nothing but the mark, and carrying a second theme for that —
+its own JAR, its own CSS scope, its own screenshot matrix — cost more than it was
+worth.
+
+```bash
+VITE_BRAND=openteams npm run build-keycloak-theme
+```
+
+Unset, or set to anything unrecognised, the build is Nebari-branded. The flag
+covers the login page, the Admin Console masthead and the Admin dashboard's hero
+mark. [src/lib/branding.ts](src/lib/branding.ts) is the only place a logo path is
+written down; add a brand by adding an entry there and a `data-brand` rule in
+[src/theme.css](src/theme.css) if the mark needs more than an `<img>`.
+
+The dev server additionally accepts `?brand=openteams` so either mark can be
+looked at without rebuilding. Keycloak never sends that query string, so it
+cannot change how a deployed theme renders.
 
 ## Releasing
 
 Pushing to `main` runs
 [publish-keycloak-image.yml](.github/workflows/publish-keycloak-image.yml), which
-builds all four theme-specific JARs and republishes the Nebari container image to
+builds both JARs and republishes the Nebari container image to
 `ghcr.io/<owner>/<repo>` tagged `latest`, `sha-<commit>` and the `version` from
 `package.json`.
 
-Every run also uploads two separate workflow artifacts — one for Nebari and one
-for OpenTeams — each containing its two Keycloak-compatible JARs. This
-makes both themes independently downloadable from every successful push to
-`main`, even when the package version has not changed.
+Every run also uploads a workflow artifact containing both Keycloak-compatible
+JARs, so the theme is downloadable from every successful push to `main`, even
+when the package version has not changed.
 
-It also cuts a GitHub release for `v<version>`. The only assets are the four
-theme-specific JARs. The screenshots are
+It also cuts a GitHub release for `v<version>`. The only assets are the two
+JARs. The screenshots are
 embedded in the release notes as links to this repository rather than attached,
 so the release page shows what the theme looks like without carrying the weight.
 A release is only created when `v<version>` does not already exist, so **bump
@@ -344,8 +367,6 @@ docker push your-registry/keycloak-nebari:latest
    - **Admin console theme**: `nebari`
    - **Account theme**: `nebari` (optional)
    - **Email theme**: `nebari` (optional)
-
-   For the OpenTeams-styled login, set **Login theme** to `openteams`.
 
 5. Click **Save**
 
@@ -563,8 +584,7 @@ forced-light state.
 
 ### Colors
 
-Edit the CSS variables in `src/theme.css`. The OpenTeams variant is scoped under
-`html[data-kc-theme="openteams"]`, so its changes do not affect Nebari.
+Edit the CSS variables in `src/theme.css`.
 
 ```css
 :root {

@@ -22,6 +22,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Keep local startup compatible with the persisted database migrations.
+        KEYCLOAK_VERSION: "26.7.1"
     container_name: keycloak-nebari
     command:
       - start-dev
