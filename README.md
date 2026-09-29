@@ -10,7 +10,7 @@ packaged in its own JAR and published as its own image — see
 
 - ✨ Custom Nebari branding with color scheme
 - 🌐 A separate OpenTeams Collab theme, `collab`
-- 🔤 Self-hosted Geist and Inter Tight variable fonts
+- 🔤 Self-hosted Geist, Inter Tight and IBM Plex Mono fonts
 - 🎨 Light and dark theme support
 - 📱 Fully responsive design
 - 🔐 Customized login, registration, and error pages
@@ -19,8 +19,10 @@ packaged in its own JAR and published as its own image — see
 
 ## Prerequisites
 
-- Node.js 18+ and npm
-- A running Keycloak instance (version 22+ recommended)
+- Node.js 20.19+ (or 22.12+) and npm — required by Vite 7
+- Java 17+ and Maven, to build the theme JARs (Keycloakify calls Maven)
+- Docker, to run the local Keycloak from `docker-compose.yml`
+- A Keycloak instance to deploy to (version 22 or newer)
 
 ## Installation
 
@@ -48,49 +50,6 @@ Preview the Collab theme by adding `theme=collab`:
 ```text
 http://localhost:5173/?preview=login-providers&theme=collab
 ```
-
-## Visual Tests
-
-The login pages are captured as screenshots and compared on every pull request.
-
-```bash
-# Compare the theme against the committed baselines
-npm run test:screenshots
-
-# Accept the current rendering as the new baselines
-npm run test:screenshots:update
-```
-
-Baselines live in `tests/screenshots/<platform>/<theme>/` because each OS rasterises
-fonts slightly differently. CI runs on Linux, so **regenerate baselines on Linux**
-— snapshots updated on macOS or Windows are written to a different directory and
-will not satisfy the check. If you are not on Linux, run the update inside the
-matching Playwright container:
-
-```bash
-docker run --rm -v "$PWD":/work -w /work --ipc=host \
-  mcr.microsoft.com/playwright:v1.62.1-noble \
-  npm run test:screenshots:update
-```
-
-Every pull request captures each login preview plus a full-page render for every
-theme, with the same assertions for each. Baselines are kept per theme, in
-`tests/screenshots/<platform>/nebari/` and `tests/screenshots/<platform>/collab/`,
-so a reviewer sees the Collab login pages next to the Nebari ones in the PR. The
-theme list lives at the top of [tests/visual.spec.ts](tests/visual.spec.ts).
-
-Every CI run also uploads a `theme-screenshots` artifact containing fresh renders
-from that branch, including when baseline comparison fails. These captures go to
-`theme-screenshots/`, separately from the committed baselines and the
-`playwright-report` diff artifact. Open the PR's **Playwright screenshots** check,
-then download **theme-screenshots** from the run's artifacts to review the current
-login screens. Intentional design changes still require updated baselines to be
-committed; CI does not accept them automatically.
-
-Any login page can be previewed standalone with the `preview` query parameter,
-which feeds a mock `kcContext` to the app — for example
-http://localhost:5173/?preview=register. The available names are listed in
-`getKcContextMockForPreview` in [src/login/KcContext.ts](src/login/KcContext.ts).
 
 ### Working on the Admin or Account console
 
@@ -135,8 +94,8 @@ that user is what renders the themed Admin Console with every section present.
 
 ### Upgrade guards
 
-`npm run check` runs as part of both `npm run typecheck` and `npm run build`, and
-covers the two ways this theme can break *silently* on a Keycloak bump — neither
+`npm run check` runs as part of `npm run build` (and so of
+`npm run build-keycloak-theme`), and covers the two ways this theme can break *silently* on a Keycloak bump — neither
 of which `tsc` can see:
 
 - **`check:page-nav-sync`** — the Admin navigation is the single owned routing
@@ -148,8 +107,8 @@ of which `tsc` can see:
   sites (which catches a section added with a computed path), and fails on a
   dropped section or on a destination not declared in the script's `NEBARI_ONLY`
   allowlist.
-- **`check:patternfly-version`** — around 400 selectors in this theme name
-  PatternFly's classes directly (`.pf-v5-c-table`, `--pf-v5-global--*`). When
+- **`check:patternfly-version`** — more than 600 references in this theme's
+  CSS name PatternFly's classes and variables directly (`.pf-v5-c-table`, `--pf-v5-global--*`). When
   Keycloak moves to PatternFly 6 those all become `pf-v6-*` and every selector
   stops matching, with no error anywhere. The check compares the *installed*
   PatternFly major against every `pf-vN-` reference in tracked files and fails on
@@ -287,100 +246,235 @@ every release; those cannot be turned off.
 
 ## Deployment
 
+Keycloak loads a theme from a JAR in its `providers/` directory. Every route
+below gets one of the JARs into that directory; after that, select the theme in
+the realm — see
+[Configuring Keycloak to Use the Theme](#configuring-keycloak-to-use-the-theme).
+
+Pick the JAR for your theme and Keycloak version:
+
+| Theme | Keycloak 26 and newer | Keycloak 22 to 25 |
+| --- | --- | --- |
+| Nebari | `nebari-keycloak-theme-for-kc-all-other-versions.jar` | `nebari-keycloak-theme-for-kc-22-to-25.jar` |
+| Collab | `collab-keycloak-theme-for-kc-all-other-versions.jar` | `collab-keycloak-theme-for-kc-22-to-25.jar` |
+
+Build them with `npm run build-keycloak-theme`, or download them from the
+[GitHub release](#releasing). The published images carry the Keycloak 26+ JAR
+for one theme each:
+
+| Theme | Image |
+| --- | --- |
+| Nebari | `ghcr.io/nebari-dev/nebari-keycloak-theme:<version>` |
+| Collab | `ghcr.io/nebari-dev/collab-keycloak-theme:<version>` |
+
+`<version>` is the `version` in `package.json`, for example `1.1.0`. Pin it
+rather than using `latest`, so a pod restart cannot change the theme under you.
+
+A ConfigMap cannot hold the theme: each JAR is about 12 MB, and a ConfigMap is
+capped at 1 MiB. For a plain Kubernetes Deployment, use an init container that
+copies the JAR out of the published image instead, as
+[k8s-deployment-example.yaml](k8s-deployment-example.yaml) does.
+
 ### Option 1: Manual Deployment
 
-1. Build the theme:
-   ```bash
-   npm run build-keycloak-theme
-   ```
+For Keycloak running directly on a host.
 
-2. Locate the generated JARs and choose the theme and Keycloak version you need:
+1. Copy the JAR into Keycloak's providers directory:
    ```bash
-   ls dist_keycloak/*.jar
-   ```
-
-3. Copy the JAR to your Keycloak deployment:
-   ```bash
-   # For standalone Keycloak
    cp dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar /path/to/keycloak/providers/
-
-   # For containerized Keycloak (Docker/Kubernetes)
-   kubectl cp dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar <keycloak-pod>:/opt/keycloak/providers/
    ```
 
-4. Restart Keycloak to load the theme:
+2. Rebuild and restart Keycloak:
    ```bash
-   # Standalone
+   /path/to/keycloak/bin/kc.sh build
    /path/to/keycloak/bin/kc.sh start
-
-   # Kubernetes
-   kubectl rollout restart deployment/keycloak
    ```
 
-### Option 2: Kubernetes with ConfigMap/Volume
+### Option 2: Kubernetes with `keycloakconfig.yml`
 
-1. Build the theme and extract contents:
-   ```bash
-   npm run build-keycloak-theme
-   mkdir -p theme-extracted
-   unzip dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar -d theme-extracted/
-   ```
+For the Nebari Keycloak chart (`keycloak-helm-test`), whose whole deployment is
+configured in `keycloakconfig.yml`. The theme needs two settings there: an image
+that contains the theme JAR, and the theme names for each realm.
 
-2. Create a ConfigMap:
-   ```bash
-   kubectl create configmap nebari-keycloak-theme \
-     --from-file=theme-extracted/theme/nebari/
-   ```
+```yaml
+keycloak:
+  # An image with the theme JAR in /opt/keycloak/providers/.
+  image:
+    repository: nebari-keycloak
+    tag: "26.5.2"
 
-3. Mount in Keycloak deployment:
-   ```yaml
-   spec:
-     containers:
-     - name: keycloak
-       volumeMounts:
-       - name: nebari-theme
-         mountPath: /opt/keycloak/themes/nebari
-     volumes:
-     - name: nebari-theme
-       configMap:
-         name: nebari-keycloak-theme
-   ```
-
-### Option 3: Build Custom Keycloak Image
-
-Create a `Dockerfile`:
-
-```dockerfile
-FROM quay.io/keycloak/keycloak:latest
-
-# Copy the theme JAR
-COPY dist_keycloak/nebari-keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/
-
-# Build the Keycloak image with the provider
-RUN /opt/keycloak/bin/kc.sh build
+  realm:
+    # Applies `themes` to realms that already exist, on every upgrade.
+    configureExisting: true
+    instances:
+      - name: nebari
+        themes:
+          login: nebari     # or collab
+          admin: nebari
+          account: nebari
 ```
 
-Build and push:
+- **The image** is built from that project's `image/Dockerfile`, with the JAR
+  from [Deployment](#deployment) copied into its `themes/` directory. The chart
+  starts Keycloak with `start --optimized` against PostgreSQL, so the image has
+  to be built for PostgreSQL. The published `ghcr.io/nebari-dev/*` images are
+  not; under `--optimized` they ignore `KC_DB=postgres`.
+- **`themes`** is what the chart's post-upgrade Job sets on each realm. A
+  realm's `import` JSON only applies when the realm does not exist yet, so its
+  `loginTheme`, `accountTheme` and `adminTheme` should match but cannot change
+  an existing realm.
+
+Apply it with `helm upgrade --install keycloak . -f keycloakconfig.yml`.
+
+### Option 3: Nebari
+
+Nebari deploys Keycloak with the `keycloakx` chart and passes
+`security.keycloak.overrides` from `nebari-config.yaml` to it as Helm values.
+Two details of Nebari's
+[own values](https://github.com/nebari-dev/nebari/blob/main/src/_nebari/stages/kubernetes_keycloak/template/modules/kubernetes/keycloak-helm/values.yaml)
+shape the override:
+
+- Nebari already mounts an `emptyDir` called `metrics-plugin` over
+  `/opt/keycloak/providers`, which would hide any JAR baked into a custom
+  Keycloak image. The theme is therefore copied into that same volume. Do not
+  set `overrides.image` to the theme image.
+- Helm replaces a string value wholesale, so overriding `extraInitContainers`
+  drops Nebari's metrics init container. Copy it back in unchanged, as below.
+
+Do not use `security.keycloak.themes` either; it is disabled on Keycloak 26.
+
+1. Create the `ghcr.io` pull secret in Nebari's namespace (`dev` by default):
+   ```bash
+   kubectl -n dev create secret docker-registry ghcr-creds \
+     --docker-server=ghcr.io \
+     --docker-username=<github-user> \
+     --docker-password=<token-with-read:packages>
+   ```
+
+2. Add the override to `nebari-config.yaml`. Keep Nebari's
+   `initialize-spi-metrics-jar` entry at the top of the list, copied unchanged
+   from its `values.yaml`, and keep its `extcrcreds` pull secret:
+   ```yaml
+   security:
+     keycloak:
+       overrides:
+         imagePullSecrets:
+           - name: extcrcreds
+           - name: ghcr-creds
+         extraInitContainers: |
+           # - name: initialize-spi-metrics-jar   <- Nebari's entry, unchanged
+           - name: install-keycloak-theme
+             # For Collab: ghcr.io/nebari-dev/collab-keycloak-theme:1.1.0
+             image: ghcr.io/nebari-dev/nebari-keycloak-theme:1.1.0
+             command: ["sh", "-c", "cp /opt/keycloak/providers/*.jar /data/"]
+             securityContext:
+               runAsUser: 0
+             volumeMounts:
+               - name: metrics-plugin
+                 mountPath: /data
+   ```
+
+3. Deploy:
+   ```bash
+   nebari deploy -c nebari-config.yaml
+   ```
+
+4. Check that both JARs are in place:
+   ```bash
+   kubectl -n dev exec keycloak-keycloakx-0 -c keycloak -- ls /opt/keycloak/providers
+   # keycloak-metrics-spi-7.0.0.jar
+   # nebari-keycloak-theme-for-kc-all-other-versions.jar
+   ```
+
+5. Select the theme in the `nebari` realm, and in `master` for the Admin
+   Console, as described in
+   [Configuring Keycloak to Use the Theme](#configuring-keycloak-to-use-the-theme).
+   Nebari's realm Terraform ignores the theme fields, so later
+   `nebari deploy` runs leave the choice alone.
+
+### Option 4: Build Custom Keycloak Image
+
+For Docker, or anything else that runs a single Keycloak image. The
+[Dockerfile](Dockerfile) in this repository does this, and is what the published
+images are built from:
+
 ```bash
-docker build -t your-registry/keycloak-nebari:latest .
+npm run build-keycloak-theme
+docker build \
+  --build-arg KEYCLOAK_VERSION=26.0 \
+  --build-arg THEME_JAR=nebari-keycloak-theme-for-kc-all-other-versions.jar \
+  -t your-registry/keycloak-nebari:latest .
 docker push your-registry/keycloak-nebari:latest
 ```
 
+The image's entrypoint is `kc.sh` with no arguments, so pass the command, for
+example `start`, when you run it. Don't use this image under Nebari; see
+[Option 3](#option-3-nebari).
+
 ## Configuring Keycloak to Use the Theme
 
-1. Login to Keycloak Admin Console
+Installing the JAR only makes the theme available. Each realm still chooses its
+own themes. The Admin Console is themed by the realm you log in to, which for
+the admin user is normally `master`.
 
-2. Navigate to your realm (e.g., `nebari`)
+The JAR provides a **login**, an **account** and an **admin** theme, named
+`nebari` or `collab`. It has no email theme, so leave **Email theme** on
+`keycloak`.
 
-3. Go to **Realm Settings** → **Themes**
+### From the Admin Console
 
-4. Set the following (or `collab` in each, for the Collab theme):
-   - **Login theme**: `nebari`
-   - **Admin console theme**: `nebari`
-   - **Account theme**: `nebari` (optional)
-   - **Email theme**: `nebari` (optional)
+1. Log in to the Admin Console as an administrator: `https://<keycloak-host>/admin/`,
+   or `https://<keycloak-host>/auth/admin/` under Nebari.
+2. Pick the realm to theme from the realm selector at the top left, for example
+   `nebari`.
+3. Go to **Realm settings** → **Themes**.
+4. Set **Login theme**, **Account theme** and **Admin console theme** to `nebari`,
+   or to `collab` for the Collab theme. If neither appears in the list, the JAR
+   was not loaded; see [Troubleshooting](#theme-not-appearing-in-keycloak).
+5. Click **Save**.
+6. To theme the Admin Console's own login page too, repeat steps 2–5 for the
+   `master` realm.
+7. Open the realm's account console, `https://<keycloak-host>/realms/<realm>/account`
+   (with the `/auth` prefix under Nebari), in a private window to see the
+   login page.
 
-5. Click **Save**
+### From the command line
+
+`kcadm.sh` ships in the Keycloak image. Open a shell in the Keycloak pod. On
+Nebari that is `keycloak-keycloakx-0` in the `dev` namespace, and the admin user
+is `root`:
+
+```bash
+kubectl -n dev exec -it keycloak-keycloakx-0 -c keycloak -- bash
+```
+
+Then, inside the pod:
+
+```bash
+cd /opt/keycloak/bin
+
+# Prompts for the admin password. Use --user root on Nebari; drop /auth outside it.
+./kcadm.sh config credentials --config /tmp/kcadm.config \
+  --server http://localhost:8080/auth --realm master --user <admin-user>
+
+./kcadm.sh update realms/<realm> --config /tmp/kcadm.config \
+  -s loginTheme=nebari -s accountTheme=nebari -s adminTheme=nebari
+
+# Optional: theme the Admin Console's own login page too.
+./kcadm.sh update realms/master --config /tmp/kcadm.config \
+  -s loginTheme=nebari -s adminTheme=nebari
+
+# Check the result.
+./kcadm.sh get realms/<realm> --config /tmp/kcadm.config \
+  --fields loginTheme,accountTheme,adminTheme
+```
+
+### Declaratively
+
+- **Realm import JSON**: set `"loginTheme"`, `"accountTheme"` and `"adminTheme"`
+  on the realm, as [realm-export.json](realm-export.json) does.
+- **Terraform** ([`keycloak/keycloak` provider](https://registry.terraform.io/providers/keycloak/keycloak/latest/docs/resources/realm)):
+  set `login_theme`, `account_theme` and `admin_theme` on `keycloak_realm`.
 
 ## Customization
 
@@ -487,8 +581,8 @@ Two things still go through CSS classes rather than components:
 
 ### Admin and Account consoles
 
-Both consoles are ~520 vendored views from `@keycloakify/keycloak-admin-ui`, and
-every one of them imports PatternFly through a single re-export shim at
+Both consoles are ~540 vendored views from `@keycloakify/keycloak-admin-ui` and
+`@keycloakify/keycloak-account-ui`, and every one that uses PatternFly imports it through a single re-export shim at
 [`src/shared/@patternfly/react-core/index.tsx`](src/shared/@patternfly/react-core/index.tsx).
 Nothing imports `@patternfly/react-core` directly.
 
@@ -511,7 +605,7 @@ controls that Keycloak still owns. For example, select focus now retains its
 one-pixel resting border and draws a non-layout-changing purple ring, preventing
 compact table rows from shifting without adding a screen-specific override.
 
-Refs matter in the adapters: 29 views spread `{...register(…)}` from
+Refs matter in the adapters: 13 views spread `{...register(…)}` from
 react-hook-form onto these controls, and that spread carries a callback ref. The
 Nebari components are plain function components, and React 18 strips `ref` before
 it reaches the DOM node — so each adapter forwards one explicitly. Drop that and
@@ -600,26 +694,27 @@ Edit the CSS variables in `src/theme.css`.
 
 ```css
 :root {
-  --nebari-primary: #4f4173;
-  --nebari-accent: #32C574;
+  --nebari-purple: #7c3aed;
+  --nebari-purple-dark: #6d28d9;
   /* ... more colors */
 }
 ```
 
 ### Logo
 
-Replace the logo files in `public/logo/`:
-- `nebari-logo-black-bg.png` - Logo for light theme
-- `nebari-logo-purple-bg.png` - Logo for dark theme
+Logos live in `public/logo/`. Each theme's light and dark logo paths are set in
+[src/lib/branding.ts](src/lib/branding.ts), relative to `public/`:
 
-Update the logo path in `src/login/Template.tsx`:
-
-```tsx
-<img 
-  src="/logo/your-logo.png" 
-  alt="Your Brand" 
-/>
+```ts
+nebari: {
+  light: "logo/nebari-logo-light.svg",
+  dark: "logo/nebari-logo-dark.svg"
+},
 ```
+
+Replace those files, or point the entries at new ones. Collab uses
+`logo/collab-symbol.png` for both, with the "Collab" wordmark set as text in
+`src/login/Template.tsx`.
 
 ### Custom Pages
 
@@ -639,17 +734,22 @@ Then import and use in `src/login/KcPage.tsx`.
 Add custom translations in `src/login/i18n.ts`:
 
 ```typescript
-export const { useI18n } = createUseI18n({
-  en: {
-    loginTitle: "Your Custom Title",
-    // ... more translations
-  },
-  pt: {
-    loginTitle: "Seu Título Personalizado",
-    // ... traduções
-  }
-});
+const { useI18n, ofTypeI18n } = i18nBuilder
+  .withThemeName<ThemeName>()
+  .withCustomTranslations({
+    en: {
+      loginSubtitle: "Welcome back! Please enter your credentials.",
+      // Key a message by theme when it names the product:
+      registerTitle: {
+        nebari: "Create your Nebari account",
+        collab: "Create your Collab account"
+      }
+    }
+  })
+  .build();
 ```
+
+Add another language as a sibling of `en`, for example `pt: { ... }`.
 
 ## Project Structure
 
@@ -659,11 +759,7 @@ nebari-keycloak-theme/
 │   └── logo/                 # Logo assets
 ├── src/
 │   ├── login/
-│   │   ├── pages/           # Custom page components
-│   │   │   ├── Login.tsx
-│   │   │   ├── Register.tsx
-│   │   │   ├── Info.tsx
-│   │   │   └── Error.tsx
+│   │   ├── pages/           # Custom page components (Login, Register, Info, Error, …)
 │   │   ├── KcPage.tsx       # Page router
 │   │   ├── Template.tsx     # Main template wrapper
 │   │   ├── KcContext.ts     # Context types
@@ -673,12 +769,19 @@ nebari-keycloak-theme/
 │   ├── shared/              # Vendored shared code + the PatternFly shim
 │   ├── components/
 │   │   ├── ui/              # Nebari registry components (upstream-managed)
-│   │   ├── nebari/          # App-owned compositions (ProfileMenu)
+│   │   ├── nebari/          # App-owned compositions (ProfileMenu, PasswordField)
 │   │   └── patternfly/      # PatternFly API → Nebari component adapters
 │   ├── hooks/               # Registry hooks + useNebariTheme
+│   ├── lib/branding.ts      # Per-theme logo paths
 │   ├── theme.css            # Tokens, cascade layers, login styles
 │   └── main.tsx             # Entry point
+├── scripts/                 # JAR build script and upgrade guards
+├── tests/                   # Playwright visual tests and baselines
 ├── dist_keycloak/           # Built theme (after build)
+├── themes.json              # The themes to build
+├── Dockerfile
+├── docker-compose.yml       # Local Keycloak + PostgreSQL
+├── realm-export.json        # Development realm (dev only)
 ├── package.json
 ├── vite.config.ts
 └── tsconfig.json
@@ -688,12 +791,25 @@ nebari-keycloak-theme/
 
 ### Theme not appearing in Keycloak
 
-1. Verify the JAR file is in the correct location
-2. Check Keycloak logs for errors:
+1. Verify the JAR is in the providers directory:
    ```bash
-   kubectl logs <keycloak-pod>
+   kubectl -n <namespace> exec <keycloak-pod> -c keycloak -- ls /opt/keycloak/providers
    ```
-3. Ensure Keycloak has been restarted after adding the theme
+2. If it is missing and the JAR is copied in by an init container (Nebari),
+   check that container:
+   ```bash
+   kubectl -n <namespace> describe pod <keycloak-pod>   # ErrImagePull means the ghcr.io pull secret is missing or wrong
+   kubectl -n <namespace> logs <keycloak-pod> -c install-keycloak-theme
+   ```
+3. Check that the JAR matches the Keycloak version: the `22-to-25` JAR on
+   Keycloak 22–25, the `all-other-versions` JAR on 26 and newer.
+4. If the JAR is added at startup rather than built into the image, make sure
+   Keycloak starts with `start`, not `start --optimized`, so it rebuilds with
+   the new provider. Either way, restart it after changing the JAR.
+5. Check Keycloak logs for errors:
+   ```bash
+   kubectl -n <namespace> logs <keycloak-pod> -c keycloak
+   ```
 
 ### Styles not applying
 
@@ -720,4 +836,5 @@ rm -rf node_modules/.vite
 
 ## License
 
-This theme is part of the Nebari project.
+This theme is part of the Nebari project and is licensed under the
+[Apache License 2.0](LICENSE).
