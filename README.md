@@ -2,13 +2,14 @@
 
 A custom Keycloak theme for Nebari using
 [Keycloakify](https://www.keycloakify.dev/), built from the Nebari design-system
-components. The OpenTeams Collab branding ships in the same theme behind a build
-flag — see [Branding](#branding).
+components. It ships two themes, `nebari` and `collab` (OpenTeams Collab), each
+packaged in its own JAR and published as its own image — see
+[Branding](#branding).
 
 ## Features
 
 - ✨ Custom Nebari branding with color scheme
-- 🌐 OpenTeams Collab branding behind a one-variable build flag
+- 🌐 A separate OpenTeams Collab theme, `collab`
 - 🔤 Self-hosted Geist and Inter Tight variable fonts
 - 🎨 Light and dark theme support
 - 📱 Fully responsive design
@@ -42,11 +43,10 @@ which feeds a mock `kcContext` to the app — for example
 http://localhost:5173/?preview=register. The available names are listed in
 `getKcContextMockForPreview` in [src/login/KcContext.ts](src/login/KcContext.ts).
 
-Preview the OpenTeams Collab branding by adding `brand=openteams`, which needs
-no rebuild:
+Preview the Collab theme by adding `theme=collab`:
 
 ```text
-http://localhost:5173/?preview=login-providers&brand=openteams
+http://localhost:5173/?preview=login-providers&theme=collab
 ```
 
 ## Visual Tests
@@ -61,7 +61,7 @@ npm run test:screenshots
 npm run test:screenshots:update
 ```
 
-Baselines live in `tests/screenshots/<platform>/` because each OS rasterises
+Baselines live in `tests/screenshots/<platform>/<theme>/` because each OS rasterises
 fonts slightly differently. CI runs on Linux, so **regenerate baselines on Linux**
 — snapshots updated on macOS or Windows are written to a different directory and
 will not satisfy the check. If you are not on Linux, run the update inside the
@@ -73,10 +73,11 @@ docker run --rm -v "$PWD":/work -w /work --ipc=host \
   npm run test:screenshots:update
 ```
 
-Every pull request captures each login preview plus a full-page render. The
-brand flag gets an assertion rather than its own baselines: it swaps the mark and
-nothing else, so a second set of captures would only re-photograph the same
-layout with a different logo in it.
+Every pull request captures each login preview plus a full-page render for every
+theme, with the same assertions for each. Baselines are kept per theme, in
+`tests/screenshots/<platform>/nebari/` and `tests/screenshots/<platform>/collab/`,
+so a reviewer sees the Collab login pages next to the Nebari ones in the PR. The
+theme list lives at the top of [tests/visual.spec.ts](tests/visual.spec.ts).
 
 Every CI run also uploads a `theme-screenshots` artifact containing fresh renders
 from that branch, including when baseline comparison fails. These captures go to
@@ -169,7 +170,7 @@ npm run test:screenshots
 npm run test:screenshots:update
 ```
 
-Baselines live in `tests/screenshots/<platform>/` because each OS rasterises
+Baselines live in `tests/screenshots/<platform>/<theme>/` because each OS rasterises
 fonts slightly differently. CI runs on Linux, so **regenerate baselines on Linux**
 — snapshots updated on macOS or Windows are written to a different directory and
 will not satisfy the check. If you are not on Linux, run the update inside the
@@ -181,10 +182,11 @@ docker run --rm -v "$PWD":/work -w /work --ipc=host \
   npm run test:screenshots:update
 ```
 
-Every pull request captures each login preview plus a full-page render. The
-brand flag gets an assertion rather than its own baselines: it swaps the mark and
-nothing else, so a second set of captures would only re-photograph the same
-layout with a different logo in it.
+Every pull request captures each login preview plus a full-page render for every
+theme, with the same assertions for each. Baselines are kept per theme, in
+`tests/screenshots/<platform>/nebari/` and `tests/screenshots/<platform>/collab/`,
+so a reviewer sees the Collab login pages next to the Nebari ones in the PR. The
+theme list lives at the top of [tests/visual.spec.ts](tests/visual.spec.ts).
 
 Every CI run also uploads a `theme-screenshots` artifact containing fresh renders
 from that branch, including when baseline comparison fails. These captures go to
@@ -197,11 +199,11 @@ committed; CI does not accept them automatically.
 ## Building the Theme
 
 ```bash
-# Build the theme
+# Build every theme
 npm run build-keycloak-theme
 
-# Build the OpenTeams Collab-branded variant instead
-VITE_BRAND=openteams npm run build-keycloak-theme
+# Build only the Collab theme
+npm run build-keycloak-theme -- --theme collab
 
 # What can I build?
 npm run build-keycloak-theme -- --list
@@ -215,49 +217,59 @@ it opens each JAR and fails if it finds more than one `theme/<name>/` directory,
 or if `META-INF/keycloak-themes.json` advertises more than one theme — so the
 guarantee cannot quietly regress.
 
-A build produces two JARs in `dist_keycloak/`:
+A full build produces four JARs in `dist_keycloak/`:
 
 | File | Target |
 | --- | --- |
-| `nebari-keycloak-theme-for-kc-all-other-versions.jar` | Keycloak 26 and newer |
-| `nebari-keycloak-theme-for-kc-22-to-25.jar` | Keycloak 22 to 25 |
+| `nebari-keycloak-theme-for-kc-all-other-versions.jar` | Nebari, Keycloak 26 and newer |
+| `nebari-keycloak-theme-for-kc-22-to-25.jar` | Nebari, Keycloak 22 to 25 |
+| `collab-keycloak-theme-for-kc-all-other-versions.jar` | Collab, Keycloak 26 and newer |
+| `collab-keycloak-theme-for-kc-22-to-25.jar` | Collab, Keycloak 22 to 25 |
 
 If the build fails part way through, the directory is restored to what it was.
 
 ## Branding
 
-Which logo the pages carry is a build flag, not a theme. OpenTeams Collab and
-Nebari differed in nothing but the mark, and carrying a second theme for that —
-its own JAR, its own CSS scope, its own screenshot matrix — cost more than it was
-worth.
+The two themes, `nebari` and `collab`, share one build and one stylesheet. The
+brand is the theme Keycloak is rendering: `src/main.tsx` stamps
+`kcContext.themeName` on `<html>` as `data-brand`, and the login page, the Admin
+Console masthead and the Admin dashboard's hero mark read it from there.
 
-```bash
-VITE_BRAND=openteams npm run build-keycloak-theme
-```
+Collab has its own look, taken from the openteams.com landing page: a deep-blue
+ground, Inter Tight, a glass card and pill buttons. Those rules are the
+`html[data-brand="collab"]` block in [src/theme.css](src/theme.css), scoped to
+the login pages and the Admin Console; the Account console keeps the Nebari
+styling. Strings that name the product, such as the register title, are keyed
+by theme in [src/login/i18n.ts](src/login/i18n.ts).
+`collab` was called `openteams` before; a realm that still selects `openteams`
+must be switched to `collab`.
 
-Unset, or set to anything unrecognised, the build is Nebari-branded. The flag
-covers the login page, the Admin Console masthead and the Admin dashboard's hero
-mark. [src/lib/branding.ts](src/lib/branding.ts) is the only place a logo path is
-written down; add a brand by adding an entry there and a `data-brand` rule in
-[src/theme.css](src/theme.css) if the mark needs more than an `<img>`.
-
-The dev server additionally accepts `?brand=openteams` so either mark can be
-looked at without rebuilding. Keycloak never sends that query string, so it
-cannot change how a deployed theme renders.
+[src/lib/branding.ts](src/lib/branding.ts) is the only place a logo path is
+written down. To add a theme, add its name to [themes.json](themes.json), an
+entry in `branding.ts`, and a `data-brand` rule in [src/theme.css](src/theme.css)
+if the mark needs more than an `<img>`.
 
 ## Releasing
 
 Pushing to `main` runs
 [publish-keycloak-image.yml](.github/workflows/publish-keycloak-image.yml), which
-builds both JARs and republishes the Nebari container image to
-`ghcr.io/<owner>/<repo>` tagged `latest`, `sha-<commit>` and the `version` from
-`package.json`.
+builds every JAR and republishes one container image per theme, each carrying
+only its own theme:
 
-Every run also uploads a workflow artifact containing both Keycloak-compatible
-JARs, so the theme is downloadable from every successful push to `main`, even
-when the package version has not changed.
+| Theme | Image |
+| --- | --- |
+| Nebari | `ghcr.io/<owner>/<repo>` |
+| Collab | `ghcr.io/<owner>/collab-keycloak-theme` |
 
-It also cuts a GitHub release for `v<version>`. The only assets are the two
+Both are tagged `latest`, `sha-<commit>` and the `version` from `package.json`.
+After the Collab package's first publish, check its visibility under its
+**Package settings** so it matches the Nebari package.
+
+Every run also uploads one workflow artifact per theme containing both
+Keycloak-compatible JARs, so each theme is downloadable from every successful
+push to `main`, even when the package version has not changed.
+
+It also cuts a GitHub release for `v<version>`. The only assets are the four
 JARs. The screenshots are
 embedded in the release notes as links to this repository rather than attached,
 so the release page shows what the theme looks like without carrying the weight.
@@ -362,7 +374,7 @@ docker push your-registry/keycloak-nebari:latest
 
 3. Go to **Realm Settings** → **Themes**
 
-4. Set the following:
+4. Set the following (or `collab` in each, for the Collab theme):
    - **Login theme**: `nebari`
    - **Admin console theme**: `nebari`
    - **Account theme**: `nebari` (optional)

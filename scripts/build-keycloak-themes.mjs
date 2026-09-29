@@ -204,9 +204,13 @@ try {
         // previous JARs are dropped — otherwise one saved under a stale name (a
         // renamed theme, say) would come back alongside the new one. On failure
         // the output directory was cleared without being repopulated, so every
-        // preserved JAR goes back and the build leaves nothing worse behind.
+        // preserved JAR goes back and the build leaves nothing worse behind. A
+        // successful full build drops every preserved JAR, since anything it did
+        // not just write belongs to a theme that no longer exists.
         const supersededByThisBuild =
-            buildSucceeded && selectedThemes.some(theme => jar.startsWith(`${theme}-`));
+            buildSucceeded &&
+            (requestedThemes.length === 0 ||
+                selectedThemes.some(theme => jar.startsWith(`${theme}-`)));
 
         if (!supersededByThisBuild && !existsSync(join(outputDirectory, jar))) {
             copyFileSync(join(preservedDirectory, jar), join(outputDirectory, jar));

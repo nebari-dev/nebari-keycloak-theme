@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const previews = [
     "login",
@@ -13,52 +13,79 @@ const previews = [
     "error"
 ] as const;
 
-for (const preview of previews) {
-    test(`${preview} page`, async ({ page }) => {
-        await page.goto(`/?preview=${preview}`);
-        const theme = page.locator(".nebari-login-card");
-        await expect(theme).toBeVisible();
-        await expect(page.locator(".nebari-logo-light")).toHaveCount(1);
-        await expect(page.locator(".collab-logo")).toHaveCount(0);
-        await expect(theme).toHaveScreenshot(`${preview}.png`, { animations: "disabled" });
-    });
+/**
+ * Every theme in themes.json, with how to tell its mark apart from the others.
+ * Each theme runs through the same previews and the same assertions, and its
+ * baselines are stored under `tests/screenshots/<platform>/<theme>/`, so adding
+ * a theme is one entry here. See `src/lib/branding.ts`.
+ */
+const themes: {
+    name: string;
+    assertBrand: (page: Page) => Promise<void>;
+}[] = [
+    {
+        name: "nebari",
+        assertBrand: async page => {
+            await expect(page.locator(".nebari-logo-light")).toHaveCount(1);
+            await expect(page.locator(".collab-logo")).toHaveCount(0);
+        }
+    },
+    {
+        name: "collab",
+        assertBrand: async page => {
+            await expect(page.getByRole("img", { name: "Collab" })).toBeVisible();
+            await expect(page.locator(".nebari-logo")).toHaveCount(0);
+            // The symbol is a raster image; capturing before it decodes would
+            // photograph an empty box and make the baseline flaky.
+            await expect
+                .poll(() =>
+                    page
+                        .locator(".collab-logo-symbol")
+                        .evaluate(
+                            (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
+                        )
+                )
+                .toBe(true);
+        }
+    }
+];
+
+async function openPreview(page: Page, theme: string, preview: string) {
+    await page.goto(`/?preview=${preview}&theme=${theme}`);
+    await expect(page.locator("html")).toHaveAttribute("data-brand", theme);
+    await expect(page.locator(".nebari-login-card")).toBeVisible();
 }
 
-test("Nebari is the default brand", async ({ page }) => {
+test("Nebari is the default theme", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("data-brand", "nebari");
-    await expect(page.locator(".nebari-logo-light")).toHaveCount(1);
-    await expect(page.locator(".collab-logo")).toHaveCount(0);
 });
 
-// The `openteams` brand flag swaps the mark, and nothing else — there is one
-// theme and one set of layout baselines, which the captures above own. So this
-// asserts the swap rather than re-photographing every page with a different
-// logo in it. See `src/lib/branding.ts`.
-test("the openteams brand flag swaps in the Collab lockup", async ({ page }) => {
-    await page.goto("/?preview=login-providers&brand=openteams");
-    await expect(page.locator("html")).toHaveAttribute("data-brand", "openteams");
-    await expect(page.locator(".nebari-login-card")).toBeVisible();
-    await expect(page.getByRole("img", { name: "Collab" })).toBeVisible();
-    await expect(page.locator(".nebari-logo")).toHaveCount(0);
-    await expect
-        .poll(() =>
-            page
-                .locator(".collab-logo-symbol")
-                .evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)
-        )
-        .toBe(true);
-});
+for (const theme of themes) {
+    test.describe(`${theme.name} theme`, () => {
+        for (const preview of previews) {
+            test(`${preview} page`, async ({ page }) => {
+                await openPreview(page, theme.name, preview);
+                await theme.assertBrand(page);
+                await expect(page.locator(".nebari-login-card")).toHaveScreenshot(
+                    [theme.name, `${preview}.png`],
+                    { animations: "disabled" }
+                );
+            });
+        }
 
-// The captures above crop to the card. This full-page one includes the page
-// background, so it shows what a deployment actually looks like — it is the
-// image attached to a release. The background glows are animated, but the
-// reduced-motion rule in theme.css stops them, keeping the capture stable.
-test("full light page", async ({ page }) => {
-    await page.goto("/?preview=login");
-    await expect(page.locator(".nebari-login-card")).toBeVisible();
-    await expect(page).toHaveScreenshot("full-page-light.png", {
-        fullPage: true,
-        animations: "disabled"
+        // The captures above crop to the card. This full-page one includes the
+        // page background, so it shows what a deployment actually looks like —
+        // it is the image shown on a release. The background glows are
+        // animated, but the reduced-motion rule in theme.css stops them, keeping
+        // the capture stable.
+        test("full light page", async ({ page }) => {
+            await openPreview(page, theme.name, "login");
+            await theme.assertBrand(page);
+            await expect(page).toHaveScreenshot([theme.name, "full-page-light.png"], {
+                fullPage: true,
+                animations: "disabled"
+            });
+        });
     });
-});
+}

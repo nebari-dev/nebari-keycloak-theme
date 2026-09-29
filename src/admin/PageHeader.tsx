@@ -67,7 +67,7 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
   const url = useHref(toDashboard({ realm }));
   const logoUrl = environment.logoUrl ? environment.logoUrl : url;
 
-  // Resolved from the brand flag rather than hardcoded, so a Collab-branded
+  // Resolved from the active theme rather than hardcoded, so the Collab
   // console does not fall back to Nebari branding.
   const defaultLogo = getBrandLogo(isDarkMode);
 
