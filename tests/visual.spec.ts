@@ -18,13 +18,20 @@ const previews = [
  * Each theme runs through the same previews and the same assertions, and its
  * baselines are stored under `tests/screenshots/<platform>/<theme>/`, so adding
  * a theme is one entry here. See `src/lib/branding.ts`.
+ *
+ * `colorSchemes` lists the schemes a theme actually renders differently. Collab
+ * forces `color-scheme: dark` on one deep-blue ground, so a dark capture of it
+ * would only duplicate the light one; Nebari has a real dark palette, and
+ * dropping its dark captures would let a dark-mode regression pass CI.
  */
 const themes: {
     name: string;
+    colorSchemes: readonly ("light" | "dark")[];
     assertBrand: (page: Page) => Promise<void>;
 }[] = [
     {
         name: "nebari",
+        colorSchemes: ["light", "dark"],
         assertBrand: async page => {
             await expect(page.locator(".nebari-logo-light")).toHaveCount(1);
             await expect(page.locator(".collab-logo")).toHaveCount(0);
@@ -32,6 +39,7 @@ const themes: {
     },
     {
         name: "collab",
+        colorSchemes: ["light"],
         assertBrand: async page => {
             await expect(page.getByRole("img", { name: "Collab" })).toBeVisible();
             await expect(page.locator(".nebari-logo")).toHaveCount(0);
@@ -74,18 +82,33 @@ for (const theme of themes) {
             });
         }
 
-        // The captures above crop to the card. This full-page one includes the
-        // page background, so it shows what a deployment actually looks like —
-        // it is the image shown on a release. The background glows are
+        if (theme.colorSchemes.includes("dark")) {
+            test("dark login page", async ({ page }) => {
+                await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+                await openPreview(page, theme.name, "login");
+                await theme.assertBrand(page);
+                await expect(page.locator(".nebari-login-card")).toHaveScreenshot(
+                    [theme.name, "login-dark.png"],
+                    { animations: "disabled" }
+                );
+            });
+        }
+
+        // The captures above crop to the card. These full-page ones include the
+        // page background, so they show what a deployment actually looks like —
+        // they are the images shown on a release. The background glows are
         // animated, but the reduced-motion rule in theme.css stops them, keeping
         // the capture stable.
-        test("full light page", async ({ page }) => {
-            await openPreview(page, theme.name, "login");
-            await theme.assertBrand(page);
-            await expect(page).toHaveScreenshot([theme.name, "full-page-light.png"], {
-                fullPage: true,
-                animations: "disabled"
+        for (const colorScheme of theme.colorSchemes) {
+            test(`full ${colorScheme} page`, async ({ page }) => {
+                await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+                await openPreview(page, theme.name, "login");
+                await theme.assertBrand(page);
+                await expect(page).toHaveScreenshot(
+                    [theme.name, `full-page-${colorScheme}.png`],
+                    { fullPage: true, animations: "disabled" }
+                );
             });
-        });
+        }
     });
 }

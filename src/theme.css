@@ -1212,10 +1212,11 @@ a.nebari-button.nebari-button-primary:visited {
    (primary), coral #ff8a69 (secondary), amber #faa944 (accent), all set in
    Inter Tight.
 
-   The landing page's shape language is what the login form borrows: a midnight
-   ground lit by one off-centre blue glow, pill buttons (the hero CTA is an
-   outlined pill, the nav CTA a filled one), coral reserved for small accents,
-   and headings in Inter Tight 600 with tight tracking.
+   The landing page's shape language is what the login form borrows: a flat
+   deep-blue ground with a translucent white card as the only figure on it,
+   pill buttons (the hero CTA is an outlined pill, the nav CTA a filled one),
+   coral reserved for small accents, and headings in Inter Tight 600 with tight
+   tracking.
 
    Selectors are scoped to the brand *and* the theme type. `data-brand` — the
    theme name, stamped by `src/main.tsx` — keeps the Nebari theme untouched; the
@@ -1422,7 +1423,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-section {
 
 /* The wordmark does not animate: it is painted from the first frame and stays
  * put while the symbol unwinds into place beside it. Nothing reflows as the
- * symbol grows, because `scale` is a transform — its 48px box is already laid
+ * symbol grows, because `scale` is a transform — its 54px box is already laid
  * out at full size, so the name never shifts. */
 .collab-logo-wordmark {
     color: #ffffff;
@@ -1674,7 +1675,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]:focu
     }
 }
 
-/* The hero's secondary call to action: an outlined pill on the midnight ground,
+/* The hero's secondary call to action: an outlined pill on the deep-blue ground,
  * hairline white rather than blue, so it reads as the quieter of the two. */
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-secondary,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-button {
