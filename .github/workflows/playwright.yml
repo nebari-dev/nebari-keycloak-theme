@@ -1,4 +1,4 @@
-name: Playwright screenshots
+name: Playwright tests
 
 on:
   pull_request:
@@ -44,6 +44,19 @@ jobs:
       - name: Compare against baselines
         run: npm run test:screenshots
 
+      # WCAG 2.2 AA scans and keyboard checks of every login page, in every
+      # theme. Known, tracked violations are listed in
+      # tests/a11y/known-violations.ts; anything else fails here.
+      #
+      # It writes to its own report and results folders. Every Playwright run
+      # empties test-results/ and rewrites playwright-report/ when it starts, so
+      # sharing them would replace the screenshot diff uploaded below.
+      - name: Accessibility (login pages)
+        if: always()
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-a11y
+        run: npm run test:a11y -- --output=test-results-a11y
+
       - name: Upload diff report
         if: always()
         uses: actions/upload-artifact@v7
@@ -55,10 +68,23 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      - name: Upload accessibility report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-a11y
+          path: |
+            playwright-report-a11y
+            test-results-a11y
+          if-no-files-found: ignore
+          retention-days: 14
+
       # Always re-render so reviewers get the screenshots this branch actually
       # produces, whether or not they match the baselines.
       - name: Render current screenshots
         if: always()
+        env:
+          PLAYWRIGHT_CAPTURE_CURRENT: "1"
         run: npm run test:screenshots:update
 
       - name: Summarise changed screenshots
@@ -67,13 +93,15 @@ jobs:
           {
             echo "### Theme screenshots"
             echo
-            if git diff --quiet -- tests/screenshots; then
+            if [ ! -d theme-screenshots/linux ]; then
+              echo "Screenshot capture failed; inspect the Playwright logs."
+            elif diff -qr tests/screenshots/linux theme-screenshots/linux > /tmp/screenshot-diff.txt; then
               echo "Rendered output matches the committed baselines."
             else
               echo "Rendered output differs from the committed baselines:"
               echo
               echo '```'
-              git diff --stat -- tests/screenshots
+              cat /tmp/screenshot-diff.txt
               echo '```'
               echo
               echo "Run \`npm run test:screenshots:update\` on Linux and commit the result."
@@ -87,6 +115,74 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: theme-screenshots
-          path: tests/screenshots
+          path: theme-screenshots
           if-no-files-found: error
+          retention-days: 14
+
+  # The Admin and Account consoles only run inside Keycloak, so this job builds
+  # the theme JARs, starts the same compose stack used locally, and runs the
+  # console accessibility suites against it (playwright.consoles.config.ts).
+  # Two theme builds, an image build, Keycloak start-up and ~270 tests
+  # (keyboard walks of long Admin lists are the slow part) took about 10
+  # minutes in a local rehearsal on 2 workers; the limit leaves room for a
+  # slower runner and CI retries.
+  consoles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+
+      # keycloakify shells out to Maven to assemble the JARs; the runner image
+      # ships Maven, it needs Java 17+. See publish-keycloak-image.yml.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - run: npm ci
+
+      - name: Build Keycloak themes
+        run: npm run build-keycloak-theme
+
+      - name: Start Keycloak
+        run: docker compose up -d --build keycloak
+
+      # Waits for the seeded realm rather than the compose healthcheck: the realm
+      # existing means the import has finished, and Keycloak 26 serves its health
+      # endpoints on the management port, not 8080.
+      - name: Wait for Keycloak
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl -sf http://localhost:8080/realms/nebari/.well-known/openid-configuration > /dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Keycloak did not come up within 5 minutes."
+          docker compose logs keycloak | tail -n 200
+          exit 1
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Accessibility (Admin and Account consoles)
+        run: npm run test:a11y:consoles
+
+      - name: Keycloak logs
+        if: failure()
+        run: docker compose logs keycloak | tail -n 300
+
+      - name: Upload console report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-consoles
+          path: |
+            playwright-report-consoles
+            test-results-consoles
+          if-no-files-found: ignore
           retention-days: 14

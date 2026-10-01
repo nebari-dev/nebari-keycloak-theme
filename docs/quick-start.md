@@ -29,21 +29,27 @@ npm run dev
 Open http://localhost:5173/?preview=login. The `preview` parameter picks which page to render against a mock
 Keycloak context, so you get hot reload without a Keycloak server:
 
-| `?preview=` | Page |
-| --- | --- |
-| `login` | Sign in |
-| `login-providers` | Sign in with Google and GitHub buttons |
-| `login-error` | Sign in after a failed attempt |
-| `register` | Registration |
-| `forgot-password` | Reset password |
-| `update-password` | Update password |
-| `verify-email` | Verify email |
-| `update-profile` | Update profile |
-| `info` | Info page |
-| `error` | Error page |
+| `?preview=` | `?pageId=` | Page |
+| --- | --- | --- |
+| `login` | `login.ftl` | Sign in |
+| `login-providers` | | Sign in with Google and GitHub buttons |
+| `login-error` | | Sign in after a failed attempt |
+| `register` | `register.ftl` | Registration |
+| `forgot-password` | `login-reset-password.ftl` | Reset password |
+| `update-password` | `login-update-password.ftl` | Update password |
+| `verify-email` | `login-verify-email.ftl` | Verify email |
+| `update-profile` | `login-update-profile.ftl` | Update profile |
+| `info` | `info.ftl` | Info page |
+| `error` | `error.ftl` | Error page |
 
-These are defined in `getKcContextMockForPreview` in [`src/login/KcContext.ts`](../src/login/KcContext.ts).
-The same previews are what the [screenshot tests](development.md#screenshot-tests) capture.
+`?pageId=` takes Keycloak's own page id, so a page can be opened by the name Keycloak logs and the `.ftl` file
+uses, for example http://localhost:5173/?pageId=login-reset-password.ftl. `?preview=` adds the variants that
+share a page, such as sign-in with social buttons. When both are given, `pageId` wins; an unknown page id falls
+back to the sign-in page with a console warning.
+
+These are defined in [`src/login/KcContext.ts`](../src/login/KcContext.ts). The same previews are what the
+[screenshot](development.md#screenshot-tests) and [accessibility](development.md#accessibility-tests) tests
+check.
 
 ## The compose loop (consoles)
 

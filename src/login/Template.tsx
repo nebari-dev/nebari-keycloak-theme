@@ -7,6 +7,7 @@ import type { KcContext } from "./KcContext";
 import type { I18n } from "./i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getBrandLogos, isCollabBrand } from "@/lib/branding";
 
 export default function Template(props: TemplateProps<KcContext, I18n>) {
     const {
@@ -39,22 +40,41 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
         isValidElement<{ className?: string }>(headerNode) &&
         (headerNode.props.className?.includes("nebari-title") ||
             headerNode.props.className?.includes("nebari-heading-group"));
-    const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+    const showCollabLockup = isCollabBrand();
+    // Both variants are rendered and CSS picks one, because the login page has
+    // no JS colour-scheme flag to choose with.
+    const brandLogos = getBrandLogos();
 
     return (
         <main className="nebari-login-wrapper">
             <Card className="nebari-login-card gap-0 py-0">
                 <div className="nebari-logo-header">
-                    <img
-                        src={publicAssetUrl("logo/nebari-logo-light.svg")}
-                        alt="Nebari"
-                        className="nebari-logo nebari-logo-light"
-                    />
-                    <img
-                        src={publicAssetUrl("logo/nebari-logo-dark.svg")}
-                        alt="Nebari"
-                        className="nebari-logo nebari-logo-dark"
-                    />
+                    {showCollabLockup ? (
+                        /* Collab publishes no light-on-dark wordmark, so the lockup is
+                           assembled here: the full-colour symbol as an image, the name
+                           as text. One `role="img"` over the pair gives it a single
+                           accessible name — otherwise a screen reader announces the
+                           symbol and the word separately, as two things. */
+                        <div className="collab-logo" role="img" aria-label="Collab">
+                            <img src={brandLogos.dark} alt="" className="collab-logo-symbol" />
+                            <span className="collab-logo-wordmark" aria-hidden="true">
+                                Collab
+                            </span>
+                        </div>
+                    ) : (
+                        <>
+                            <img
+                                src={brandLogos.light}
+                                alt="Nebari"
+                                className="nebari-logo nebari-logo-light"
+                            />
+                            <img
+                                src={brandLogos.dark}
+                                alt="Nebari"
+                                className="nebari-logo nebari-logo-dark"
+                            />
+                        </>
+                    )}
                 </div>
 
                 <CardHeader className="nebari-header px-0">

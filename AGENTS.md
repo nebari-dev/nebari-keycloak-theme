@@ -4,11 +4,16 @@ Working agreement for coding agents in this repo. Read it before touching code.
 
 ## What this is
 
-A Keycloakify v11 theme that ships one JAR with three Keycloak themes, all named `nebari`: the **login** pages,
-the **Account** console and the **Admin** console. It is published as a Keycloak 26 image to
-`ghcr.io/nebari-dev/nebari-keycloak-theme` on every push to `main`.
+A Keycloakify v11 theme with two brands, `nebari` and `collab` (OpenTeams Collab), listed in
+[`themes.json`](themes.json). Each brand is packaged in its own JAR with three Keycloak themes under that brand's
+name: the **login** pages, the **Account** console and the **Admin** console. Each is published as its own
+Keycloak 26 image on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-theme` and
+`ghcr.io/nebari-dev/collab-keycloak-theme`.
 
 - The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
+- The brands share one build and one stylesheet. `src/main.tsx` stamps the theme name on `<html>` as
+  `data-brand`; logo paths live only in [`src/lib/branding.ts`](src/lib/branding.ts), and Collab's styling is
+  the `html[data-brand="collab"]` block in `src/theme.css`, scoped by `data-kc-theme-type` as well.
 - The consoles are ~520 views vendored from Keycloak by `keycloakify sync-extensions`. They are **not rewritten**.
   They are restyled by swapping the components they import underneath them, through one owned re-export shim.
 
@@ -24,8 +29,10 @@ npm install                          # also re-syncs the vendored console source
 npm run dev                          # login pages at :5173, e.g. /?preview=login
 npm run check                        # upgrade guards
 npm run typecheck                    # tsc --noEmit
-npm run test:screenshots             # compare login pages against Linux baselines
-npm run build-keycloak-theme         # guards + tsc + vite build + JARs in dist_keycloak/
+npm run test:screenshots             # compare login pages against Linux baselines, per brand
+npm run test:a11y                    # login-page accessibility (axe + keyboard), every brand and scheme
+npm run test:a11y:consoles           # Admin + Account accessibility; needs the compose Keycloak running
+npm run build-keycloak-theme         # guards + tsc + vite build + one JAR pair per brand in dist_keycloak/
 docker compose up -d --build keycloak   # consoles, on the nebari realm
 ```
 
@@ -52,8 +59,11 @@ docker compose up -d --build keycloak   # consoles, on the nebari realm
 - **The dev server can't show the consoles.** They need a real Keycloak. Rebuild the JAR *and* the image &mdash;
   `docker compose up -d --build keycloak` &mdash; and sign in on the `nebari` realm, not `master`. Forgetting
   `--build` makes it look like nothing changed.
-- **Nothing tests the consoles automatically.** CI covers login-page pixels, the type check and the guards. For a
-  console change, check it in the compose loop and say in the pull request that you did.
+- **CI only checks the consoles for accessibility.** It runs every Playwright test &mdash; login-page pixels and
+  accessibility, and console accessibility against a real Keycloak &mdash; plus the type check and the guards.
+  Nothing checks that a console screen still works: for a console change, check it in the compose loop and say
+  in the pull request that you did.
+- **Don't add to `tests/a11y/known-violations.ts` to make a test pass.** Fix the problem or file the issue first.
 - **Most owned files carry `@ts-nocheck`.** Changes to `PageNav.tsx` or `KeycloakDataTable.tsx` are not
   type-checked. Don't read a green type check as covering them.
 - **A rebaselined screenshot is a claim that the new rendering is right.** Look at the diff before committing it.

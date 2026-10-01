@@ -104,6 +104,31 @@
     --sidebar-accent-foreground: oklch(32.95% 0.0209 254.12);
     --sidebar-border: oklch(78.06% 0.0056 286.27);
     --sidebar-ring: oklch(61.98% 0.2159 311.67);
+
+    /* Console header. The Nebari registry deliberately does not ship these — the
+       consuming app owns its header palette — but the canonical header recipe
+       styles the bar only through them, so they have to exist in both themes. */
+    --header-background: #f8f8f8;
+    --header-border: #b7b7bb;
+    --header-foreground: #262628;
+    --header-action-hover: #d9d9dc;
+    --sign-out-foreground: #d2161c;
+
+    /* Login backdrop: the three Figma glows, drawn in `.nebari-login-wrapper::before`. */
+    --login-backdrop: #fff;
+    --login-glow-purple: rgba(210, 132, 255, .48);
+    --login-glow-purple-mid: rgba(232, 194, 255, .30);
+    --login-glow-teal: rgba(170, 244, 235, .48);
+    --login-glow-teal-mid: rgba(209, 248, 243, .30);
+    --login-glow-amber: rgba(250, 216, 144, .42);
+    --login-glow-amber-mid: rgba(252, 237, 204, .28);
+
+    /* Typography. */
+    --font-sans: "Geist Variable", "Geist", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --Font-Sans: var(--font-sans);
+    --color-foreground-default: var(--foreground, #262628);
+    --color-foreground-destructive: var(--destructive-foreground, #d2161c);
 }
 
 [data-theme="light"] {
@@ -125,15 +150,101 @@
     --accent-light: var(--nebari-purple-light);
 }
 
-/* Header tokens. The Nebari registry deliberately does not ship these — the
- * consuming app owns its header palette — but the canonical header recipe
- * styles the bar only through them, so they have to exist in both themes. */
-:root {
-    --header-background: #f8f8f8;
-    --header-border: #b7b7bb;
-    --header-foreground: #262628;
-    --header-action-hover: #d9d9dc;
-    --sign-out-foreground: #d2161c;
+/* Login dark palette. Dark backdrop values are the fills from the old
+   login-dark-background.svg: #1B3C39 teal, #442655 purple, #413313 amber. */
+[data-theme="dark"] {
+    color-scheme: dark;
+    --bg-primary: #202124;
+    --bg-secondary: #343437;
+    --bg-elevated: #262629;
+    --bg-hover: #3d3d41;
+    --text-primary: #f7f7f8;
+    --text-secondary: #f0f0f2;
+    --text-muted: #a7a7b0;
+    --border-color: #56565d;
+    --border-subtle: #62626b;
+    --accent: #b34ee4;
+    --accent-dark: #c268ec;
+    --nebari-purple: #b34ee4;
+    --nebari-red: #eb8a83;
+    --login-backdrop: #202124;
+    --login-glow-purple: rgba(68, 38, 85, .95);
+    --login-glow-purple-mid: rgba(68, 38, 85, .55);
+    --login-glow-teal: rgba(27, 60, 57, .95);
+    --login-glow-teal-mid: rgba(27, 60, 57, .55);
+    --login-glow-amber: rgba(65, 51, 19, .95);
+    --login-glow-amber-mid: rgba(65, 51, 19, .55);
+}
+
+/* The same backdrop for the system preference, so it is right even before
+   main.tsx stamps data-theme onto the document. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --login-backdrop: #202124;
+        --login-glow-purple: rgba(68, 38, 85, .95);
+        --login-glow-purple-mid: rgba(68, 38, 85, .55);
+        --login-glow-teal: rgba(27, 60, 57, .95);
+        --login-glow-teal-mid: rgba(27, 60, 57, .55);
+        --login-glow-amber: rgba(65, 51, 19, .95);
+        --login-glow-amber-mid: rgba(65, 51, 19, .55);
+    }
+}
+
+/* Console dark palette. It follows the login palette on purpose: where both set
+   a token (`--accent`), this one wins for `[data-theme="dark"]` at equal
+   specificity. */
+.dark,
+[data-theme="dark"] {
+    --header-background: var(--card);
+    --header-border: #5a5a61;
+    --header-foreground: #f8f8f8;
+    --header-action-hover: #4a4a50;
+    --sign-out-foreground: #ff6b6b;
+    --background: oklch(26.94% 0.0037 286.15);
+    --foreground: oklch(97.91% 0 0);
+    --scrim: rgba(0, 0, 0, 0.6);
+    --card: oklch(33.01% 0.0052 286.11);
+    --card-foreground: oklch(97.91% 0 0);
+    --popover: oklch(26.94% 0.0037 286.15);
+    --popover-foreground: oklch(97.91% 0 0);
+    --primary: oklch(61.98% 0.2159 311.67);
+    --primary-foreground: oklch(0% 0 0);
+    --primary-hover: oklch(69.98% 0.1926 311.48);
+    --secondary: oklch(40% 0.0269 250.57);
+    --secondary-foreground: oklch(95.04% 0.0042 236.50);
+    --muted: oklch(33.01% 0.0052 286.11);
+    --muted-foreground: oklch(69.88% 0.0130 286.06);
+    --muted-foreground-strong: oklch(78.06% 0.0056 286.27);
+    --accent: oklch(40% 0.0269 250.57);
+    --accent-foreground: oklch(95.04% 0.0042 236.50);
+    --destructive: oklch(33.1% 0.1332 27.42);
+    --destructive-foreground: #F29E93;
+    --warning: oklch(33.09% 0.0677 92.20);
+    --warning-foreground: oklch(87.09% 0.1248 91.93);
+    --success: oklch(32.88% 0.0887 149.73);
+    --success-foreground: oklch(87.04% 0.0814 149.55);
+    --border: oklch(47.01% 0.0112 285.96);
+    --input: oklch(54.86% 0.0154 285.88);
+    --border-strong: oklch(61.96% 0.0134 286.00);
+    --ring: oklch(69.98% 0.1926 311.48);
+    --chart-1: oklch(69.98% 0.1926 311.48);
+    --chart-2: oklch(69.9% 0.0995 187.56);
+    --chart-3: oklch(77.95% 0.1259 85.96);
+    --chart-4: oklch(69.95% 0.1433 264.44);
+    --chart-5: oklch(69.96% 0.1814 149.67);
+    --sidebar: oklch(26.94% 0.0037 286.15);
+    --sidebar-foreground: oklch(97.91% 0 0);
+    --sidebar-primary: oklch(61.98% 0.2159 311.67);
+    --sidebar-primary-foreground: oklch(0% 0 0);
+    --sidebar-accent: oklch(40% 0.0269 250.57);
+    --sidebar-accent-foreground: oklch(95.04% 0.0042 236.50);
+    --sidebar-border: oklch(47.01% 0.0112 285.96);
+    --sidebar-ring: oklch(69.98% 0.1926 311.48);
+}
+
+/* `.dark` alone takes a softer destructive foreground than `[data-theme="dark"]`. */
+.dark {
+    --destructive-foreground: oklch(78.02% 0.1024 27.78);
 }
 
 /* ========================
@@ -210,34 +321,40 @@ samp {
 }
 
 /* ========================
-   PAGE LAYOUT
+   LOGIN PAGES
+
+   Every rule for the Nebari login pages, one definition per component. The
+   values are the Figma login specification (NIC Landing Page / Login); dark
+   overrides follow in LOGIN DARK, and the token-driven typography and input
+   states that must win over both come last, in LOGIN TYPOGRAPHY.
+
+   The bare element selectors here are scoped with `:where(.nebari-login-wrapper)`
+   — the login `Template`'s root. Unscoped, they matched every `input`, `select`,
+   `textarea` and `button[type="submit"]` in the app, and because they are
+   unlayered they beat both PatternFly (layer `patternfly`) and every Tailwind
+   utility (layer `utilities`). That leaked login styling into the Admin and
+   Account consoles: a stray 1px/6px-radius box inside PatternFly's
+   `TextInputGroup`, hardcoded hex that ignored dark mode, and `width: 100%` on
+   every submit button, which is what stopped icon+label buttons sitting on one
+   line. `:where()` contributes no specificity, so scoping does not change which
+   rule wins inside the login pages. Prefer adding to the `.nebari-*` classes
+   over widening these.
    ======================== */
 
+/* ---- Page and card ---- */
+
 .nebari-login-wrapper {
-    min-height: 100vh;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
+    min-height: 100vh;
+    padding: 24px;
+    overflow: hidden;
+    isolation: isolate;
     background: var(--bg-primary);
-    /* Radial glows matching NIC landing-page aesthetic — visible in both themes */
-    background-image:
-        radial-gradient(ellipse at 20% 60%, rgba(155, 61, 204, 0.10) 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 15%, rgba(11, 112, 224, 0.07) 0%, transparent 55%);
-}
-
-[data-theme="dark"] .nebari-login-wrapper {
-    background-image:
-        radial-gradient(ellipse at 25% 45%, rgba(155, 61, 204, 0.06) 0%, transparent 55%),
-        radial-gradient(ellipse at 75% 20%, rgba(11, 112, 224, 0.04) 0%, transparent 55%);
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .nebari-login-wrapper {
-        background-image:
-            radial-gradient(ellipse at 25% 45%, rgba(155, 61, 204, 0.06) 0%, transparent 55%),
-            radial-gradient(ellipse at 75% 20%, rgba(11, 112, 224, 0.04) 0%, transparent 55%);
-    }
+    background-color: var(--login-backdrop);
+    background-image: none;
 }
 
 .nebari-login-container {
@@ -247,100 +364,175 @@ samp {
 
 .nebari-login-card {
     position: relative;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-top: 3px solid var(--nebari-purple);
-    border-radius: var(--radius);
-    padding: 2.25rem 2.5rem 2rem;
-    /* Shadow — NIC dashboard shadow-sm */
-    box-shadow: var(--shadow-sm), 0 4px 24px rgba(124, 58, 237, 0.06);
+    z-index: 1;
+    width: min(384px, 100%);
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #b7b7bb;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
 
-/* Lighter shadow in dark mode — glows don't need heavy shadow */
-[data-theme="dark"] .nebari-login-card {
-    box-shadow: none;
+/* ---- Backdrop ----
+
+   The three glows from the Figma login background, which used to ship as one
+   SVG per theme. A url()-referenced SVG cannot read custom properties, so the
+   shapes are drawn as gradients and only the colours (the `--login-*` tokens)
+   change between themes.
+
+   A rotating layer only hides its own edges inside its inscribed circle, so
+   this is a square of 150vmax: half of that (75vmax) clears the viewport's
+   half-diagonal, which can reach 70.8vmax on a square viewport. The backdrop
+   colour stays on the wrapper — an opaque fill here would spin with the layer
+   — and the glows are sized in vmax so each one fades to fully transparent
+   before the square's edge instead of being clipped mid-fade. */
+.nebari-login-wrapper::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    width: 150vmax;
+    height: 150vmax;
+    margin: -75vmax 0 0 -75vmax;
+    background-image:
+        radial-gradient(44vmax 26vmax at calc(50% - 30vmax) calc(50% - 2vmax), var(--login-glow-purple) 0%, var(--login-glow-purple-mid) 46%, transparent 100%),
+        radial-gradient(40vmax 34vmax at calc(50% + 34vmax) calc(50% - 22vmax), var(--login-glow-teal) 0%, var(--login-glow-teal-mid) 48%, transparent 100%),
+        radial-gradient(42vmax 34vmax at calc(50% + 32vmax) calc(50% + 23vmax), var(--login-glow-amber) 0%, var(--login-glow-amber-mid) 48%, transparent 100%);
+    animation: nebari-background-orbit 70s linear infinite;
+    transform-origin: center;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .nebari-login-card {
-        box-shadow: none;
-    }
+@keyframes nebari-background-orbit {
+    to { transform: rotate(-360deg); }
 }
 
-/* ========================
-   LOGO HEADER
-   ======================== */
+@media (prefers-reduced-motion: reduce) {
+    .nebari-login-wrapper::before { animation: none; }
+}
+
+/* ---- Logo and heading ---- */
 
 .nebari-logo-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.75rem;
+    margin: 0 0 24px;
 }
 
 .nebari-logo {
-    width: 160px;
-    height: 40px;
-    /* 160 / 4 = 40 */
+    width: 123px;
+    height: 32px;
+    margin: 0 auto;
     object-fit: contain;
     object-position: center;
-    margin: 0 auto;
 }
 
-/* ========================
-   PAGE TITLE
-   ======================== */
+/* Only the variant for the active colour scheme is shown; LOGIN DARK swaps them. */
+.nebari-logo-dark { display: none; }
 
 .nebari-header {
-    text-align: center;
-    margin-bottom: 1.75rem;
+    margin: 0 0 24px;
+    text-align: left;
 }
 
+.nebari-heading-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Size and colour come from `.nebari-header .nebari-title` in LOGIN TYPOGRAPHY. */
 .nebari-title {
-    font-size: 1.375rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+    margin: 0;
+    color: #262628;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    letter-spacing: 0;
 }
 
 .nebari-subtitle {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    margin-top: 0.375rem;
+    margin: 0;
+    color: #262628;
+    font-size: 16px;
     font-weight: 400;
+    line-height: 24px;
 }
 
-/* ========================
-   FORM CONTAINER
-   ======================== */
+/* ---- Form layout ----
 
-.nebari-form-container {
-    margin-bottom: 0;
+   One vertical rhythm for every login form. This used to be a hand-picked list
+   of form ids, with the pages not on it falling back to per-group margins — the
+   reason field spacing differed between, say, sign-in and register. Every login
+   page renders inside `.nebari-login-wrapper`, so the gap is stated once and the
+   `Field` components stack against it. */
+.nebari-login-wrapper form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* ========================
-   FORM GROUPS
-   ======================== */
+.nebari-form-container { margin-bottom: 0; }
 
-.nebari-form-group {
-    margin-bottom: 1rem;
+.nebari-form-group,
+.nebari-form-group:last-child { margin: 0; }
+
+/* Remember-me / forgot-password row. */
+.nebari-form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    font-size: 0.875rem;
 }
 
-.nebari-form-group:last-child {
-    margin-bottom: 0;
+/* Back-link left, submit right, or stacked. */
+.nebari-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 4px 0 0;
 }
 
-/* ========================
-   LABELS
-   ======================== */
+.nebari-form-actions .nebari-button-full { flex: 1; }
+
+/* ---- Labels ---- */
 
 .nebari-label {
     display: block;
-    margin-bottom: 0.375rem;
-    font-size: 0.875rem;
+    margin: 0 0 4px;
+    color: #262628;
+    font-size: 14px;
     font-weight: 500;
-    color: var(--text-secondary);
+    line-height: 20px;
+}
+
+.nebari-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 20px;
+}
+
+.nebari-label-row .nebari-label { margin-bottom: 4px; }
+
+/* Keycloak renders the required marker beside (not inside) its label. */
+.nebari-label-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 4px;
+    color: #d2161c;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+.nebari-label-wrapper .nebari-label {
+    margin: 0;
+    color: #262628;
 }
 
 .nebari-required-asterisk {
@@ -348,23 +540,16 @@ samp {
     margin-left: 2px;
 }
 
-/* ========================
-   INPUT FIELDS
+.nebari-forgot-link {
+    margin-bottom: 4px;
+    padding: 2px 8px;
+    color: #70707a;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+}
 
-   The bare element selectors below are scoped with `:where(.nebari-login-wrapper)`
-   — the login `Template`'s root. Unscoped, they matched every `input`, `select`,
-   `textarea` and `button[type="submit"]` in the app, and because they are
-   unlayered they beat both PatternFly (layer `patternfly`) and every Tailwind
-   utility (layer `utilities`). That leaked login styling into the Admin and
-   Account consoles: a stray 1px/6px-radius box inside PatternFly's
-   `TextInputGroup`, hardcoded hex that ignored dark mode, and `width: 100%` on
-   every submit button, which is what stopped icon+label buttons sitting on one
-   line.
-
-   `:where()` contributes no specificity, so scoping does not change which rule
-   wins inside the login pages — they render identically, which the screenshot
-   suite verifies. Prefer adding to the `.nebari-*` classes over widening these.
-   ======================== */
+/* ---- Inputs ---- */
 
 .nebari-input,
 :where(.nebari-login-wrapper) input[type="text"],
@@ -374,21 +559,22 @@ samp {
 :where(.nebari-login-wrapper) select,
 :where(.nebari-login-wrapper) textarea {
     width: 100%;
-    padding: 0.625rem 0.875rem;
-    font-size: 0.9375rem;
-    line-height: 1.5;
-    color: var(--text-primary);
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    height: 32px;
+    padding: 5px 12px;
+    color: #262628;
+    background: #f8f8f8;
+    border: 1px solid #9d9da6;
+    border-radius: 6px;
     font-family: inherit;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .nebari-input::placeholder,
 :where(.nebari-login-wrapper) input::placeholder {
-    color: var(--text-muted);
+    color: #70707a;
     font-weight: 400;
 }
 
@@ -415,7 +601,7 @@ samp {
 
 .nebari-input[aria-invalid="true"],
 :where(.nebari-login-wrapper) input[aria-invalid="true"] {
-    border-color: var(--nebari-red);
+    border-color: #d2161c;
 }
 
 .nebari-input[aria-invalid="true"]:focus,
@@ -424,9 +610,20 @@ samp {
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
-/* ========================
-   BUTTONS
-   ======================== */
+/* Field-level validation error (below input). */
+.nebari-field-error {
+    display: block;
+    margin-top: 0;
+    color: #d2161c;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+}
+
+/* On sign-in, the username error replaces its label rather than stacking under it. */
+#kc-form-login .nebari-form-group:has(#username[aria-invalid="true"]) > .nebari-label { display: none; }
+
+/* ---- Buttons ---- */
 
 .nebari-button,
 :where(.nebari-login-wrapper) button[type="submit"],
@@ -436,24 +633,25 @@ samp {
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 0.625rem 1.25rem;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    line-height: 1.5;
-    text-align: center;
-    border-radius: 8px;
+    min-height: 32px;
+    padding: 5px 10px;
     border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    text-align: center;
+    text-decoration: none;
     cursor: pointer;
     transition: var(--transition-fast);
-    font-family: inherit;
-    text-decoration: none;
 }
 
 .nebari-button-primary,
 :where(.nebari-login-wrapper) button[type="submit"],
 :where(.nebari-login-wrapper) input[type="submit"] {
-    background: var(--accent);
     color: #ffffff;
+    background: #9547c0;
 }
 
 .nebari-button-primary:hover,
@@ -488,45 +686,64 @@ samp {
     color: var(--text-primary);
 }
 
+.nebari-button-full { width: 100%; }
+
 /* Link buttons keep button semantics, not link semantics.
  *
- * What they have to beat is the login-wrapper anchor rule further down, whose
+ * What they have to beat is the login-wrapper anchor rule below, whose
  * `:hover` sets `text-decoration: underline`. That rule is deliberately
  * specificity-free — `:where(.nebari-login-wrapper) a:where(:not([data-slot]))`
  * scores (0,0,1) — while these selectors score (0,1,1), so plain specificity
- * settles it in source-order-independent fashion. `!important` was belt and
- * braces and made the next override need `!important` too. */
+ * settles it in source-order-independent fashion. */
 a.nebari-button,
 a.nebari-button-primary,
-a.nebari-button-secondary {
-    text-decoration: none;
-}
-
+a.nebari-button-secondary,
 a.nebari-button:hover,
 a.nebari-button-primary:hover,
 a.nebari-button-secondary:hover {
     text-decoration: none;
 }
 
-/* Full-width button modifier */
-.nebari-button-full {
-    width: 100%;
+/* Keep link-style primary buttons legible in every interaction state.
+ *
+ * Two classes plus an element — (0,2,1) — which already outranks both the
+ * browser's `a:visited` default and the (0,0,1) login-wrapper anchor rule, so no
+ * `!important` is needed. */
+a.nebari-button.nebari-button-primary,
+a.nebari-button.nebari-button-primary:hover,
+a.nebari-button.nebari-button-primary:focus,
+a.nebari-button.nebari-button-primary:active,
+a.nebari-button.nebari-button-primary:visited {
+    color: #fff;
 }
 
-/* Form actions row (back-link left, submit right, or stacked) */
-.nebari-form-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
+/* ---- Links ----
+
+   Scoped like the bare element selectors above: unlayered, this beat the
+   design system's own link and button colours everywhere in the consoles.
+
+   `:not([data-slot])` excludes design-system components for the same reason
+   inside the login pages: a `Button` rendered as an `<a>` (a "back to
+   application" link, say) would otherwise take this colour instead of its own
+   `text-primary-foreground`, and its label would disappear into the fill.
+
+   It is wrapped in `:where()` so it contributes no specificity. A bare
+   `:not([data-slot])` counts as an attribute selector, which pushed this rule to
+   (0,1,1) and let it beat single-class rules on plain anchors — the social
+   sign-in buttons turned purple. `:where()` keeps the exclusion and puts the
+   rule back at (0,0,1), below `.nebari-social-button` and friends. */
+:where(.nebari-login-wrapper) a:where(:not([data-slot])) {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
 }
 
-.nebari-form-actions .nebari-button-full {
-    flex: 1;
+:where(.nebari-login-wrapper) a:where(:not([data-slot])):hover {
+    color: var(--accent-dark);
+    text-decoration: underline;
 }
 
-/* Inline link style */
 .nebari-link {
     color: var(--nebari-purple);
     text-decoration: none;
@@ -540,67 +757,14 @@ a.nebari-button-secondary:hover {
     text-decoration: underline;
 }
 
-/* Field-level validation error (below input) */
-.nebari-field-error {
-    display: block;
-    margin-top: 0.375rem;
-    font-size: 0.8125rem;
-    color: var(--nebari-red);
-}
+/* ---- Social providers ---- */
 
-/* ========================
-   LINKS
-   ======================== */
-
-/* Scoped like the other bare element selectors above: unlayered, this beat the
- * design system's own link and button colours everywhere in the consoles.
- *
- * `:not([data-slot])` excludes design-system components for the same reason
- * inside the login pages: a `Button` rendered as an `<a>` (a "back to
- * application" link, say) would otherwise take this colour instead of its own
- * `text-primary-foreground`, and its label would disappear into the fill.
- *
- * It is wrapped in `:where()` so it contributes no specificity. A bare
- * `:not([data-slot])` counts as an attribute selector, which pushed this rule to
- * (0,1,1) and let it beat single-class rules on plain anchors — the social
- * sign-in buttons turned purple. `:where()` keeps the exclusion and puts the
- * rule back at (0,0,1), below `.nebari-social-button` and friends. */
-:where(.nebari-login-wrapper) a:where(:not([data-slot])) {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.15s;
-}
-
-:where(.nebari-login-wrapper) a:where(:not([data-slot])):hover {
-    color: var(--accent-dark);
-    text-decoration: underline;
-}
-
-/* ========================
-   FORM OPTIONS (remember me / forgot password row)
-   ======================== */
-
-.nebari-form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0.875rem 0 1.25rem;
-    font-size: 0.875rem;
-}
-
-/* ========================
-   SOCIAL PROVIDERS
-   ======================== */
-
-.nebari-social-section {
-    margin-top: 1.5rem;
-}
+.nebari-social-section { margin-top: 12px; }
 
 .nebari-social-providers {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 12px;
 }
 
 .nebari-social-button {
@@ -609,73 +773,65 @@ a.nebari-button-secondary:hover {
     justify-content: center;
     gap: 0.5rem;
     width: 100%;
-    padding: 0.625rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-    font-size: 0.875rem;
+    min-height: 32px;
+    padding: 5px 10px;
+    color: #262628;
+    background: #fff;
+    border: 1px solid #9d9da6;
+    border-radius: 6px;
+    font-size: 14px;
     font-weight: 500;
-    transition: var(--transition-fast);
-    cursor: pointer;
+    line-height: 20px;
     text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
 }
 
 .nebari-social-button:hover {
-    border-color: var(--accent);
-    background: var(--bg-hover);
-    text-decoration: none;
     color: var(--text-primary);
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    text-decoration: none;
 }
 
-/* ========================
-   INFO SECTION (register / back-to-login link)
-   ======================== */
+.nebari-social-icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    object-fit: contain;
+}
 
+/* ---- Info and notices ---- */
+
+/* Register / back-to-login link. */
 .nebari-info-section {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-    font-size: 0.875rem;
+    margin-top: 16px;
+    padding-top: 0;
+    border-top: 0;
     color: var(--text-muted);
+    font-size: 12px;
     font-weight: 400;
+    text-align: center;
 }
-
-/* ========================
-   REQUIRED FIELDS NOTICE
-   ======================== */
 
 .nebari-required-notice {
     margin-top: 1rem;
-    font-size: 0.8125rem;
     color: var(--text-muted);
+    font-size: 0.8125rem;
     font-weight: 400;
 }
 
-/* ========================
-   RESPONSIVE
-   ======================== */
+/* ---- Responsive ---- */
 
 @media (max-width: 480px) {
-    .nebari-login-wrapper {
-        padding: 1rem;
-        align-items: flex-start;
-        padding-top: 3rem;
-    }
-
-    .nebari-login-card {
-        padding: 1.75rem 1.25rem 1.5rem;
-    }
-
-    .nebari-title {
-        font-size: 1.25rem;
-    }
+    .nebari-login-wrapper { align-items: center; padding: 16px; }
+    .nebari-login-card { padding: 24px; }
 }
 
-/* ========================
-   KEYCLOAK BUILT-IN CLASS OVERRIDES
-   ======================== */
+/* ---- Keycloakify default pages ----
+
+   Pages this theme has not written fall through to Keycloakify's own
+   implementation, which styles itself through these class names. */
 
 .kcLabelClass {
     display: block;
@@ -778,254 +934,25 @@ a.nebari-button-secondary:hover {
     text-decoration: none;
 }
 
-/* Keep the Figma login specification last in the cascade. */
-html,
-body,
-button,
-input,
-select,
-textarea { font-family: var(--font-sans); }
+/* ========================
+   LOGIN DARK
 
-.nebari-login-wrapper {
-    min-height: 100vh;
-    padding: 24px;
-    align-items: center;
-    background-color: #fff;
+   Figma: NIC Landing Page / Login (Dark), node 366:1291. These follow the
+   light rules so `data-theme` is authoritative at equal specificity. The
+   `:root:not([data-theme="light"])` variants cover the system preference before
+   main.tsx stamps `data-theme` onto the document.
+   ======================== */
+
+[data-theme="dark"] body {
+    background: #202124;
+    color: var(--text-primary);
 }
-
-.nebari-login-card {
-    width: min(384px, 100%);
-    padding: 24px;
-    background: #fff;
-    border: 1px solid #b7b7bb;
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-}
-
-.nebari-logo-header { margin: 0 0 24px; }
-.nebari-logo { width: 123px; height: 32px; }
-.nebari-header { margin: 0 0 24px; text-align: left; }
-.nebari-title { margin: 0; color: #262628; font-size: 18px; font-weight: 600; line-height: 24px; letter-spacing: 0; }
-.nebari-heading-group { display: flex; flex-direction: column; gap: 2px; }
-.nebari-subtitle { margin: 0; color: #262628; font-size: 16px; font-weight: 400; line-height: 24px; }
-
-/* One vertical rhythm for every login form. This used to be a hand-picked list
- * of form ids, with the pages not on it falling back to per-group margins — the
- * reason field spacing differed between, say, sign-in and register. Every login
- * page renders inside `.nebari-login-wrapper`, so the gap is stated once and the
- * `Field` components stack against it. The update-profile visual baseline is
- * intentionally 80px taller as a result: its four previously collapsed
- * inter-field gaps and action gap now use this same 20px rhythm. */
-.nebari-login-wrapper form { display: flex; flex-direction: column; gap: 20px; }
-
-.nebari-form-group,
-.nebari-form-group:last-child { margin: 0; }
-.nebari-label-row { display: flex; align-items: center; justify-content: space-between; min-height: 20px; }
-.nebari-label { margin: 0 0 4px; color: #262628; font-size: 14px; font-weight: 500; line-height: 20px; }
-.nebari-label-row .nebari-label { margin-bottom: 4px; }
-.nebari-forgot-link { margin-bottom: 4px; padding: 2px 8px; color: #70707a; font-size: 12px; font-weight: 500; line-height: 16px; }
-
-.nebari-input,
-:where(.nebari-login-wrapper) input[type="text"],
-:where(.nebari-login-wrapper) input[type="email"],
-:where(.nebari-login-wrapper) input[type="password"],
-:where(.nebari-login-wrapper) input[type="tel"],
-:where(.nebari-login-wrapper) select,
-:where(.nebari-login-wrapper) textarea {
-    height: 32px;
-    padding: 5px 12px;
-    border: 1px solid #9d9da6;
-    border-radius: 6px;
-    background: #f8f8f8;
-    color: #262628;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20px;
-}
-
-.nebari-input::placeholder,
-:where(.nebari-login-wrapper) input::placeholder { color: #70707a; font-weight: 400; }
-.nebari-input[aria-invalid="true"],
-:where(.nebari-login-wrapper) input[aria-invalid="true"] { border-color: #d2161c; }
-.nebari-field-error { display: block; margin-top: 0; color: #d2161c; font-size: 12px; font-weight: 400; line-height: 16px; }
-#kc-form-login .nebari-form-group:has(#username[aria-invalid="true"]) > .nebari-label { display: none; }
-
-.nebari-button,
-:where(.nebari-login-wrapper) button[type="submit"],
-:where(.nebari-login-wrapper) input[type="submit"],
-.btn { min-height: 32px; padding: 5px 10px; border-radius: 6px; font-size: 14px; font-weight: 500; line-height: 20px; }
-.nebari-button-primary,
-:where(.nebari-login-wrapper) button[type="submit"],
-:where(.nebari-login-wrapper) input[type="submit"] { background: #9547c0; }
-.nebari-form-options { margin: 0; }
-.nebari-form-actions { margin: 4px 0 0; gap: 12px; }
-
-.nebari-social-section { margin-top: 12px; }
-.nebari-social-providers { gap: 12px; }
-.nebari-social-button { min-height: 32px; padding: 5px 10px; border: 1px solid #9d9da6; border-radius: 6px; background: #fff; color: #262628; font-size: 14px; font-weight: 500; line-height: 20px; }
-.nebari-info-section { margin-top: 16px; padding-top: 0; border-top: 0; font-size: 12px; }
-
-@media (max-width: 480px) {
-    .nebari-login-wrapper { align-items: center; padding: 16px; }
-    .nebari-login-card { padding: 24px; }
-}
-
-/* Slowly orbit the three Figma color blobs as one lightweight layer. */
-.nebari-login-wrapper {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    background-color: var(--login-backdrop);
-    background-image: none;
-}
-
-/* Backdrop palette — the three glows from the Figma login background, which
-   used to ship as one SVG per theme. A url()-referenced SVG cannot read these
-   custom properties, so the shapes are drawn as gradients here and only the
-   colours change between themes.
-
-   These sit before the [data-theme="dark"] block below: custom properties on
-   :root and on [data-theme] have equal specificity, so source order decides. */
-:root {
-    --login-backdrop: #fff;
-    --login-glow-purple: rgba(210, 132, 255, .48);
-    --login-glow-purple-mid: rgba(232, 194, 255, .30);
-    --login-glow-teal: rgba(170, 244, 235, .48);
-    --login-glow-teal-mid: rgba(209, 248, 243, .30);
-    --login-glow-amber: rgba(250, 216, 144, .42);
-    --login-glow-amber-mid: rgba(252, 237, 204, .28);
-}
-
-/* Dark values are the fills from the old login-dark-background.svg:
-   #1B3C39 teal, #442655 purple, #413313 amber. */
-[data-theme="dark"] {
-    --login-backdrop: #202124;
-    --login-glow-purple: rgba(68, 38, 85, .95);
-    --login-glow-purple-mid: rgba(68, 38, 85, .55);
-    --login-glow-teal: rgba(27, 60, 57, .95);
-    --login-glow-teal-mid: rgba(27, 60, 57, .55);
-    --login-glow-amber: rgba(65, 51, 19, .95);
-    --login-glow-amber-mid: rgba(65, 51, 19, .55);
-}
-
-/* Same values for the system preference, so the backdrop is right even before
-   main.tsx stamps data-theme onto the document. */
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --login-backdrop: #202124;
-        --login-glow-purple: rgba(68, 38, 85, .95);
-        --login-glow-purple-mid: rgba(68, 38, 85, .55);
-        --login-glow-teal: rgba(27, 60, 57, .95);
-        --login-glow-teal-mid: rgba(27, 60, 57, .55);
-        --login-glow-amber: rgba(65, 51, 19, .95);
-        --login-glow-amber-mid: rgba(65, 51, 19, .55);
-    }
-}
-
-/* A rotating layer only hides its own edges inside its inscribed circle, so
-   this is a square of 150vmax: half of that (75vmax) clears the viewport's
-   half-diagonal, which can reach 70.8vmax on a square viewport. The backdrop
-   colour stays on the wrapper — an opaque fill here would spin with the layer
-   — and the glows are sized in vmax so each one fades to fully transparent
-   before the square's edge instead of being clipped mid-fade. */
-.nebari-login-wrapper::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: 50%;
-    left: 50%;
-    width: 150vmax;
-    height: 150vmax;
-    margin: -75vmax 0 0 -75vmax;
-    background-image:
-        radial-gradient(44vmax 26vmax at calc(50% - 30vmax) calc(50% - 2vmax), var(--login-glow-purple) 0%, var(--login-glow-purple-mid) 46%, transparent 100%),
-        radial-gradient(40vmax 34vmax at calc(50% + 34vmax) calc(50% - 22vmax), var(--login-glow-teal) 0%, var(--login-glow-teal-mid) 48%, transparent 100%),
-        radial-gradient(42vmax 34vmax at calc(50% + 32vmax) calc(50% + 23vmax), var(--login-glow-amber) 0%, var(--login-glow-amber-mid) 48%, transparent 100%);
-    animation: nebari-background-orbit 70s linear infinite;
-    transform-origin: center;
-}
-
-.nebari-login-card {
-    position: relative;
-    z-index: 1;
-}
-
-.nebari-social-icon {
-    width: 16px;
-    height: 16px;
-    flex: 0 0 16px;
-    object-fit: contain;
-}
-
-[data-theme="dark"] .nebari-social-icon {
-    filter: invert(1);
-}
-
-@keyframes nebari-background-orbit {
-    to { transform: rotate(-360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .nebari-login-wrapper::before { animation: none; }
-}
-
-/* Keycloak renders the required marker beside (not inside) its label. */
-.nebari-label-wrapper {
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-    margin-bottom: 4px;
-    color: #d2161c;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-}
-
-.nebari-label-wrapper .nebari-label {
-    margin: 0;
-    color: #262628;
-}
-
-/* Keep link-style primary buttons legible in every interaction state.
- *
- * Two classes plus an element — (0,2,1) — which already outranks both the
- * browser's `a:visited` default and the (0,0,1) login-wrapper anchor rule, so no
- * `!important` is needed. It mattered that this one dropped it: while it was
- * important, the dark-theme override below had to be important purely to beat
- * it, and the two were an arms race rather than a cascade. */
-a.nebari-button.nebari-button-primary,
-a.nebari-button.nebari-button-primary:hover,
-a.nebari-button.nebari-button-primary:focus,
-a.nebari-button.nebari-button-primary:active,
-a.nebari-button.nebari-button-primary:visited {
-    color: #fff;
-}
-
-/* Figma: NIC Landing Page / Login (Dark), node 366:1291.
-   These rules intentionally come last so data-theme is authoritative. */
-.nebari-logo-dark { display: none; }
-
-[data-theme="dark"] {
-    color-scheme: dark;
-    --bg-primary: #202124;
-    --bg-secondary: #343437;
-    --bg-elevated: #262629;
-    --bg-hover: #3d3d41;
-    --text-primary: #f7f7f8;
-    --text-secondary: #f0f0f2;
-    --text-muted: #a7a7b0;
-    --border-color: #56565d;
-    --border-subtle: #62626b;
-    --accent: #b34ee4;
-    --accent-dark: #c268ec;
-    --nebari-purple: #b34ee4;
-    --nebari-red: #eb8a83;
-}
-
-[data-theme="dark"] body { background: #202124; color: var(--text-primary); }
 
 [data-theme="dark"] .nebari-login-wrapper {
     background-color: #202124;
+    background-image:
+        radial-gradient(ellipse at 25% 45%, rgba(155, 61, 204, 0.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 20%, rgba(11, 112, 224, 0.04) 0%, transparent 55%);
 }
 
 [data-theme="dark"] .nebari-login-card {
@@ -1034,8 +961,22 @@ a.nebari-button.nebari-button-primary:visited {
     box-shadow: 0 1px 2px rgba(0, 0, 0, .24);
 }
 
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .nebari-login-wrapper {
+        background-image:
+            radial-gradient(ellipse at 25% 45%, rgba(155, 61, 204, 0.06) 0%, transparent 55%),
+            radial-gradient(ellipse at 75% 20%, rgba(11, 112, 224, 0.04) 0%, transparent 55%);
+    }
+
+    /* Outranks the `[data-theme="dark"]` shadow above: (0,3,0) against (0,2,0). */
+    :root:not([data-theme="light"]) .nebari-login-card {
+        box-shadow: none;
+    }
+}
+
 [data-theme="dark"] .nebari-logo-light { display: none; }
 [data-theme="dark"] .nebari-logo-dark { display: block; }
+
 [data-theme="dark"] .nebari-title,
 [data-theme="dark"] .nebari-subtitle,
 [data-theme="dark"] .nebari-label,
@@ -1067,6 +1008,7 @@ a.nebari-button.nebari-button-primary:visited {
 
 [data-theme="dark"] .nebari-input[aria-invalid="true"],
 [data-theme="dark"] :where(.nebari-login-wrapper) input[aria-invalid="true"] { border-color: #d96c64; }
+
 [data-theme="dark"] .nebari-field-error,
 [data-theme="dark"] .nebari-label-wrapper { color: #eb8a83; }
 
@@ -1079,7 +1021,10 @@ a.nebari-button.nebari-button-primary:visited {
 
 [data-theme="dark"] .nebari-button-primary:hover,
 [data-theme="dark"] :where(.nebari-login-wrapper) button[type="submit"]:hover,
-[data-theme="dark"] :where(.nebari-login-wrapper) input[type="submit"]:hover { background: #c268ec; color: #111114; }
+[data-theme="dark"] :where(.nebari-login-wrapper) input[type="submit"]:hover {
+    background: #c268ec;
+    color: #111114;
+}
 
 [data-theme="dark"] a.nebari-button.nebari-button-primary,
 [data-theme="dark"] a.nebari-button.nebari-button-primary:hover,
@@ -1099,6 +1044,89 @@ a.nebari-button.nebari-button-primary:visited {
     background: #3d3d41;
     border-color: #777780;
     color: #fff;
+}
+
+[data-theme="dark"] .nebari-social-icon { filter: invert(1); }
+
+/* ========================
+   LOGIN TYPOGRAPHY
+
+   Token-driven typography and input states for every login form. They come
+   after LOGIN DARK on purpose: at equal specificity they win, so the title and
+   error colours follow `--foreground` and `--destructive-foreground` instead
+   of the dark hex overrides.
+   ======================== */
+
+
+.nebari-header .nebari-title {
+    margin: 0;
+    color: var(--color-foreground-default, #262628);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+    letter-spacing: normal;
+}
+
+/* Label/LG — shared input-label typography across all login-flow forms. */
+.nebari-label,
+[data-slot="field-label"],
+.kcLabelClass,
+.nebari-label-wrapper .nebari-label {
+    color: var(--color-foreground-default, #262628);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: normal;
+}
+
+.nebari-label-row .nebari-forgot-link {
+    margin: 0;
+    padding: 0;
+    color: var(--color-foreground-default, #262628);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0;
+}
+
+[data-slot="field-error"].nebari-login-error {
+    margin-top: 0;
+    color: var(--color-foreground-destructive, #F29E93);
+    font-family: var(--Font-Sans, Geist);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: 0;
+}
+
+/* Login inputs use a border-only focus treatment. This final override
+   neutralizes older login CSS above, including its focus shadow. */
+[data-slot="input"]:focus {
+    border-width: 2px;
+    border-color: var(--ring);
+    box-shadow: none;
+}
+
+/* Validation uses a 1px destructive border at rest and 2px while focused. */
+[data-slot="input"][aria-invalid="true"],
+[data-slot="input"][data-invalid] {
+    border-width: 1px;
+    border-color: var(--color-foreground-destructive, #d2161c);
+    box-shadow: none;
+}
+
+[data-slot="input"][aria-invalid="true"]:focus,
+[data-slot="input"][data-invalid]:focus {
+    border-width: 2px;
+    border-color: var(--color-foreground-destructive, #d2161c);
+    box-shadow: none;
 }
 
 @theme inline {
@@ -1202,174 +1230,543 @@ a.nebari-button.nebari-button-primary:visited {
     }
 }
 
-.dark,
-[data-theme="dark"] {
-    --header-background: var(--card);
-    --header-border: #5a5a61;
-    --header-foreground: #f8f8f8;
-    --header-action-hover: #4a4a50;
-    --sign-out-foreground: #ff6b6b;
-    --background: oklch(26.94% 0.0037 286.15);
-    --foreground: oklch(97.91% 0 0);
-    --scrim: rgba(0, 0, 0, 0.6);
-    --card: oklch(33.01% 0.0052 286.11);
-    --card-foreground: oklch(97.91% 0 0);
-    --popover: oklch(26.94% 0.0037 286.15);
-    --popover-foreground: oklch(97.91% 0 0);
-    --primary: oklch(61.98% 0.2159 311.67);
-    --primary-foreground: oklch(0% 0 0);
-    --primary-hover: oklch(69.98% 0.1926 311.48);
-    --secondary: oklch(40% 0.0269 250.57);
-    --secondary-foreground: oklch(95.04% 0.0042 236.50);
-    --muted: oklch(33.01% 0.0052 286.11);
-    --muted-foreground: oklch(69.88% 0.0130 286.06);
-    --muted-foreground-strong: oklch(78.06% 0.0056 286.27);
-    --accent: oklch(40% 0.0269 250.57);
-    --accent-foreground: oklch(95.04% 0.0042 236.50);
-    --destructive: oklch(33.1% 0.1332 27.42);
-    --destructive-foreground: #F29E93;
-    --warning: oklch(33.09% 0.0677 92.20);
-    --warning-foreground: oklch(87.09% 0.1248 91.93);
-    --success: oklch(32.88% 0.0887 149.73);
-    --success-foreground: oklch(87.04% 0.0814 149.55);
-    --border: oklch(47.01% 0.0112 285.96);
-    --input: oklch(54.86% 0.0154 285.88);
-    --border-strong: oklch(61.96% 0.0134 286.00);
-    --ring: oklch(69.98% 0.1926 311.48);
-    --chart-1: oklch(69.98% 0.1926 311.48);
-    --chart-2: oklch(69.9% 0.0995 187.56);
-    --chart-3: oklch(77.95% 0.1259 85.96);
-    --chart-4: oklch(69.95% 0.1433 264.44);
-    --chart-5: oklch(69.96% 0.1814 149.67);
-    --sidebar: oklch(26.94% 0.0037 286.15);
-    --sidebar-foreground: oklch(97.91% 0 0);
-    --sidebar-primary: oklch(61.98% 0.2159 311.67);
-    --sidebar-primary-foreground: oklch(0% 0 0);
-    --sidebar-accent: oklch(40% 0.0269 250.57);
-    --sidebar-accent-foreground: oklch(95.04% 0.0042 236.50);
-    --sidebar-border: oklch(47.01% 0.0112 285.96);
-    --sidebar-ring: oklch(69.98% 0.1926 311.48);
-}
+/* ==========================================================================
+   COLLAB THEME
 
-/* Heading/H3 — authoritative login-flow page-title typography. */
-:root {
-    --font-sans: "Geist Variable", "Geist", sans-serif;
-    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+   The `collab` theme (OpenTeams Collab, formerly `openteams`). Palette and
+   typography taken from the https://openteams.com landing page — its Elementor
+   global kit, so these are the brand values rather than colours sampled off a
+   screenshot: midnight #000f3a, deep blue #022791, electric blue #4d75fe
+   (primary), coral #ff8a69 (secondary), amber #faa944 (accent), all set in
+   Inter Tight.
+
+   The landing page's shape language is what the login form borrows: a flat
+   deep-blue ground with a translucent white card as the only figure on it,
+   pill buttons (the hero CTA is an outlined pill, the nav CTA a filled one),
+   coral reserved for small accents, and headings in Inter Tight 600 with tight
+   tracking.
+
+   Selectors are scoped to the brand *and* the theme type. `data-brand` — the
+   theme name, stamped by `src/main.tsx` — keeps the Nebari theme untouched; the
+   type keeps this off the Admin and Account consoles. `data-brand` alone is not
+   enough: it is set for every theme type, because the console mastheads need it
+   to pick a logo, so scoping on it alone applied this login card's input sizing,
+   fonts and colour tokens to both consoles: a 30px console search field became
+   46px and its text ran under the search icon.
+   ========================================================================== */
+
+/* Login and Admin only. The Account console is excluded because
+   `src/account/nebari-account.css` paints its content panel light regardless of
+   these tokens: with a dark `--foreground` its field labels turned white on a
+   white panel and disappeared. Until that stylesheet can follow a dark palette,
+   the Account console keeps the Nebari console styling, which is readable. */
+html[data-brand="collab"]:not([data-kc-theme-type="account"]) {
+    color-scheme: dark;
+    --font-sans: "Inter Tight Variable", "Inter Tight", sans-serif;
     --Font-Sans: var(--font-sans);
-    --color-foreground-default: var(--foreground, #262628);
-    --color-foreground-destructive: var(--destructive-foreground, #d2161c);
+    --background: #022791;
+    --foreground: #ffffff;
+    /* Surfaces are white scrims over the ground, the same material the login
+       card is made of, rather than a second blue mixed by hand. `--popover` has
+       to be opaque because dropdowns overlay page content, so it carries the
+       composite of a .14 scrim over #022791 rather than the scrim itself. */
+    --card: rgba(255, 255, 255, .10);
+    --card-foreground: #ffffff;
+    --popover: #2545a0;
+    --popover-foreground: #ffffff;
+    --primary: #4d75fe;
+    --primary-foreground: #ffffff;
+    --primary-hover: #6487ff;
+    --secondary: rgba(77, 117, 254, .15);
+    --secondary-foreground: #ffffff;
+    --muted: rgba(255, 255, 255, .08);
+    --muted-foreground: #b9c7f6;
+    --muted-foreground-strong: #dce4ff;
+    --accent: rgba(77, 117, 254, .18);
+    --accent-foreground: #ffffff;
+    --destructive: rgba(255, 138, 105, .15);
+    --destructive-foreground: #ffad96;
+    --border: rgba(255, 255, 255, .24);
+    --input: rgba(255, 255, 255, .34);
+    --border-strong: rgba(255, 255, 255, .55);
+    --ring: #4d75fe;
+    --bg-primary: #022791;
+    --bg-secondary: #2545a0;
+    --bg-elevated: rgba(255, 255, 255, .14);
+    --bg-hover: rgba(77, 117, 254, .18);
+    --text-primary: #ffffff;
+    --text-secondary: #dce4ff;
+    --text-muted: #b9c7f6;
+    --border-color: rgba(255, 255, 255, .24);
+    --border-subtle: rgba(255, 255, 255, .14);
+    --color-foreground-default: #ffffff;
+    --color-foreground-destructive: #ffad96;
+    --nebari-purple: #4d75fe;
+    --nebari-purple-dark: #6487ff;
+    --nebari-purple-light: rgba(77, 117, 254, .15);
+    --nebari-red: #ff8a69;
+    --login-backdrop: #022791;
+
+    /* The Admin and Account console chrome reads its own token set, separate
+       from the palette above. Without these the masthead and sidebar keep the
+       light `:root` values while everything else turns navy — which is what
+       made the sidebar white-on-white. Values mirror the palette: the deep-blue
+       surface for chrome, electric blue for selection, coral for sign-out. */
+    /* #113498 is a .06 white scrim over #022791, resolved to a solid. Solid and
+       not the scrim itself: the masthead and sidebar are fixed chrome, and a
+       translucent one would show whatever scrolls behind it. */
+    --header-background: #113498;
+    --header-border: rgba(255, 255, 255, .24);
+    --header-foreground: #ffffff;
+    --header-action-hover: rgba(77, 117, 254, .18);
+    --sign-out-foreground: #ff8a69;
+    --sidebar: #113498;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #4d75fe;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: rgba(77, 117, 254, .18);
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: rgba(255, 255, 255, .24);
+    --sidebar-ring: #4d75fe;
 }
 
-.nebari-header .nebari-title {
-    margin: 0;
-    color: var(--color-foreground-default, #262628);
-    font-family: var(--Font-Sans, Geist);
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 24px;
-    letter-spacing: normal;
+html[data-brand="collab"][data-kc-theme-type="login"] body,
+html[data-brand="collab"][data-kc-theme-type="login"] button,
+html[data-brand="collab"][data-kc-theme-type="login"] input,
+html[data-brand="collab"][data-kc-theme-type="login"] select,
+html[data-brand="collab"][data-kc-theme-type="login"] textarea {
+    font-family: var(--font-sans);
 }
 
-/* Label/LG — shared input-label typography across all login-flow forms. */
-.nebari-label,
-[data-slot="field-label"],
-.kcLabelClass,
-.nebari-label-wrapper .nebari-label {
-    color: var(--color-foreground-default, #262628);
-    font-family: var(--Font-Sans, Geist);
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 20px;
-    letter-spacing: normal;
+html[data-brand="collab"][data-kc-theme-type="login"] body {
+    background: #022791;
+    color: #ffffff;
 }
 
-.nebari-label-row .nebari-forgot-link {
-    margin: 0;
-    padding: 0;
-    color: var(--color-foreground-default, #262628);
-    font-family: var(--Font-Sans, Geist);
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 16px;
-    letter-spacing: 0;
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper {
+    padding: 32px;
+    background-color: #022791;
+    background-image: none;
 }
 
-[data-slot="field-error"].nebari-login-error {
+/* One flat ground, nothing painted on it. The card is the only figure on the
+ * page, and it separates from the ground by being a lighter translucent white
+ * rather than by sitting in a pool of light — so the bloom the Nebari variant
+ * inherits, and the faint grid over it, are both switched off here. Both are
+ * `::before`/`::after` on the shared wrapper, so they have to be suppressed
+ * rather than simply not declared. */
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper::before,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper::after {
+    content: none;
+}
+
+/* A white scrim over the blue ground rather than a fill of its own: #ffffff24
+ * is the design's value, and because it is an alpha the card stays a lightened
+ * version of whatever is behind it instead of a colour that has to be kept in
+ * step with the ground by hand.
+ *
+ * `backdrop-filter` is specified at 24px and set here, but note it has nothing
+ * to do while the ground is flat — there is no detail behind the card to
+ * soften. It earns its keep only if something is ever painted back there.
+ * `-webkit-` is still required for Safari.
+ *
+ * The 24px padding and the 24px `gap` between the card's rows are the same
+ * step, so the text block is inset by exactly the distance that separates its
+ * rows. `Template.tsx` sets Tailwind's `gap-0 py-0` on this element; these
+ * rules are unlayered and so outrank both utilities. */
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-card {
+    width: min(480px, 100%);
+    padding: 24px;
+    gap: 24px;
+    overflow: visible;
+    background: #ffffff24;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+/* The per-row margins the Nebari variant uses are dropped: with the card now on
+ * a `gap`, each one would stack on top of it and the rhythm would drift back
+ * out of the 24px step. */
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-logo-header,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-header {
+    margin-bottom: 0;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-section {
     margin-top: 0;
-    color: var(--color-foreground-destructive, #F29E93);
-    font-family: var(--Font-Sans, Geist);
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 16px;
-    letter-spacing: 0;
 }
 
-/* Login inputs use a border-only focus treatment. This final override
-   neutralizes older login CSS above, including its focus shadow. */
-[data-slot="input"]:focus {
-    border-width: 2px;
-    border-color: var(--ring);
-    box-shadow: none;
+/* The Collab lockup: the shipped symbol, then the name as text.
+ *
+ * The symbol's source is square with the artwork bled to its edges, so the box
+ * is square too and `height` alone sizes it. The wordmark is Inter Tight 600 to
+ * match the headings, at a size and tracking chosen so its cap height lines up
+ * with the symbol rather than the two being set to the same nominal px.
+ *
+ * `align-items: center` is optical, not geometric: the symbol's mass sits below
+ * its own centre, so centring the boxes is what makes the pair look level. */
+.collab-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Validation uses a 1px destructive border at rest and 2px while focused. */
-[data-slot="input"][aria-invalid="true"],
-[data-slot="input"][data-invalid] {
+/* The symbol arrives upside down and infinitely small, then unwinds to upright
+ * at full size. CSS interpolates `rotate(180deg)` down to `rotate(0deg)` through
+ * decreasing angles, and decreasing is anticlockwise — writing the start as
+ * -180deg would spin it the other way for an identical starting pose.
+ *
+ * It runs once, on mount, because that is all a CSS animation does: there is no
+ * loop, no hover trigger, and nothing re-triggers it while the page is up. Each
+ * login page is its own document load, so it plays as the page appears and not
+ * again. The `both` fill keeps the first frame painted during the delay instead
+ * of flashing the symbol upright before the animation takes hold. */
+@keyframes collab-logo-intro {
+    from {
+        opacity: 0;
+        transform: rotate(180deg) scale(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+/* Both numbers here are measured off the design rather than picked, and both
+ * are expressed against the card: the symbol is 11.3% of its width and the
+ * wordmark's cap height 4.85%. At the 480px card that is 54px and a 32px font
+ * (this face puts its cap at 0.731 of the font size). They were 48px and 26px,
+ * set when the card was 440px; widening the card left them reading small
+ * against it, and this puts them back on the ratio. */
+.collab-logo-symbol {
+    display: block;
+    width: 54px;
+    height: 54px;
+    animation: collab-logo-intro .85s cubic-bezier(.16, .84, .32, 1) .06s both;
+}
+
+/* The wordmark does not animate: it is painted from the first frame and stays
+ * put while the symbol unwinds into place beside it. Nothing reflows as the
+ * symbol grows, because `scale` is a transform — its 54px box is already laid
+ * out at full size, so the name never shifts. */
+.collab-logo-wordmark {
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -.4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .collab-logo-symbol {
+        animation: none;
+    }
+}
+
+/* The lockup again in the Admin Console masthead, which is 56px tall and already
+   carries a nav label and a profile menu — so it is sized to the chrome rather
+   than to the login card, and it does not spin. An entrance animation belongs on
+   a page someone arrives at, not on the frame of a tool they work inside. */
+.collab-logo--masthead {
+    gap: 8px;
+}
+
+.collab-logo--masthead .collab-logo-symbol {
+    width: 32px;
+    height: 32px;
+    animation: none;
+}
+
+/* The masthead's own foreground, not the login card's white: the Account
+   console keeps the Nebari styling, whose light header would swallow a white
+   name. In the Admin Console the header foreground is white anyway. */
+.collab-logo--masthead .collab-logo-wordmark {
+    font-size: 19px;
+    color: inherit;
+}
+
+/* The Admin Console dashboard's hero mark.
+ *
+ * Upstream's `Dashboard.tsx` is vendored and renders `<Brand src={iconSvgUrl}>`
+ * from `admin/assets/icon.svg` — one file for every theme, because the bundle is
+ * compiled once and only the packaging is per-theme. Left alone, the Collab
+ * console greets the user with the Nebari mark. `content` on a replaced element
+ * swaps the rendered image without claiming the component, and `--brand-symbol`
+ * comes from `src/main.tsx`, so the path still lives only in `branding.ts`.
+ *
+ * The symbol is square where Nebari's mark is wide, so the width from
+ * `src/admin/index.css` is restated to keep the same visual weight. */
+html[data-brand="collab"][data-kc-theme-type="admin"] .keycloak__dashboard_icon {
+    content: var(--brand-symbol);
+    width: 72px;
+    max-width: 72px;
+    height: auto;
+}
+
+/* Landing-page headings are Inter Tight 600 pulled in tight, not 700. 21px is
+ * measured: the design's title puts ink 4.08% of the card's width tall, and at
+ * a 480px card that is what 21px renders. */
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-header .nebari-title {
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -.4px;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-subtitle,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label,
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="field-label"],
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-wrapper .nebari-label,
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="checkbox"] {
+    color: #ffffff;
+    font-family: var(--font-sans);
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label,
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="field-label"],
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-wrapper .nebari-label {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .2px;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper form {
+    gap: 24px;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-input,
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"],
+html[data-brand="collab"][data-kc-theme-type="login"] input[type="text"],
+html[data-brand="collab"][data-kc-theme-type="login"] input[type="email"],
+html[data-brand="collab"][data-kc-theme-type="login"] input[type="password"],
+html[data-brand="collab"][data-kc-theme-type="login"] input[type="tel"],
+html[data-brand="collab"][data-kc-theme-type="login"] select,
+html[data-brand="collab"][data-kc-theme-type="login"] textarea {
+    height: 46px;
+    padding: 11px 16px;
+    /* Square-ish, to sit with the panel rather than echo the pill buttons —
+     * on the site only calls to action are pill-shaped. */
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .10);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 22px;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]::placeholder,
+html[data-brand="collab"][data-kc-theme-type="login"] input::placeholder {
+    color: #9eaddd;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]:hover,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-input:hover {
+    border-color: rgba(255, 255, 255, .34);
+    background: rgba(255, 255, 255, .14);
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]:focus,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-input:focus {
     border-width: 1px;
-    border-color: var(--color-foreground-destructive, #d2161c);
+    border-color: #4d75fe;
+    background: rgba(255, 255, 255, .14);
+    box-shadow: 0 0 0 3px rgba(77, 117, 254, .3);
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input-end-adornment"] [data-slot="button"] {
+    color: #b9c7f6;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-row .nebari-forgot-link,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-link,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-required-notice {
+    color: #b9c7f6;
+    font-family: var(--font-sans);
+}
+
+/* Standalone action links are the site's blue ("Learn more about us →"); the
+ * forgot-password link stays muted because it sits inside a field label row. */
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section .nebari-link {
+    color: #4d75fe;
+    font-weight: 500;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-row .nebari-forgot-link:hover,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-link:hover,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section .nebari-link:hover {
+    color: #ffffff;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] #kc-login,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary,
+html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"],
+html[data-brand="collab"][data-kc-theme-type="login"] input[type="submit"] {
+    /* Inter Tight 500 at 16/0.3px, flat — no lift or glow, 6px radius measured
+     * off the design. At rest this is the palette's deep blue, the same value
+     * as the page ground, so the button reads as a window back through the card
+     * rather than as a slab sitting on it. That leaves the darker end of the
+     * palette free for the hover state, which is where the weight belongs. */
+    min-height: 44px;
+    padding: 11px 30px;
+    border: 1px solid #022791;
+    border-radius: 6px;
+    background: #022791;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: .3px;
+    line-height: 22px;
     box-shadow: none;
 }
 
-[data-slot="input"][aria-invalid="true"]:focus,
-[data-slot="input"][data-invalid]:focus {
-    border-width: 2px;
-    border-color: var(--color-foreground-destructive, #d2161c);
-    box-shadow: none;
+html[data-brand="collab"][data-kc-theme-type="login"] #kc-login:hover,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary:hover,
+html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]:hover,
+html[data-brand="collab"][data-kc-theme-type="login"] input[type="submit"]:hover {
+    border-color: #00040f;
+    background: #00040f;
+    color: #ffffff;
+    text-decoration: none;
 }
 
-.dark {
-    --background: oklch(26.94% 0.0037 286.15);
-    --foreground: oklch(97.91% 0 0);
-    --scrim: rgba(0, 0, 0, 0.6);
-    --card: oklch(33.01% 0.0052 286.11);
-    --card-foreground: oklch(97.91% 0 0);
-    --popover: oklch(26.94% 0.0037 286.15);
-    --popover-foreground: oklch(97.91% 0 0);
-    --primary: oklch(61.98% 0.2159 311.67);
-    --primary-foreground: oklch(0% 0 0);
-    --primary-hover: oklch(69.98% 0.1926 311.48);
-    --secondary: oklch(40% 0.0269 250.57);
-    --secondary-foreground: oklch(95.04% 0.0042 236.50);
-    --muted: oklch(33.01% 0.0052 286.11);
-    --muted-foreground: oklch(69.88% 0.0130 286.06);
-    --muted-foreground-strong: oklch(78.06% 0.0056 286.27);
-    --accent: oklch(40% 0.0269 250.57);
-    --accent-foreground: oklch(95.04% 0.0042 236.50);
-    --destructive: oklch(33.1% 0.1332 27.42);
-    --destructive-foreground: oklch(78.02% 0.1024 27.78);
-    --warning: oklch(33.09% 0.0677 92.20);
-    --warning-foreground: oklch(87.09% 0.1248 91.93);
-    --success: oklch(32.88% 0.0887 149.73);
-    --success-foreground: oklch(87.04% 0.0814 149.55);
-    --border: oklch(47.01% 0.0112 285.96);
-    --input: oklch(54.86% 0.0154 285.88);
-    --border-strong: oklch(61.96% 0.0134 286.00);
-    --ring: oklch(69.98% 0.1926 311.48);
-    --chart-1: oklch(69.98% 0.1926 311.48);
-    --chart-2: oklch(69.9% 0.0995 187.56);
-    --chart-3: oklch(77.95% 0.1259 85.96);
-    --chart-4: oklch(69.95% 0.1433 264.44);
-    --chart-5: oklch(69.96% 0.1814 149.67);
-    --sidebar: oklch(26.94% 0.0037 286.15);
-    --sidebar-foreground: oklch(97.91% 0 0);
-    --sidebar-primary: oklch(61.98% 0.2159 311.67);
-    --sidebar-primary-foreground: oklch(0% 0 0);
-    --sidebar-accent: oklch(40% 0.0269 250.57);
-    --sidebar-accent-foreground: oklch(95.04% 0.0042 236.50);
-    --sidebar-border: oklch(47.01% 0.0112 285.96);
-    --sidebar-ring: oklch(69.98% 0.1926 311.48);
+/* The arrow is a pseudo-element, so it costs no markup and no change to the
+ * shared Template. The button is already `inline-flex` with a `gap-2`, which
+ * spaces the arrow from the label for free — but that gap applies even at zero
+ * width, so at rest a matching negative margin cancels it and the label stays
+ * centred. On hover both relax together and the label slides left as the arrow
+ * arrives, which is what makes it read as one movement rather than two.
+ *
+ * `input[type="submit"]` is deliberately absent below: it is a replaced element
+ * and cannot carry `::after`. Every page here renders a real `<button>`; the
+ * rule above keeps the input form painted to match, it just gets no arrow. */
+html[data-brand="collab"][data-kc-theme-type="login"] #kc-login::after,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary::after,
+html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]::after {
+    /* A drawn arrow, not the "\2192" glyph. That glyph puts only 10x5px of ink on
+     * screen at this font size, and scaling it up to read at all stretches it
+     * into a hairline with a pinprick head, because it is cut to sit in a line
+     * of 16px text. An SVG is sized and weighted independently: `--arrow-w` is
+     * the one number to turn, and the stroke scales with it, so the line stays
+     * about as heavy as the label's stems whatever the size.
+     *
+     * The viewBox is square on purpose. The design's arrow is as tall as it is
+     * wide — a short shaft behind a full-height chevron, not a long rule with a
+     * tip on it — and it measures ~12x12 against an 11px cap height, which is
+     * what an 18px box with this path puts on screen. */
+    --arrow-w: 18px;
+
+    content: "";
+    display: block;
+    width: 0;
+    height: var(--arrow-w);
+    margin-left: -8px;
+    overflow: hidden;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") left center / var(--arrow-w) auto no-repeat;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition:
+        width .2s cubic-bezier(.2, .7, .3, 1),
+        margin-left .2s cubic-bezier(.2, .7, .3, 1),
+        opacity .16s ease-out,
+        transform .2s cubic-bezier(.2, .7, .3, 1);
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] #kc-login:hover::after,
+html[data-brand="collab"][data-kc-theme-type="login"] #kc-login:focus-visible::after,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary:hover::after,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary:focus-visible::after,
+html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]:hover::after,
+html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]:focus-visible::after {
+    width: var(--arrow-w);
+    margin-left: 0;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Keyboard users get the arrow on focus as well as hover. Nobody gets it as a
+ * slide if they have asked for less motion — it simply is or is not there. */
+@media (prefers-reduced-motion: reduce) {
+    html[data-brand="collab"][data-kc-theme-type="login"] #kc-login::after,
+    html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary::after,
+    html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]::after {
+        transition: none;
+    }
+}
+
+/* The hero's secondary call to action: an outlined pill on the deep-blue ground,
+ * hairline white rather than blue, so it reads as the quieter of the two. */
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-secondary,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-button {
+    /* Levelled with the primary button above. Left as they were they would have
+       been taller than the call to action once it came down to 44px. The
+       padding has to come down with the `min-height`: the content box plus
+       padding already exceeded it, so `min-height` alone changed nothing. */
+    min-height: 44px;
+    padding: 11px 24px;
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-radius: 999px;
+    background: transparent;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: .3px;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-secondary:hover,
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-button:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, .08);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-providers {
+    gap: 12px;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-icon {
+    filter: invert(1);
+}
+
+/* 14px rather than the shared 16px: measured off the design, where the control
+ * is 3.0% of the card's width against this theme's 3.6%. `size-4` is a Tailwind
+ * utility on the element, so both axes have to be restated to beat it. */
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="checkbox-control"] {
+    width: 14px;
+    height: 14px;
+    border-color: rgba(255, 255, 255, .58);
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="alert"] {
+    border-radius: 6px;
+}
+
+@media (max-width: 480px) {
+    html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper {
+        padding: 18px;
+    }
+
+    html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-card {
+        padding: 24px;
+    }
+
+    .collab-logo-symbol {
+        width: 47px;
+        height: 47px;
+    }
+
+    .collab-logo-wordmark {
+        font-size: 28px;
+    }
 }

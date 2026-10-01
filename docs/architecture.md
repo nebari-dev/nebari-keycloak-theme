@@ -1,10 +1,13 @@
 # Architecture
 
-## Three themes in one JAR
+## Three themes per brand
 
-`keycloakify build` packages one JAR containing three Keycloak themes, all named `nebari` (set by `themeName`
-in [`vite.config.ts`](../vite.config.ts)). They are built very differently, because the problem is different for
-each:
+The repo ships two brands, `nebari` and `collab`, listed in [`themes.json`](../themes.json).
+[`scripts/build-keycloak-themes.mjs`](../scripts/build-keycloak-themes.mjs) runs one `vite build`, then
+`keycloakify build` once per brand with `KEYCLOAKIFY_THEME_NAME` set, which
+[`vite.config.ts`](../vite.config.ts) passes as `themeName`. So each JAR contains three Keycloak themes under
+one brand's name, and the script fails the build if a JAR contains more than one. The three themes are built
+very differently, because the problem is different for each:
 
 | Theme | Size of the problem | Approach |
 | --- | --- | --- |
@@ -28,7 +31,26 @@ built from the design-system components &mdash; `Field`, `Input`, `Button`, `Che
 [`PasswordField`](../src/components/nebari/PasswordField.tsx) for the reveal toggle.
 
 [`src/main.tsx`](../src/main.tsx) is the entry point. In production Keycloak injects the context; in the dev
-server the `?preview=` mock stands in for it.
+server a mock stands in for it, picked by `?pageId=` (Keycloak's page id) or `?preview=` (a named variant),
+and `?theme=collab` picks the brand.
+
+## Brands
+
+Both brands come from the same bundle, so the brand is decided at runtime from the theme Keycloak is rendering.
+`src/main.tsx` stamps `kcContext.themeName` on `<html>` as `data-brand` and `kcContext.themeType` as
+`data-kc-theme-type`, and publishes the brand's symbol as the `--brand-symbol` custom property.
+
+- **Logos** are resolved by [`src/lib/branding.ts`](../src/lib/branding.ts), the only place a logo path is
+  written down. The login template and both console mastheads read it. Collab has no light-on-dark wordmark,
+  so its lockup is the symbol plus the name set as text.
+- **Styling** for Collab is the `html[data-brand="collab"]` block at the end of
+  [`src/theme.css`](../src/theme.css). Its rules are scoped by theme type as well as brand, because
+  `data-brand` is set on every theme type: login-only rules must not reach the consoles. The Account console is
+  excluded from the Collab palette until `nebari-account.css` can follow a dark one. The rules are unlayered,
+  like the rest of the login styles.
+- **The Admin dashboard's hero mark** is imported by the vendored `Dashboard.tsx`, so it can't be swapped per
+  brand in the bundle. A CSS `content: var(--brand-symbol)` rule replaces it instead of owning the file.
+- **Product names** in login strings are keyed by theme in [`src/login/i18n.ts`](../src/login/i18n.ts).
 
 ## The consoles: swapping components underneath
 
@@ -140,4 +162,6 @@ update the early script too.
 - **React 18 versus the registry.** Registry components take `ref` as a plain prop, the React 19 convention.
   Where a DOM node is needed &mdash; menu triggers, tooltips &mdash; the theme renders one through the `render`
   prop, and the PatternFly tooltip is still used for that reason.
-- **The consoles have no automated tests.** See [Development](development.md#what-ci-checks).
+- **The consoles are only tested for accessibility.** CI scans the main Admin and Account screens against a
+  real Keycloak, but nothing checks that a console screen still works. See
+  [Development](development.md#what-ci-checks).

@@ -37,8 +37,22 @@ coverage/
 .nyc_output/
 playwright-report/
 test-results/
+test-results-capture/
+test-results-consoles/
+test-results-a11y/
+playwright-report-a11y/
+playwright-report-consoles/
+.playwright/
+theme-screenshots/
 
 # Temporary
 tmp/
 temp/
 *.tmp
+
+# TypeScript project-reference output. `tsc -b` emits these next to the config
+# it builds, and tsconfig.node.json covers vite.config.ts, so a type-check run
+# leaves a compiled copy of the Vite config in the working tree.
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts

@@ -11,23 +11,29 @@ All tokens live in [`src/theme.css`](../src/theme.css), in three groups:
 | `--header-background`, `--header-foreground`, `--header-border`, `--header-action-hover` | This repo; the registry doesn't ship them | You are changing the console header only |
 
 Light and dark values sit side by side in the same file. Change both, and check the result in both modes &mdash;
-the [screenshot tests](development.md#screenshot-tests) cover dark mode on the sign-in page only.
+the [screenshot tests](development.md#screenshot-tests) cover Nebari's dark mode on the sign-in page only.
+
+Collab overrides these tokens in the `html[data-brand="collab"]` block at the end of the file. It has one
+deep-blue palette and forces `color-scheme: dark`, so it has no separate light and dark values.
 
 PatternFly components that stay on PatternFly pick these tokens up through the bridge in
 [`src/admin/index.css`](../src/admin/index.css), so a token change reaches them too.
 
 ## Logo
 
-The login card renders two SVGs and shows one per colour mode, from
-[`src/login/Template.tsx`](../src/login/Template.tsx):
+Each brand's logo paths are set in [`src/lib/branding.ts`](../src/lib/branding.ts), the only place a logo
+path is written down. The login card and both console mastheads read them from there:
 
-| File | Shown in |
-| --- | --- |
-| `public/logo/nebari-logo-light.svg` | Light mode |
-| `public/logo/nebari-logo-dark.svg` | Dark mode |
+| Brand | Light mode | Dark mode |
+| --- | --- | --- |
+| Nebari | `public/logo/nebari-logo-light.svg` | `public/logo/nebari-logo-dark.svg` |
+| Collab | `public/logo/collab-symbol.png` | `public/logo/collab-symbol.png` |
 
-Replace those files, keeping the names. The mark on the Admin welcome tab is a separate, owned asset at
-`src/admin/assets/icon.svg`.
+Replace those files, or point the entries at new ones. Collab ships no light-on-dark wordmark, so its lockup is
+the symbol plus "Collab" set as text in the login template and the mastheads.
+
+The mark on the Admin welcome tab is a separate, owned asset at `src/admin/assets/icon.svg`. For Collab, a CSS
+rule in `src/theme.css` swaps it for the symbol through the `--brand-symbol` property that `src/main.tsx` sets.
 
 ## Translations
 
@@ -72,10 +78,13 @@ style one:
 
 1. Create it in `src/login/pages/`, using an existing page as the template.
 2. Add a `case` for its `.ftl` page id in [`src/login/KcPage.tsx`](../src/login/KcPage.tsx).
-3. Add a preview for it in `getKcContextMockForPreview` in
-   [`src/login/KcContext.ts`](../src/login/KcContext.ts).
-4. Add the preview name to [`tests/visual.spec.ts`](../tests/visual.spec.ts), then generate its baseline on
-   Linux &mdash; see [Development](development.md#regenerate-baselines-on-linux).
+3. Add a preview for it to `previewPageIds` in [`src/login/KcContext.ts`](../src/login/KcContext.ts). That
+   also makes its page id work as `?pageId=`.
+4. Add the preview name to `previews`, and the page to `loginPages`, in
+   [`tests/previews.ts`](../tests/previews.ts). The screenshot and accessibility suites both read that file,
+   and the accessibility suite fails if a page in `src/login/pages/` is missing from `loginPages`.
+5. Generate its screenshot baseline on Linux &mdash; see
+   [Development](development.md#regenerate-baselines-on-linux).
 
 ## Design-system components
 

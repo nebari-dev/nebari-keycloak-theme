@@ -5,8 +5,7 @@
  * $ npx keycloakify own --path "account/root/Header.tsx" --revert
  */
 
-import logoSvgUrl from "../assets/logo.svg"; // white text — dark bg
-import logoLightSvgUrl from "../assets/logo-light.svg"; // black text — light bg
+import { getBrandLogo, isCollabBrand } from "@/lib/branding";
 import { ProfileMenu } from "@/components/nebari/ProfileMenu";
 import {
   MenuBarActions,
@@ -91,9 +90,22 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
 
   const logoUrl = env.logoUrl ? env.logoUrl : "/";
   const internalLogoHref = useHref(logoUrl);
-  const indexHref = logoUrl.startsWith("/") ? internalLogoHref : logoUrl;
+  // `Root.tsx` mounts the router without a basename — its top route *is* the
+  // console's path — so `useHref("/")` is the server root, which Keycloak
+  // redirects to the master realm's Admin Console. `/` is Keycloak's default
+  // `logoUrl` and means "home", so send it to this console's own root.
+  const indexHref =
+    logoUrl === "/"
+      ? new URL(environment.baseUrl).pathname
+      : logoUrl.startsWith("/")
+        ? internalLogoHref
+        : logoUrl;
 
-  const resolvedLogo = isDarkMode ? logoSvgUrl : logoLightSvgUrl;
+  // Was `isDarkMode ? logo.svg : logo-light.svg` from ../assets. Only the light
+  // asset had ever been replaced with Nebari's, so dark mode rendered the stock
+  // Keycloak logo — and neither knew about any theme but Nebari.
+  const resolvedLogo = getBrandLogo(isDarkMode);
+  const showCollabLockup = isCollabBrand();
 
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
@@ -122,7 +134,19 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
       </PageToggleButton>
 
       <MenuBarBrand href={indexHref} aria-label={t("logo")}>
-        <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
+        {/* Collab publishes no light-on-dark wordmark, so the masthead assembles
+            the lockup — symbol image plus live text — as the Admin Console's
+            `PageHeader.tsx` does. */}
+        {showCollabLockup ? (
+          <span className="collab-logo collab-logo--masthead" role="img" aria-label="Collab">
+            <img src={resolvedLogo} alt="" className="collab-logo-symbol" />
+            <span className="collab-logo-wordmark" aria-hidden="true">
+              Collab
+            </span>
+          </span>
+        ) : (
+          <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
+        )}
       </MenuBarBrand>
 
       {/* No `MenuBarNav`: this console has no top-level sections, and an empty
