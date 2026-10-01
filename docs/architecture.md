@@ -44,9 +44,9 @@ Both brands come from the same bundle, so the brand is decided at runtime from t
   so its lockup is the symbol plus the name set as text.
 - **Styling** for Collab is the `html[data-brand="collab"]` block at the end of
   [`src/theme.css`](../src/theme.css). Its rules are scoped by theme type as well as brand, because
-  `data-brand` is set on every theme type: login-only rules must not reach the consoles. The Account console is
-  excluded from the Collab palette until `nebari-account.css` can follow a dark one. The rules are unlayered,
-  like the rest of the login styles.
+  `data-brand` is set on every theme type: login-only rules must not reach the consoles. The Account console's
+  colours are `--account-*` variables in `nebari-account.css` and `nebari-brand.css`; Nebari uses their
+  fallbacks and the Collab block sets them. The rules are unlayered, like the rest of the login styles.
 - **The Admin dashboard's hero mark** is imported by the vendored `Dashboard.tsx`, so it can't be swapped per
   brand in the bundle. A CSS `content: var(--brand-symbol)` rule replaces it instead of owning the file.
 - **Product names** in login strings are keyed by theme in [`src/login/i18n.ts`](../src/login/i18n.ts).

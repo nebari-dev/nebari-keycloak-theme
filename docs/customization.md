@@ -14,7 +14,9 @@ Light and dark values sit side by side in the same file. Change both, and check 
 the [screenshot tests](development.md#screenshot-tests) cover Nebari's dark mode on the sign-in page only.
 
 Collab overrides these tokens in the `html[data-brand="collab"]` block at the end of the file. It has one
-deep-blue palette and forces `color-scheme: dark`, so it has no separate light and dark values.
+deep-blue palette and forces `color-scheme: dark`, so it has no separate light and dark values. The Account
+console's colours are `--account-*` variables in `src/account/nebari-account.css` and `src/nebari-brand.css`:
+Nebari uses each variable's fallback, and the Collab block sets them.
 
 PatternFly components that stay on PatternFly pick these tokens up through the bridge in
 [`src/admin/index.css`](../src/admin/index.css), so a token change reaches them too.
