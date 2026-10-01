@@ -1,17 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-
-const previews = [
-    "login",
-    "login-providers",
-    "login-error",
-    "register",
-    "forgot-password",
-    "update-password",
-    "verify-email",
-    "update-profile",
-    "info",
-    "error"
-] as const;
+import { openPreview, previews } from "./previews";
 
 /**
  * Every theme in themes.json, with how to tell its mark apart from the others.
@@ -57,12 +45,6 @@ const themes: {
         }
     }
 ];
-
-async function openPreview(page: Page, theme: string, preview: string) {
-    await page.goto(`/?preview=${preview}&theme=${theme}`);
-    await expect(page.locator("html")).toHaveAttribute("data-brand", theme);
-    await expect(page.locator(".nebari-login-card")).toBeVisible();
-}
 
 test("Nebari is the default theme", async ({ page }) => {
     await page.goto("/");

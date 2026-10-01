@@ -38,6 +38,11 @@ coverage/
 playwright-report/
 test-results/
 test-results-capture/
+test-results-consoles/
+test-results-a11y/
+playwright-report-a11y/
+playwright-report-consoles/
+.playwright/
 theme-screenshots/
 
 # Temporary

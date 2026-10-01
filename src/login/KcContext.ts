@@ -27,6 +27,33 @@ const previewPageIds = {
 
 type PreviewName = keyof typeof previewPageIds | "login-providers" | "login-error";
 
+type ImplementedPageId = (typeof previewPageIds)[keyof typeof previewPageIds];
+
+function isImplementedPageId(pageId: string): pageId is ImplementedPageId {
+    return (Object.values(previewPageIds) as string[]).includes(pageId);
+}
+
+/**
+ * The mock for a Keycloak page id, such as `login-reset-password.ftl`, so the
+ * dev server and tests can address a page by the name Keycloak gives it. Only
+ * the pages this theme implements are accepted; anything else returns
+ * undefined, and the caller falls back to the `?preview=` mocks.
+ */
+export function getKcContextMockForPageId(pageId: string | null): KcContext | undefined {
+    if (pageId === null) {
+        return undefined;
+    }
+
+    if (!isImplementedPageId(pageId)) {
+        console.warn(
+            `Unknown pageId "${pageId}"; showing the sign-in page. Implemented: ${Object.values(previewPageIds).join(", ")}`
+        );
+        return undefined;
+    }
+
+    return getKcContextMock({ pageId });
+}
+
 export function getKcContextMockForPreview(previewName: string | null): KcContext {
     const name = (previewName ?? "login") as PreviewName;
 

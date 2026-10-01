@@ -33,7 +33,9 @@ export default defineConfig({
         baseURL: "http://127.0.0.1:4173",
         colorScheme: "light",
         locale: "en-US",
-        reducedMotion: "reduce",
+        // Not a top-level `use` option: Playwright only applies it through
+        // contextOptions, and silently ignores it anywhere else.
+        contextOptions: { reducedMotion: "reduce" },
         serviceWorkers: "block"
     },
     webServer: {
@@ -41,5 +43,20 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         url: "http://127.0.0.1:4173"
     },
-    projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }]
+    // The console accessibility suites need a real Keycloak rather than this
+    // dev server, so they have their own config: playwright.consoles.config.ts.
+    projects: [
+        {
+            name: "visual",
+            testMatch: "visual.spec.ts",
+            use: { ...devices["Desktop Chrome"] }
+        },
+        {
+            name: "a11y-login",
+            // helpers.spec.ts proves the checks can still fail; it rides along
+            // with the login suite so a broken check can't go unnoticed.
+            testMatch: ["a11y/login.a11y.spec.ts", "a11y/helpers.spec.ts"],
+            use: { ...devices["Desktop Chrome"] }
+        }
+    ]
 });

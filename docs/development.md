@@ -6,13 +6,16 @@ Setting up is covered in [Quick start](quick-start.md). This page is the referen
 
 | Script | What it does |
 | --- | --- |
-| `npm run dev` | Vite dev server for the login pages, with `?preview=` mocks |
+| `npm run dev` | Vite dev server for the login pages, with `?pageId=` and `?preview=` mocks |
 | `npm run build-keycloak-theme` | Runs `build`, then packages the Keycloak JARs into `dist_keycloak/` |
 | `npm run build` | Upgrade guards, then `tsc`, then `vite build` |
 | `npm run check` | Both [upgrade guards](#upgrade-guards) |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run test:screenshots` | Compares the login pages against the committed baselines |
 | `npm run test:screenshots:update` | Accepts the current rendering as the new baselines |
+| `npm run test:a11y` | [Accessibility tests](#accessibility-tests) for the login pages, against the dev server |
+| `npm run test:a11y:consoles` | Accessibility tests for the Admin and Account consoles, against the compose Keycloak |
+| `npm run test:a11y:admin` / `test:a11y:account` | One console's accessibility tests |
 | `npm run lint` | ESLint with `--max-warnings 0` |
 
 `npm run lint` is not part of CI and currently reports problems in generated, gitignored console files that
@@ -20,19 +23,25 @@ this repo doesn't author. Run it on the files you touched rather than treating t
 
 ## What CI checks
 
-Every pull request runs [`playwright.yml`](../.github/workflows/playwright.yml):
+Every pull request runs [`playwright.yml`](../.github/workflows/playwright.yml), which runs every Playwright
+test in two jobs:
 
-1. **Theme guards** &mdash; `npm run check`
-2. **Type check** &mdash; `npm run typecheck`
-3. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<brand>/`
+- **`screenshots`**, against the dev server:
+  1. **Theme guards** &mdash; `npm run check`
+  2. **Type check** &mdash; `npm run typecheck`
+  3. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<brand>/`
+  4. **Login-page accessibility** &mdash; `npm run test:a11y`, including the tests of the checks themselves
+- **`consoles`**, against a real Keycloak: builds the theme JARs (`npm run build-keycloak-theme`), starts the
+  compose stack, and runs `npm run test:a11y:consoles`. On failure it prints the Keycloak log, and it uploads
+  the report as `playwright-report-consoles`.
 
 Pushes to `main` also run the publisher, which builds through `npm run build` and so runs the guards again.
 See [Releasing](releasing.md).
 
-**What CI does not cover:** the Admin and Account consoles have no automated visual or behavioural test. The
-screenshots are login pages only, because the consoles need a live Keycloak session to render. The upgrade
-guards below exist partly to narrow that gap. For console changes, check them by hand in the
-[compose loop](quick-start.md#the-compose-loop-consoles).
+**What CI does not cover:** the consoles have accessibility tests but no visual or behavioural ones. The
+screenshots are login pages only, and nothing checks that a console screen *works*, only that it is
+accessible. The upgrade guards below exist partly to narrow that gap. For console changes, still check them by
+hand in the [compose loop](quick-start.md#the-compose-loop-consoles).
 
 ## Screenshot tests
 
@@ -69,6 +78,80 @@ was regenerated in the same commit, and CI went green on it.
 
 Each CI run uploads two artifacts to help with that: `playwright-report` (the diff when a comparison fails) and
 `theme-screenshots` (what the branch actually rendered, whether or not it matched).
+
+## Accessibility tests
+
+[`tests/a11y/`](../tests/a11y/) checks the login pages and the Admin and Account consoles in every theme in
+[`themes.json`](../themes.json). The checks know nothing about any one brand, so a new theme is covered as soon
+as it is listed. The target is WCAG 2.2 AA, which includes every 2.1 A and AA criterion.
+
+| Check | What it catches | Where |
+| --- | --- | --- |
+| axe scan | Colour contrast, names and labels, ARIA, landmarks, target size &mdash; every axe rule tagged WCAG A/AA | Every page, light and dark |
+| axe best practices | Positive `tabindex`, one main landmark, one `h1` | Login pages only: their markup is ours, the consoles' is vendored |
+| Keyboard reach | A visible control Tab never reaches (2.1.1) | Every page |
+| Focus indicator | A stop whose focused look doesn't differ from its unfocused one, pseudo-elements and `:focus-within` wrappers included (2.4.7) | Every page |
+| No trap | Shift+Tab not retracing the Tab order (2.1.2) | Every page |
+| Errors | An invalid field whose message isn't referenced by `aria-describedby` or `aria-errormessage` (1.3.1, 3.3.1) | Login |
+| Submit | Enter not submitting a form | Login |
+| Reflow | Horizontal scrolling at 320px (1.4.10) | Login |
+| Motion | Animation still running under `prefers-reduced-motion` (2.3.3) | Login |
+| Dialogs | A dialog that doesn't take focus, lets Tab out, ignores Escape or loses its trigger's focus (2.4.3) | Admin |
+| Menus | A menu that won't open, navigate or close from the keyboard, or misreports `aria-expanded` (4.1.2) | Admin |
+
+A control out of the Tab order passes only when something focusable stands in for it: a table row that opens
+its link on Enter, a combobox input for its toggle button, or a composite widget's roving focus. One that
+enables or disables itself as focus moves, like PatternFly's tab-scroll buttons, isn't counted as skipped.
+The keyboard checks run once per theme; the colour scheme changes neither the Tab order nor whether focus
+changes how an element looks.
+
+```bash
+npm run test:a11y                              # login pages; starts the dev server itself
+docker compose up -d --build keycloak          # the consoles need a real Keycloak
+npm run test:a11y:consoles                     # Admin and Account; KEYCLOAK_URL overrides http://localhost:8080
+```
+
+The console tests have their own config, [`playwright.consoles.config.ts`](../playwright.consoles.config.ts),
+so a plain `npx playwright test` never needs Keycloak. Its setup project creates a realm per theme,
+`a11y-<theme>`, cloned from `realm-export.json` through the admin REST API as the master `admin`, and never
+touches the `nebari` realm. It adds what an empty realm hides &mdash; an identity provider so the Account
+Console lists Linked accounts, a group, and the right to view it &mdash; then signs in once per console. The
+Admin screens are the ones used most: users, roles, groups, clients, client scopes, realm settings,
+authentication, identity providers, user federation, sessions and events.
+
+### Reading a failure
+
+- **axe** failures print one line per element: the rule, its selector, and for contrast the two colours and
+  the ratio. Open the page in the dev server (`?preview=<page>&theme=<theme>`) or the console, and find the
+  element in devtools.
+- **Keyboard** failures name the controls by role and accessible name: `controls that Tab never reaches`,
+  `focus stops without a visible focus indicator`, or a diff between the Tab and Shift+Tab orders.
+- `npm run test:ui` (login pages and screenshots) or `npm run test:ui:consoles` (Admin and Account) opens
+  Playwright's UI mode, which shows each step with a DOM snapshot. The two configs open separately. In the
+  consoles window, run the `consoles-setup` tests first if the saved sign-ins are older than Keycloak's
+  30-minute idle timeout.
+
+### Known violations
+
+Problems that exist today are listed in [`tests/a11y/known-violations.ts`](../tests/a11y/known-violations.ts),
+so the suite stays green and still fails on anything new. Each entry is one rule, scoped to its surfaces and
+themes, matched by a selector or an exact colour pair, with the reason and the issue that will fix it. Don't add
+an entry to make a test pass: fix the problem, or file the issue first. When the issue is fixed, delete the
+entry so the check guards the fix.
+
+### The checks are tested too
+
+[`tests/a11y/helpers.spec.ts`](../tests/a11y/helpers.spec.ts) builds small pages that break each rule and
+proves the checks fail on them, and pages using each legitimate pattern and proves they pass. It runs with the
+login suite. A check that stops failing looks exactly like a page that passes &mdash; a bad element key once
+made every keyboard walk stop after its first stop, and only this caught it.
+
+### Why axe is loaded early in the consoles
+
+The consoles freeze built-in prototypes through oidc-spa's `browserRuntimeFreeze`, and `@axe-core/playwright`
+injects axe after load, which that freeze rejects. For the consoles, [`tests/a11y/axe.ts`](../tests/a11y/axe.ts)
+loads axe before the page's scripts and patches one assignment in it; it throws if an axe upgrade removes that
+assignment, rather than silently scanning nothing. The login pages use `@axe-core/playwright` directly.
 
 ## Upgrade guards
 
