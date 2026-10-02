@@ -420,7 +420,12 @@ samp {
     margin: 4px 0 0;
 }
 
-.nebari-form-actions .nebari-button-full { flex: 1; }
+/* Buttons fill the row's remaining width without pushing past the card. */
+.nebari-form-actions .nebari-button-full,
+.nebari-form-actions > [data-slot="button"] {
+    flex: 1;
+    min-width: 0;
+}
 
 /* ---- Labels ---- */
 
@@ -1121,8 +1126,33 @@ a.nebari-button.nebari-button-primary:visited {
    COLLAB THEME
    ========================================================================== */
 
-html[data-brand="collab"] {
+:root[data-brand="collab"] {
     color-scheme: dark;
+    --pf-v5-global--Color--100: var(--foreground);
+    --pf-v5-global--Color--200: var(--muted-foreground);
+    --pf-v5-global--Color--dark-100: var(--foreground);
+    --pf-v5-global--Color--dark-200: var(--muted-foreground);
+    --pf-v5-global--Color--light-100: var(--foreground);
+    --pf-v5-global--Color--light-200: var(--muted-foreground);
+    --pf-v5-global--BorderColor--100: var(--border);
+    --pf-v5-global--BorderColor--200: var(--input);
+    --pf-v5-global--BorderColor--300: var(--border);
+    --pf-v5-global--BorderColor--400: var(--border-strong);
+    --pf-v5-global--BorderColor--dark-100: var(--border);
+    --pf-v5-global--BorderColor--light-100: var(--border);
+    --pf-v5-global--icon--Color--dark: var(--foreground);
+    --pf-v5-global--icon--Color--light: var(--muted-foreground);
+    --pf-v5-global--disabled-color--100: var(--muted-foreground);
+    --pf-v5-global--disabled-color--200: var(--border);
+    --pf-v5-global--disabled-color--300: var(--border);
+    --pf-v5-global--success-color--100: #10b981;
+    --pf-v5-global--success-color--200: var(--foreground);
+    --pf-v5-global--warning-color--100: #f59e0b;
+    --pf-v5-global--warning-color--200: var(--foreground);
+    --pf-v5-global--danger-color--100: var(--nebari-red);
+    --pf-v5-global--danger-color--200: var(--destructive-foreground);
+    --pf-v5-global--info-color--100: #507EFF;
+    --pf-v5-global--info-color--200: var(--foreground);
     --font-sans: "Inter Tight Variable", "Inter Tight", sans-serif;
     --Font-Sans: var(--font-sans);
     --background: #022791;
@@ -1183,10 +1213,6 @@ html[data-brand="collab"] {
 
 /* Account console colours (see src/account/nebari-account.css and src/nebari-brand.css). */
 html[data-brand="collab"][data-kc-theme-type="account"] {
-    --pf-v5-global--Color--100: #ffffff;
-    --pf-v5-global--Color--200: #8FACFF;
-    --pf-v5-global--Color--dark-100: #ffffff;
-    --pf-v5-global--Color--dark-200: #8FACFF;
     --pf-v5-global--BackgroundColor--100: rgba(255, 255, 255, .08);
     --pf-v5-global--BackgroundColor--200: #022791;
     --pf-v5-global--BackgroundColor--light-100: rgba(255, 255, 255, .08);
@@ -1259,6 +1285,15 @@ html[data-brand="collab"][data-kc-theme-type="account"] {
     --account-shadow-a78bfa-a12: rgba(80, 126, 255, .12);
 }
 
+/* Checked switches use the selection blue so the knob stays visible. */
+html[data-brand="collab"] [data-slot="switch"][data-checked] {
+    background-color: #507EFF;
+}
+
+html[data-brand="collab"] [data-slot="switch"][data-checked]:hover {
+    background-color: #7095FF;
+}
+
 /* Data list rows sit on the content panel without adding another layer. */
 html[data-brand="collab"][data-kc-theme-type="account"] .pf-v5-c-data-list {
     --pf-v5-c-data-list__item--BackgroundColor: transparent;
@@ -1273,13 +1308,13 @@ html[data-brand="collab"][data-kc-theme-type="login"] textarea {
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] body {
-    background: #022791;
-    color: #ffffff;
+    background: var(--background);
+    color: var(--foreground);
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper {
     padding: 32px;
-    background-color: #022791;
+    background-color: var(--login-backdrop);
     background-image: none;
 }
 
@@ -1295,7 +1330,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-card {
     padding: 24px;
     gap: 24px;
     overflow: visible;
-    background: #ffffff14;
+    background: var(--card);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, .12);
@@ -1342,7 +1377,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-section {
 
 /* The wordmark doesn't animate. */
 .collab-logo-wordmark {
-    color: #ffffff;
+    color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 32px;
     font-weight: 600;
@@ -1383,7 +1418,7 @@ html[data-brand="collab"][data-kc-theme-type="admin"] .keycloak__dashboard_icon 
 
 /* Headings */
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-header .nebari-title {
-    color: #ffffff;
+    color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 21px;
     font-weight: 600;
@@ -1396,7 +1431,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label,
 html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="field-label"],
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-wrapper .nebari-label,
 html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="checkbox"] {
-    color: #ffffff;
+    color: var(--foreground);
     font-family: var(--font-sans);
 }
 
@@ -1406,6 +1441,10 @@ html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-wrapper .neb
     font-size: 14px;
     font-weight: 500;
     letter-spacing: .2px;
+}
+
+html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-wrapper {
+    color: var(--destructive-foreground);
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper form {
@@ -1425,7 +1464,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] textarea {
     border: 1px solid rgba(255, 255, 255, .18);
     border-radius: 8px;
     background: rgba(255, 255, 255, .10);
-    color: #ffffff;
+    color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 15px;
     line-height: 22px;
@@ -1433,7 +1472,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] textarea {
 
 html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]::placeholder,
 html[data-brand="collab"][data-kc-theme-type="login"] input::placeholder {
-    color: #8FACFF;
+    color: var(--muted-foreground);
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]:hover,
@@ -1445,33 +1484,33 @@ html[data-brand="collab"][data-kc-theme-type="login"] .nebari-input:hover {
 html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]:focus,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-input:focus {
     border-width: 1px;
-    border-color: #507EFF;
+    border-color: var(--ring);
     background: rgba(255, 255, 255, .14);
     box-shadow: 0 0 0 3px rgba(80, 126, 255, .3);
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input-end-adornment"] [data-slot="button"] {
-    color: #8FACFF;
+    color: var(--muted-foreground);
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-row .nebari-forgot-link,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-link,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-required-notice {
-    color: #8FACFF;
+    color: var(--muted-foreground);
     font-family: var(--font-sans);
 }
 
 /* Action links use the primary blue; the forgot-password link stays muted. */
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section .nebari-link {
-    color: #8FACFF;
+    color: var(--muted-foreground);
     font-weight: 500;
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-row .nebari-forgot-link:hover,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-link:hover,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section .nebari-link:hover {
-    color: #ffffff;
+    color: var(--foreground);
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] #kc-login,
@@ -1480,10 +1519,10 @@ html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"],
 html[data-brand="collab"][data-kc-theme-type="login"] input[type="submit"] {
     min-height: 44px;
     padding: 11px 30px;
-    border: 1px solid #022791;
+    border: 1px solid var(--primary);
     border-radius: 6px;
-    background: #022791;
-    color: #ffffff;
+    background: var(--primary);
+    color: var(--primary-foreground);
     font-family: var(--font-sans);
     font-size: 15px;
     font-weight: 500;
@@ -1496,9 +1535,9 @@ html[data-brand="collab"][data-kc-theme-type="login"] #kc-login:hover,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary:hover,
 html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]:hover,
 html[data-brand="collab"][data-kc-theme-type="login"] input[type="submit"]:hover {
-    border-color: #1540BA;
-    background: #1540BA;
-    color: #ffffff;
+    border-color: var(--primary-hover);
+    background: var(--primary-hover);
+    color: var(--primary-foreground);
     text-decoration: none;
 }
 
@@ -1555,7 +1594,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-button {
     border: 1px solid rgba(255, 255, 255, .5);
     border-radius: 999px;
     background: transparent;
-    color: #ffffff;
+    color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 15px;
     font-weight: 500;
@@ -1564,9 +1603,9 @@ html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-button {
 
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-secondary:hover,
 html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-button:hover {
-    border-color: #ffffff;
+    border-color: var(--foreground);
     background: rgba(255, 255, 255, .08);
-    color: #ffffff;
+    color: var(--foreground);
     text-decoration: none;
 }
 

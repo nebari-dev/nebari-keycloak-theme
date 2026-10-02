@@ -13,7 +13,7 @@ All tokens live in [`src/theme.css`](../src/theme.css), in three groups:
 Light and dark values sit side by side in the same file. Change both, and check the result in both modes &mdash;
 the [screenshot tests](development.md#screenshot-tests) cover Nebari's dark mode on the sign-in page only.
 
-Collab overrides these tokens in the `html[data-brand="collab"]` block at the end of the file. It has one
+Collab overrides these tokens in the `[data-brand="collab"]` section at the end of the file. It has one
 deep-blue palette and forces `color-scheme: dark`, so it has no separate light and dark values. The Account
 console's colours are `--account-*` variables in `src/account/nebari-account.css` and `src/nebari-brand.css`:
 Nebari uses each variable's fallback, and the Collab block sets them.

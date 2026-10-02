@@ -42,7 +42,7 @@ Both brands come from the same bundle, so the brand is decided at runtime from t
 - **Logos** are resolved by [`src/lib/branding.ts`](../src/lib/branding.ts), the only place a logo path is
   written down. The login template and both console mastheads read it. Collab has no light-on-dark wordmark,
   so its lockup is the symbol plus the name set as text.
-- **Styling** for Collab is the `html[data-brand="collab"]` block at the end of
+- **Styling** for Collab is the `[data-brand="collab"]` section at the end of
   [`src/theme.css`](../src/theme.css). Its rules are scoped by theme type as well as brand, because
   `data-brand` is set on every theme type: login-only rules must not reach the consoles. The Account console's
   colours are `--account-*` variables in `nebari-account.css` and `nebari-brand.css`; Nebari uses their

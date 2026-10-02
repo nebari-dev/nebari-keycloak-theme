@@ -62,7 +62,7 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
                     {/* `type` is baked into the render element: Base UI merges the
                         render element's props last, so `Button`'s default
                         `<button type="button" />` would win over a `type` prop. */}
-                    <Button className="flex-1" render={<button type="submit" />}>
+                    <Button className="w-full" render={<button type="submit" />}>
                         {msgStr("doSubmit")}
                     </Button>
                 </div>
