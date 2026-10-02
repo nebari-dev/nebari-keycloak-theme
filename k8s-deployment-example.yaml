@@ -1,12 +1,3 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: nebari-keycloak-theme
-  namespace: default
-data:
-  # This will be populated after building the theme
-  # See deployment instructions in README.md
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,17 +13,35 @@ spec:
       labels:
         app: keycloak
     spec:
+      # The theme JAR is about 12 MB, too large for a ConfigMap. An init
+      # container copies it out of the theme image instead. See "Deployment" in
+      # README.md.
+      imagePullSecrets:
+      - name: ghcr-creds
+      initContainers:
+      - name: install-keycloak-theme
+        image: ghcr.io/nebari-dev/nebari-keycloak-theme:1.1.0
+        command: ["sh", "-c", "cp /opt/keycloak/providers/*.jar /theme-providers/"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: theme-providers
+          mountPath: /theme-providers
       containers:
       - name: keycloak
-        image: quay.io/keycloak/keycloak:23.0
+        image: quay.io/keycloak/keycloak:26.0
+        # Plain `start`, not `--optimized`, so Keycloak rebuilds with the theme.
         args:
           - start
           - --hostname-strict=false
-          - --proxy=edge
+          - --http-enabled=true
+          - --proxy-headers=xforwarded
         env:
-        - name: KEYCLOAK_ADMIN
+        - name: KC_HEALTH_ENABLED
+          value: "true"
+        - name: KC_BOOTSTRAP_ADMIN_USERNAME
           value: admin
-        - name: KEYCLOAK_ADMIN_PASSWORD
+        - name: KC_BOOTSTRAP_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
               name: keycloak-admin
@@ -56,28 +65,26 @@ spec:
           containerPort: 8080
         - name: https
           containerPort: 8443
+        - name: management
+          containerPort: 9000
         readinessProbe:
           httpGet:
             path: /health/ready
-            port: 8080
+            port: 9000
           initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /health/live
-            port: 8080
+            port: 9000
           initialDelaySeconds: 30
           periodSeconds: 10
         volumeMounts:
-        # Mount the custom theme
-        - name: nebari-theme
-          mountPath: /opt/keycloak/providers/nebari-theme.jar
-          subPath: nebari-theme.jar
-          readOnly: true
+        - name: theme-providers
+          mountPath: /opt/keycloak/providers
       volumes:
-      - name: nebari-theme
-        configMap:
-          name: nebari-keycloak-theme
+      - name: theme-providers
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -126,4 +133,5 @@ spec:
 ---
 # Secrets (create separately)
 # kubectl create secret generic keycloak-admin --from-literal=password=<admin-password>
+# kubectl create secret docker-registry ghcr-creds --docker-server=ghcr.io --docker-username=<github-user> --docker-password=<token-with-read:packages>
 # kubectl create secret generic keycloak-db --from-literal=username=<db-user> --from-literal=password=<db-password>

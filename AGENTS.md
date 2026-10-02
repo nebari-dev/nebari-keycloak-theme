@@ -4,11 +4,16 @@ Working agreement for coding agents in this repo. Read it before touching code.
 
 ## What this is
 
-A Keycloakify v11 theme that ships one JAR with three Keycloak themes, all named `nebari`: the **login** pages,
-the **Account** console and the **Admin** console. It is published as a Keycloak 26 image to
-`ghcr.io/nebari-dev/nebari-keycloak-theme` on every push to `main`.
+A Keycloakify v11 theme with two brands, `nebari` and `collab` (OpenTeams Collab), listed in
+[`themes.json`](themes.json). Each brand is packaged in its own JAR with three Keycloak themes under that brand's
+name: the **login** pages, the **Account** console and the **Admin** console. Each is published as its own
+Keycloak 26 image on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-theme` and
+`ghcr.io/nebari-dev/collab-keycloak-theme`.
 
 - The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
+- The brands share one build and one stylesheet. `src/main.tsx` stamps the theme name on `<html>` as
+  `data-brand`; logo paths live only in [`src/lib/branding.ts`](src/lib/branding.ts), and Collab's styling is
+  the `[data-brand="collab"]` section of `src/theme.css`, scoped by `data-kc-theme-type` as well.
 - The consoles are ~520 views vendored from Keycloak by `keycloakify sync-extensions`. They are **not rewritten**.
   They are restyled by swapping the components they import underneath them, through one owned re-export shim.
 
@@ -24,8 +29,8 @@ npm install                          # also re-syncs the vendored console source
 npm run dev                          # login pages at :5173, e.g. /?preview=login
 npm run check                        # upgrade guards
 npm run typecheck                    # tsc --noEmit
-npm run test:screenshots             # compare login pages against Linux baselines
-npm run build-keycloak-theme         # guards + tsc + vite build + JARs in dist_keycloak/
+npm run test:screenshots             # compare login pages against Linux baselines, per brand
+npm run build-keycloak-theme         # guards + tsc + vite build + one JAR pair per brand in dist_keycloak/
 docker compose up -d --build keycloak   # consoles, on the nebari realm
 ```
 

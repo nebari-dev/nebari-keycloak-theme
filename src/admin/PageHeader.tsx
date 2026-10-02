@@ -26,6 +26,7 @@ import { useRealm } from "./context/realm-context/RealmContext";
 import { toDashboard } from "./dashboard/routes/Dashboard";
 import { usePreviewLogo } from "./realm-settings/themes/LogoContext";
 import { joinPath } from "./utils/joinPath";
+import { getBrandLogo, isCollabBrand } from "@/lib/branding";
 import useToggle from "./utils/useToggle";
 
 function loggedInUserName(token: Record<string, unknown>, fallback: string) {
@@ -66,11 +67,15 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
   const url = useHref(toDashboard({ realm }));
   const logoUrl = environment.logoUrl ? environment.logoUrl : url;
 
-  const defaultLogo = `${import.meta.env.BASE_URL}logo/nebari-logo-${isDarkMode ? "dark" : "light"}.svg`;
+  // Resolved from the active theme rather than hardcoded, so the Collab
+  // console does not fall back to Nebari branding.
+  const defaultLogo = getBrandLogo(isDarkMode);
 
   const resolvedLogo = customLogo
     ? (customLogo.startsWith("/") ? joinPath(environment["resourceUrl"], customLogo) : customLogo)
     : defaultLogo;
+
+  const showCollabLockup = isCollabBrand() && !customLogo;
 
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
@@ -91,7 +96,21 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
       </PageToggleButton>
 
       <MenuBarBrand href={logoUrl} aria-label={t("logo")}>
-        <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+        {/* Collab publishes no light-on-dark wordmark, so the masthead assembles
+            the lockup the way the login page does — symbol as an image, name as
+            text, one `role="img"` over the pair. A realm-configured logo wins
+            over it: that is someone deliberately overriding the branding, and it
+            arrives as a single image with no wordmark to pair. */}
+        {showCollabLockup ? (
+          <span className="collab-logo collab-logo--masthead" role="img" aria-label="Collab">
+            <img src={resolvedLogo} alt="" className="collab-logo-symbol" />
+            <span className="collab-logo-wordmark" aria-hidden="true">
+              Collab
+            </span>
+          </span>
+        ) : (
+          <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+        )}
       </MenuBarBrand>
 
       <MenuBarNav aria-label="Keycloak Admin Console">

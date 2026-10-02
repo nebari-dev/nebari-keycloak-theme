@@ -3,6 +3,18 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { keycloakify } from "keycloakify/vite-plugin";
 import path from "node:path";
+// Shared with scripts/build-keycloak-themes.mjs so a new theme is added in one
+// place. The two lists silently disagreeing would mean a theme that builds in
+// dev but never gets packaged, or the reverse.
+import themeNames from "./themes.json";
+
+const packagedThemeName = process.env.KEYCLOAKIFY_THEME_NAME;
+
+if (packagedThemeName !== undefined && !themeNames.includes(packagedThemeName)) {
+    throw new Error(
+        `Unknown KEYCLOAKIFY_THEME_NAME "${packagedThemeName}". Expected one of: ${themeNames.join(", ")}`
+    );
+}
 
 /**
  * PatternFly ships its stylesheets unlayered, and unlayered CSS outranks every
@@ -57,8 +69,9 @@ export default defineConfig({
         tailwindcss(),
         keycloakify({
             accountThemeImplementation: "Single-Page",
-            themeName: "nebari",
-            themeVersion: "1.0.0",
+            // Development exposes every variant. The packaging script sets the
+            // environment variable so each published JAR contains one theme.
+            themeName: packagedThemeName ?? themeNames,
             extraThemeProperties: [
                 "parentTheme=keycloak.v2"
             ]

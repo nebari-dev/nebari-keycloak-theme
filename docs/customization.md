@@ -11,23 +11,31 @@ All tokens live in [`src/theme.css`](../src/theme.css), in three groups:
 | `--header-background`, `--header-foreground`, `--header-border`, `--header-action-hover` | This repo; the registry doesn't ship them | You are changing the console header only |
 
 Light and dark values sit side by side in the same file. Change both, and check the result in both modes &mdash;
-the [screenshot tests](development.md#screenshot-tests) cover dark mode on the sign-in page only.
+the [screenshot tests](development.md#screenshot-tests) cover both modes on the login pages only, not the consoles.
+
+Collab overrides these tokens in the `[data-brand="collab"]` section at the end of the file: a deep-blue
+light palette, and a midnight (`#000F3A`) dark palette that only redefines tokens. The Account
+console's colours are `--account-*` variables in `src/account/nebari-account.css` and `src/nebari-brand.css`:
+Nebari uses each variable's fallback, and the Collab block sets them.
 
 PatternFly components that stay on PatternFly pick these tokens up through the bridge in
 [`src/admin/index.css`](../src/admin/index.css), so a token change reaches them too.
 
 ## Logo
 
-The login card renders two SVGs and shows one per colour mode, from
-[`src/login/Template.tsx`](../src/login/Template.tsx):
+Each brand's logo paths are set in [`src/lib/branding.ts`](../src/lib/branding.ts), the only place a logo
+path is written down. The login card and both console mastheads read them from there:
 
-| File | Shown in |
-| --- | --- |
-| `public/logo/nebari-logo-light.svg` | Light mode |
-| `public/logo/nebari-logo-dark.svg` | Dark mode |
+| Brand | Light mode | Dark mode |
+| --- | --- | --- |
+| Nebari | `public/logo/nebari-logo-light.svg` | `public/logo/nebari-logo-dark.svg` |
+| Collab | `public/logo/collab-symbol.png` | `public/logo/collab-symbol.png` |
 
-Replace those files, keeping the names. The mark on the Admin welcome tab is a separate, owned asset at
-`src/admin/assets/icon.svg`.
+Replace those files, or point the entries at new ones. Collab ships no light-on-dark wordmark, so its lockup is
+the symbol plus "Collab" set as text in the login template and the mastheads.
+
+The mark on the Admin welcome tab is a separate, owned asset at `src/admin/assets/icon.svg`. For Collab, a CSS
+rule in `src/theme.css` swaps it for the symbol through the `--brand-symbol` property that `src/main.tsx` sets.
 
 ## Translations
 

@@ -35,72 +35,72 @@
         'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* ── Brand violet — overrides PF blue (#06c) ──────────────────────────── */
-    --pf-v5-global--primary-color--100: #7c3aed;
-    --pf-v5-global--primary-color--200: #6d28d9;
-    --pf-v5-global--primary-color--300: #5b21b6;
+    --pf-v5-global--primary-color--100: var(--account-pf-7c3aed, #7c3aed);
+    --pf-v5-global--primary-color--200: var(--account-pf-6d28d9, #6d28d9);
+    --pf-v5-global--primary-color--300: var(--account-pf-5b21b6, #5b21b6);
 
     /* Active state (nav left-border accent uses active-color--400) */
-    --pf-v5-global--active-color--100: #7c3aed;
-    --pf-v5-global--active-color--400: #7c3aed;
+    --pf-v5-global--active-color--100: var(--account-pf-7c3aed, #7c3aed);
+    --pf-v5-global--active-color--400: var(--account-pf-7c3aed, #7c3aed);
 
     /* Links */
-    --pf-v5-global--link--Color: #7c3aed;
-    --pf-v5-global--link--Color--hover: #9b3dcc;
-    --pf-v5-global--link--Color--visited: #6d28d9;
+    --pf-v5-global--link--Color: var(--account-pf-7c3aed, #7c3aed);
+    --pf-v5-global--link--Color--hover: var(--account-pf-9b3dcc, #9b3dcc);
+    --pf-v5-global--link--Color--visited: var(--account-pf-6d28d9, #6d28d9);
 
     /* Buttons */
-    --pf-v5-c-button--m-primary--BackgroundColor: #7c3aed;
-    --pf-v5-c-button--m-primary--hover--BackgroundColor: #6d28d9;
-    --pf-v5-c-button--m-primary--active--BackgroundColor: #5b21b6;
-    --pf-v5-c-button--m-primary--focus--BackgroundColor: #6d28d9;
+    --pf-v5-c-button--m-primary--BackgroundColor: var(--account-bg-7c3aed, #7c3aed);
+    --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--account-bg-6d28d9, #6d28d9);
+    --pf-v5-c-button--m-primary--active--BackgroundColor: var(--account-bg-5b21b6, #5b21b6);
+    --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--account-bg-6d28d9, #6d28d9);
 
     /* Nav sidebar current-page indicator */
-    --pf-v5-c-nav__link--m-current--after--BorderColor: #7c3aed;
+    --pf-v5-c-nav__link--m-current--after--BorderColor: var(--account-border-7c3aed, #7c3aed);
 
     /* Focus outline */
-    --pf-v5-global--primary-color--light-100: rgba(124, 58, 237, 0.14);
+    --pf-v5-global--primary-color--light-100: var(--account-pf-7c3aed-a14, rgba(124, 58, 237, 0.14));
 
     /* Toggle switch / checkbox / radio */
-    --pf-v5-c-check__input--checked--BackgroundColor: #7c3aed;
-    --pf-v5-c-radio__input--checked--BackgroundColor: #7c3aed;
-    --pf-v5-c-switch__input--checked__toggle--BackgroundColor: #7c3aed;
+    --pf-v5-c-check__input--checked--BackgroundColor: var(--account-bg-7c3aed, #7c3aed);
+    --pf-v5-c-radio__input--checked--BackgroundColor: var(--account-bg-7c3aed, #7c3aed);
+    --pf-v5-c-switch__input--checked__toggle--BackgroundColor: var(--account-bg-7c3aed, #7c3aed);
 
     /* Radio / check label colours */
-    --pf-v5-c-radio__label--Color: #111118;
-    --pf-v5-c-check__label--Color: #111118;
-    --pf-v5-c-radio__description--Color: #6a6a7a;
-    --pf-v5-c-check__description--Color: #6a6a7a;
+    --pf-v5-c-radio__label--Color: var(--account-fg-111118, #111118);
+    --pf-v5-c-check__label--Color: var(--account-fg-111118, #111118);
+    --pf-v5-c-radio__description--Color: var(--account-fg-6a6a7a, #6a6a7a);
+    --pf-v5-c-check__description--Color: var(--account-fg-6a6a7a, #6a6a7a);
 
     /* Secondary / outline buttons — lighter purple, same weight as sidebar fills */
-    --pf-v5-c-button--m-secondary--Color: #7c3aed;
-    --pf-v5-c-button--m-secondary--BorderColor: rgba(124, 58, 237, 0.40);
-    --pf-v5-c-button--m-secondary--hover--Color: #6d28d9;
-    --pf-v5-c-button--m-secondary--hover--BorderColor: rgba(124, 58, 237, 0.70);
-    --pf-v5-c-button--m-secondary--hover--BackgroundColor: rgba(124, 58, 237, 0.06);
-    --pf-v5-c-button--m-secondary--focus--BorderColor: rgba(124, 58, 237, 0.70);
-    --pf-v5-c-button--m-secondary--focus--BackgroundColor: rgba(124, 58, 237, 0.06);
-    --pf-v5-c-button--m-secondary--active--Color: #5b21b6;
-    --pf-v5-c-button--m-secondary--active--BorderColor: rgba(124, 58, 237, 0.85);
-    --pf-v5-c-button--m-secondary--active--BackgroundColor: rgba(124, 58, 237, 0.10);
+    --pf-v5-c-button--m-secondary--Color: var(--account-fg-7c3aed, #7c3aed);
+    --pf-v5-c-button--m-secondary--BorderColor: var(--account-border-7c3aed-a40, rgba(124, 58, 237, 0.40));
+    --pf-v5-c-button--m-secondary--hover--Color: var(--account-fg-6d28d9, #6d28d9);
+    --pf-v5-c-button--m-secondary--hover--BorderColor: var(--account-border-7c3aed-a70, rgba(124, 58, 237, 0.70));
+    --pf-v5-c-button--m-secondary--hover--BackgroundColor: var(--account-bg-7c3aed-a6, rgba(124, 58, 237, 0.06));
+    --pf-v5-c-button--m-secondary--focus--BorderColor: var(--account-border-7c3aed-a70, rgba(124, 58, 237, 0.70));
+    --pf-v5-c-button--m-secondary--focus--BackgroundColor: var(--account-bg-7c3aed-a6, rgba(124, 58, 237, 0.06));
+    --pf-v5-c-button--m-secondary--active--Color: var(--account-fg-5b21b6, #5b21b6);
+    --pf-v5-c-button--m-secondary--active--BorderColor: var(--account-border-7c3aed-a85, rgba(124, 58, 237, 0.85));
+    --pf-v5-c-button--m-secondary--active--BackgroundColor: var(--account-bg-7c3aed-a10, rgba(124, 58, 237, 0.10));
 
     /* Link-variant buttons */
-    --pf-v5-c-button--m-link--Color: #7c3aed;
-    --pf-v5-c-button--m-link--hover--Color: #6d28d9;
+    --pf-v5-c-button--m-link--Color: var(--account-fg-7c3aed, #7c3aed);
+    --pf-v5-c-button--m-link--hover--Color: var(--account-fg-6d28d9, #6d28d9);
 
     /* ── NIC dashboard surface tokens mapped to PF vars ───────────────────── */
-    --pf-v5-c-page--BackgroundColor: #f4f4f6;
-    --pf-v5-c-page__main-section--m-light--BackgroundColor: #ffffff;
-    --pf-v5-c-page__main-section--BackgroundColor: #f4f4f6;
-    --pf-v5-c-masthead--BackgroundColor: #ffffff;
-    --pf-v5-c-page__sidebar--BackgroundColor: #f4f4f6;
-    --pf-v5-c-card--BackgroundColor: #ffffff;
+    --pf-v5-c-page--BackgroundColor: var(--account-bg-f4f4f6, #f4f4f6);
+    --pf-v5-c-page__main-section--m-light--BackgroundColor: var(--account-bg-ffffff, #ffffff);
+    --pf-v5-c-page__main-section--BackgroundColor: var(--account-bg-f4f4f6, #f4f4f6);
+    --pf-v5-c-masthead--BackgroundColor: var(--account-bg-ffffff, #ffffff);
+    --pf-v5-c-page__sidebar--BackgroundColor: var(--account-bg-f4f4f6, #f4f4f6);
+    --pf-v5-c-card--BackgroundColor: var(--account-bg-ffffff, #ffffff);
     --pf-v5-c-card--BorderRadius: 12px;
     --pf-v5-global--BorderRadius--sm: 8px;
     --pf-v5-global--BorderRadius--lg: 12px;
-    --pf-v5-global--BorderColor--100: #e3e3ea;
-    --pf-v5-global--BorderColor--200: #efeff3;
-    --pf-v5-global--BoxShadow--sm: 0 1px 4px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
-    --pf-v5-global--BoxShadow--xs: 0 1px 2px rgba(0, 0, 0, .04);
+    --pf-v5-global--BorderColor--100: var(--account-border-e3e3ea, #e3e3ea);
+    --pf-v5-global--BorderColor--200: var(--account-border-efeff3, #efeff3);
+    --pf-v5-global--BoxShadow--sm: 0 1px 4px var(--account-shadow-000000-a6, rgba(0, 0, 0, .06)), 0 1px 2px var(--account-shadow-000000-a4, rgba(0, 0, 0, .04));
+    --pf-v5-global--BoxShadow--xs: 0 1px 2px var(--account-shadow-000000-a4, rgba(0, 0, 0, .04));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -114,44 +114,44 @@
         'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
     /* ── Brand violet dark ────────────────────────────────────────────────── */
-    --pf-v5-global--primary-color--100: #a78bfa;
-    --pf-v5-global--primary-color--200: #7c3aed;
-    --pf-v5-global--primary-color--300: #6d28d9;
+    --pf-v5-global--primary-color--100: var(--account-pf-a78bfa, #a78bfa);
+    --pf-v5-global--primary-color--200: var(--account-pf-7c3aed, #7c3aed);
+    --pf-v5-global--primary-color--300: var(--account-pf-6d28d9, #6d28d9);
 
-    --pf-v5-global--active-color--100: #a78bfa;
-    --pf-v5-global--active-color--400: #a78bfa;
+    --pf-v5-global--active-color--100: var(--account-pf-a78bfa, #a78bfa);
+    --pf-v5-global--active-color--400: var(--account-pf-a78bfa, #a78bfa);
 
-    --pf-v5-global--link--Color: #a78bfa;
-    --pf-v5-global--link--Color--hover: #c4b5fd;
+    --pf-v5-global--link--Color: var(--account-pf-a78bfa, #a78bfa);
+    --pf-v5-global--link--Color--hover: var(--account-pf-c4b5fd, #c4b5fd);
 
-    --pf-v5-c-button--m-primary--BackgroundColor: #7c3aed;
-    --pf-v5-c-button--m-primary--hover--BackgroundColor: #6d28d9;
-    --pf-v5-c-button--m-primary--active--BackgroundColor: #5b21b6;
-    --pf-v5-c-button--m-primary--focus--BackgroundColor: #6d28d9;
+    --pf-v5-c-button--m-primary--BackgroundColor: var(--account-bg-7c3aed, #7c3aed);
+    --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--account-bg-6d28d9, #6d28d9);
+    --pf-v5-c-button--m-primary--active--BackgroundColor: var(--account-bg-5b21b6, #5b21b6);
+    --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--account-bg-6d28d9, #6d28d9);
 
-    --pf-v5-c-nav__link--m-current--after--BorderColor: #a78bfa;
+    --pf-v5-c-nav__link--m-current--after--BorderColor: var(--account-border-a78bfa, #a78bfa);
 
-    --pf-v5-c-check__input--checked--BackgroundColor: #7c3aed;
-    --pf-v5-c-radio__input--checked--BackgroundColor: #7c3aed;
-    --pf-v5-c-switch__input--checked__toggle--BackgroundColor: #7c3aed;
+    --pf-v5-c-check__input--checked--BackgroundColor: var(--account-bg-7c3aed, #7c3aed);
+    --pf-v5-c-radio__input--checked--BackgroundColor: var(--account-bg-7c3aed, #7c3aed);
+    --pf-v5-c-switch__input--checked__toggle--BackgroundColor: var(--account-bg-7c3aed, #7c3aed);
 
     /* Radio / check label colours */
-    --pf-v5-c-radio__label--Color: #e0e0f0;
-    --pf-v5-c-check__label--Color: #e0e0f0;
-    --pf-v5-c-radio__description--Color: #8888a0;
-    --pf-v5-c-check__description--Color: #8888a0;
+    --pf-v5-c-radio__label--Color: var(--account-fg-e0e0f0, #e0e0f0);
+    --pf-v5-c-check__label--Color: var(--account-fg-e0e0f0, #e0e0f0);
+    --pf-v5-c-radio__description--Color: var(--account-fg-8888a0, #8888a0);
+    --pf-v5-c-check__description--Color: var(--account-fg-8888a0, #8888a0);
 
     /* ── NIC dashboard dark surface tokens ────────────────────────────────── */
-    --pf-v5-c-page--BackgroundColor: #0d0d14;
-    --pf-v5-c-page__main-section--m-light--BackgroundColor: #17171f;
-    --pf-v5-c-page__main-section--BackgroundColor: #0d0d14;
-    --pf-v5-c-masthead--BackgroundColor: #17171f;
-    --pf-v5-c-page__sidebar--BackgroundColor: #0d0d14;
-    --pf-v5-c-card--BackgroundColor: #17171f;
-    --pf-v5-global--BorderColor--100: #26262f;
-    --pf-v5-global--BorderColor--200: #1e1e28;
-    --pf-v5-global--BoxShadow--sm: 0 1px 4px rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .2);
-    --pf-v5-global--BoxShadow--xs: 0 1px 2px rgba(0, 0, 0, .2);
+    --pf-v5-c-page--BackgroundColor: var(--account-bg-0d0d14, #0d0d14);
+    --pf-v5-c-page__main-section--m-light--BackgroundColor: var(--account-bg-17171f, #17171f);
+    --pf-v5-c-page__main-section--BackgroundColor: var(--account-bg-0d0d14, #0d0d14);
+    --pf-v5-c-masthead--BackgroundColor: var(--account-bg-17171f, #17171f);
+    --pf-v5-c-page__sidebar--BackgroundColor: var(--account-bg-0d0d14, #0d0d14);
+    --pf-v5-c-card--BackgroundColor: var(--account-bg-17171f, #17171f);
+    --pf-v5-global--BorderColor--100: var(--account-border-26262f, #26262f);
+    --pf-v5-global--BorderColor--200: var(--account-border-1e1e28, #1e1e28);
+    --pf-v5-global--BoxShadow--sm: 0 1px 4px var(--account-shadow-000000-a3, rgba(0, 0, 0, .3)), 0 1px 2px var(--account-shadow-000000-a2, rgba(0, 0, 0, .2));
+    --pf-v5-global--BoxShadow--xs: 0 1px 2px var(--account-shadow-000000-a2, rgba(0, 0, 0, .2));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -212,13 +212,13 @@ samp,
    ═══════════════════════════════════════════════════════════════════════════ */
 .pf-v5-c-card {
     border-radius: 12px;
-    border: 1px solid #e3e3ea;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+    border: 1px solid var(--account-border-e3e3ea, #e3e3ea);
+    box-shadow: 0 1px 4px var(--account-shadow-000000-a6, rgba(0, 0, 0, .06)), 0 1px 2px var(--account-shadow-000000-a4, rgba(0, 0, 0, .04));
 }
 
 .pf-v5-theme-dark .pf-v5-c-card {
-    border-color: #26262f;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+    border-color: var(--account-border-26262f, #26262f);
+    box-shadow: 0 1px 4px var(--account-shadow-000000-a3, rgba(0, 0, 0, .3));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

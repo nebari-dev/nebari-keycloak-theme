@@ -7,9 +7,12 @@ can also be run by hand from the Actions tab.
 
 1. Builds the theme with `npm run build-keycloak-theme`. That runs the [upgrade guards](development.md#upgrade-guards)
    and the type check first, so a failure stops the publish.
-2. Builds and pushes the Keycloak image to `ghcr.io/nebari-dev/nebari-keycloak-theme`.
-3. **If no release exists yet for the current version,** cuts a GitHub release `v<version>` with both JARs
-   attached and screenshots of the login pages in the notes. If one exists, it skips this step and logs a
+2. Uploads each brand's two JARs as a workflow artifact, so they can be downloaded from every run.
+3. Builds and pushes one Keycloak image per brand, each carrying only its own theme:
+   `ghcr.io/nebari-dev/nebari-keycloak-theme` and `ghcr.io/nebari-dev/collab-keycloak-theme`. After the Collab
+   package's first publish, check its visibility under **Package settings** so it matches the Nebari package.
+4. **If no release exists yet for the current version,** cuts a GitHub release `v<version>` with all four JARs
+   attached and screenshots of both brands' login pages in the notes. If one exists, it skips this step and logs a
    notice.
 
 Runs are never cancelled midway, so a half-pushed image or release can't happen; a second push waits for the
@@ -19,9 +22,8 @@ first.
 
 **Bump `version` in `package.json`.** That is the whole trigger. The next push to `main` creates `v<version>`.
 
-Without a bump, pushes still publish a fresh image but no new release. Keep `themeVersion` in
-[`vite.config.ts`](../vite.config.ts) in step with `package.json` &mdash; it is written into the theme's metadata
-inside the JAR.
+Without a bump, pushes still publish fresh images but no new release. The JAR's own version metadata is taken
+from `version` in `package.json` too, so there is no second number to keep in step.
 
 ## Versions and tags
 

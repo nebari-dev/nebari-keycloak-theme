@@ -24,7 +24,7 @@ Every pull request runs [`playwright.yml`](../.github/workflows/playwright.yml):
 
 1. **Theme guards** &mdash; `npm run check`
 2. **Type check** &mdash; `npm run typecheck`
-3. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/`
+3. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<brand>/`
 
 Pushes to `main` also run the publisher, which builds through `npm run build` and so runs the guards again.
 See [Releasing](releasing.md).
@@ -36,8 +36,9 @@ guards below exist partly to narrow that gap. For console changes, check them by
 
 ## Screenshot tests
 
-The ten login previews, a dark-mode sign-in and two full-page captures are compared against baselines on every
-pull request.
+Each brand in [`tests/visual.spec.ts`](../tests/visual.spec.ts) runs the ten login previews and a full-page
+capture in light and dark mode; dark baselines carry a `-dark` suffix. They are compared against baselines on every
+pull request. Preview a brand in the dev server with `?theme=collab`.
 
 ```bash
 npm run test:screenshots          # compare
@@ -46,8 +47,8 @@ npm run test:screenshots:update   # accept the current rendering
 
 ### Regenerate baselines on Linux
 
-Baselines are stored per platform in `tests/screenshots/<platform>/`, because each OS rasterises fonts slightly
-differently. CI runs on Linux, so **only the `linux/` baselines count**. Updating on macOS or Windows writes to
+Baselines are stored per platform and brand in `tests/screenshots/<platform>/<brand>/`, because each OS
+rasterises fonts slightly differently. CI runs on Linux, so **only the `linux/` baselines count**. Updating on macOS or Windows writes to
 a different directory and won't satisfy the check.
 
 If you aren't on Linux, run the update inside the Playwright container that matches the pinned version:

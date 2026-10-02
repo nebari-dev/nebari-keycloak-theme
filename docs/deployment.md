@@ -5,28 +5,33 @@ Getting the theme into Keycloak and switching it on are two separate steps. Inst
 
 ## What gets built
 
-`npm run build-keycloak-theme` writes two JARs to `dist_keycloak/`. Use the one that matches your Keycloak:
+`npm run build-keycloak-theme` writes two JARs per brand to `dist_keycloak/`. Use the one that matches your
+brand and your Keycloak:
 
-| File | Keycloak |
-| --- | --- |
-| `keycloak-theme-for-kc-all-other-versions.jar` | 26 and newer |
-| `keycloak-theme-for-kc-22-to-25.jar` | 22 to 25 |
+| File | Brand | Keycloak |
+| --- | --- | --- |
+| `nebari-keycloak-theme-for-kc-all-other-versions.jar` | Nebari | 26 and newer |
+| `nebari-keycloak-theme-for-kc-22-to-25.jar` | Nebari | 22 to 25 |
+| `collab-keycloak-theme-for-kc-all-other-versions.jar` | Collab | 26 and newer |
+| `collab-keycloak-theme-for-kc-22-to-25.jar` | Collab | 22 to 25 |
 
-Install exactly one, by name. A glob like `keycloak-theme-*.jar` matches both.
+Install one per brand, by name. A glob like `nebari-keycloak-theme-*.jar` matches both Keycloak ranges. To build
+a single brand, run `npm run build-keycloak-theme -- --theme collab`.
 
-Each release on GitHub attaches both JARs, so you don't need to build them yourself.
+Each release on GitHub attaches all four JARs, so you don't need to build them yourself.
 
 ## Installing
 
 ### The published image
 
-Every push to `main` publishes a complete Keycloak image with the theme already built in:
+Every push to `main` publishes one complete Keycloak image per brand, each with only its own theme built in:
 
-```
-ghcr.io/nebari-dev/nebari-keycloak-theme
-```
+| Brand | Image |
+| --- | --- |
+| Nebari | `ghcr.io/nebari-dev/nebari-keycloak-theme` |
+| Collab | `ghcr.io/nebari-dev/collab-keycloak-theme` |
 
-It is based on `quay.io/keycloak/keycloak:26.0` and uses the Keycloak 26 JAR. Three tags are published:
+Both are based on `quay.io/keycloak/keycloak:26.0` and use the brand's Keycloak 26 JAR. Each gets three tags:
 
 | Tag | Moves? |
 | --- | --- |
@@ -45,7 +50,7 @@ If you already build a Keycloak image, add the JAR as a provider and rebuild:
 
 ```dockerfile
 FROM quay.io/keycloak/keycloak:26.0 AS builder
-COPY keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/nebari-theme.jar
+COPY nebari-keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/
 RUN /opt/keycloak/bin/kc.sh build
 
 FROM quay.io/keycloak/keycloak:26.0
@@ -53,7 +58,8 @@ COPY --from=builder /opt/keycloak/ /opt/keycloak/
 ```
 
 This repo's own [`Dockerfile`](../Dockerfile) is the working version of this, with the Keycloak version and JAR
-name as build arguments.
+name as build arguments. Its default `THEME_JAR` installs every brand's Keycloak 26 JAR, which is what the local
+compose image uses; the publish workflow narrows it to one.
 
 ### An existing Keycloak
 
@@ -71,6 +77,9 @@ A theme applies per realm. In the Admin Console of the realm you want to change,
 | Login theme | `nebari` |
 | Admin console theme | `nebari` |
 | Account theme | `nebari` |
+
+For Collab, set all three to `collab`. A realm that still selects `openteams`, Collab's old name, must be
+switched to `collab`.
 
 Leave **Email theme** alone &mdash; this theme doesn't provide one.
 

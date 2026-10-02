@@ -1,13 +1,13 @@
 {
   "name": "nebari-keycloak-theme",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "postinstall": "keycloakify sync-extensions",
     "dev": "vite",
     "build": "npm run check && tsc && vite build",
-    "build-keycloak-theme": "npm run build && keycloakify build",
+    "build-keycloak-theme": "node scripts/build-keycloak-themes.mjs",
     "check": "npm run check:page-nav-sync && npm run check:patternfly-version",
     "check:page-nav-sync": "node scripts/check-page-nav-sync.mjs",
     "check:patternfly-version": "node scripts/check-patternfly-version.mjs",
@@ -21,6 +21,7 @@
     "@base-ui/react": "^1.7.0",
     "@dagrejs/dagre": "^1.1.8",
     "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/inter-tight": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@keycloak/keycloak-admin-client": "26.5.2",
     "@keycloakify/keycloak-account-ui": "~260502.0.2",
