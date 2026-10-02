@@ -1194,6 +1194,8 @@ a.nebari-button.nebari-button-primary:visited {
     --nebari-purple-light: rgba(80, 126, 255, .15);
     --nebari-red: #ff8a69;
     --login-backdrop: #022791;
+    --login-input-border: rgba(255, 255, 255, .18);
+    --login-placeholder: var(--muted-foreground);
 
     /* Console masthead and sidebar */
     --header-background: #1540BA;
@@ -1211,19 +1213,33 @@ a.nebari-button.nebari-button-primary:visited {
     --sidebar-ring: #507EFF;
 }
 
+/* Dark mode */
+:root[data-brand="collab"][data-theme="dark"] {
+    --background: #000F3A;
+    --login-backdrop: #000F3A;
+    --bg-primary: #000F3A;
+    --sidebar: #000F3A;
+    --card: rgba(255, 255, 255, .14);
+    --popover: #253156;
+    --bg-secondary: #253156;
+    --header-background: #253156;
+    --login-input-border: rgba(255, 255, 255, .3);
+    --login-placeholder: rgba(255, 255, 255, .5);
+}
+
 /* Account console colours (see src/account/nebari-account.css and src/nebari-brand.css). */
 html[data-brand="collab"][data-kc-theme-type="account"] {
-    --pf-v5-global--BackgroundColor--100: rgba(255, 255, 255, .08);
-    --pf-v5-global--BackgroundColor--200: #022791;
-    --pf-v5-global--BackgroundColor--light-100: rgba(255, 255, 255, .08);
-    --account-bg-0d0d14: #022791;
+    --pf-v5-global--BackgroundColor--100: var(--card);
+    --pf-v5-global--BackgroundColor--200: var(--background);
+    --pf-v5-global--BackgroundColor--light-100: var(--card);
+    --account-bg-0d0d14: var(--background);
     --account-bg-13131a: rgba(255, 255, 255, .12);
-    --account-bg-17171f: rgba(255, 255, 255, .08);
+    --account-bg-17171f: var(--card);
     --account-bg-1a1a2e: rgba(255, 255, 255, .12);
     --account-bg-1e1e28: rgba(255, 255, 255, .12);
-    --account-bg-5b21b6: #1540BA;
-    --account-bg-6d28d9: #1540BA;
-    --account-bg-7c3aed: #022791;
+    --account-bg-5b21b6: var(--primary-hover);
+    --account-bg-6d28d9: var(--primary-hover);
+    --account-bg-7c3aed: var(--primary);
     --account-bg-7c3aed-a10: rgba(80, 126, 255, .10);
     --account-bg-7c3aed-a6: rgba(80, 126, 255, .6);
     --account-bg-7c3aed-a7: rgba(80, 126, 255, .7);
@@ -1235,54 +1251,66 @@ html[data-brand="collab"][data-kc-theme-type="account"] {
     --account-bg-ef4444-a7: rgba(255, 138, 105, .7);
     --account-bg-ef4444-a9: rgba(255, 138, 105, .9);
     --account-bg-f0ebff: rgba(255, 255, 255, .12);
-    --account-bg-f4f4f6: #022791;
+    --account-bg-f4f4f6: var(--background);
     --account-bg-fafafa: rgba(255, 255, 255, .12);
-    --account-bg-ffffff: rgba(255, 255, 255, .08);
-    --account-border-1e1e28: rgba(255, 255, 255, .14);
-    --account-border-26262f: rgba(255, 255, 255, .24);
-    --account-border-6d28d9: #507EFF;
-    --account-border-7c3aed: #507EFF;
+    --account-bg-ffffff: var(--card);
+    --account-border-1e1e28: var(--border-subtle);
+    --account-border-26262f: var(--border);
+    --account-border-6d28d9: var(--ring);
+    --account-border-7c3aed: var(--ring);
     --account-border-7c3aed-a25: rgba(80, 126, 255, .25);
     --account-border-7c3aed-a40: rgba(80, 126, 255, .40);
     --account-border-7c3aed-a50: rgba(80, 126, 255, .50);
     --account-border-7c3aed-a70: rgba(80, 126, 255, .70);
     --account-border-7c3aed-a85: rgba(80, 126, 255, .85);
-    --account-border-a78bfa: #507EFF;
+    --account-border-a78bfa: var(--ring);
     --account-border-a78bfa-a45: rgba(80, 126, 255, .45);
-    --account-border-dc2626: #ff8a69;
-    --account-border-e3e3ea: rgba(255, 255, 255, .24);
-    --account-border-ef4444: #ff8a69;
+    --account-border-dc2626: var(--nebari-red);
+    --account-border-e3e3ea: var(--border);
+    --account-border-ef4444: var(--nebari-red);
     --account-border-ef4444-a25: rgba(255, 138, 105, .25);
-    --account-border-efeff3: rgba(255, 255, 255, .14);
-    --account-fg-111118: #ffffff;
-    --account-fg-374151: #ffffff;
-    --account-fg-5b21b6: #8FACFF;
-    --account-fg-6a6a7a: #8FACFF;
-    --account-fg-6d28d9: #8FACFF;
-    --account-fg-7c3aed: #8FACFF;
+    --account-border-efeff3: var(--border-subtle);
+    --account-fg-111118: var(--foreground);
+    --account-fg-374151: var(--foreground);
+    --account-fg-5b21b6: var(--muted-foreground);
+    --account-fg-6a6a7a: var(--muted-foreground);
+    --account-fg-6d28d9: var(--muted-foreground);
+    --account-fg-7c3aed: var(--muted-foreground);
     --account-fg-7c3aed-a35: rgba(80, 126, 255, .35);
-    --account-fg-8888a0: #8FACFF;
-    --account-fg-a78bfa: #8FACFF;
+    --account-fg-8888a0: var(--muted-foreground);
+    --account-fg-a78bfa: var(--muted-foreground);
     --account-fg-a78bfa-a35: rgba(80, 126, 255, .35);
-    --account-fg-c8c8d8: #ffffff;
-    --account-fg-c9cdd3: #8FACFF;
-    --account-fg-dc2626: #ffad96;
-    --account-fg-e0e0f0: #ffffff;
-    --account-fg-ef4444: #ffad96;
-    --account-fg-f0f0f8: #ffffff;
-    --account-fg-ffffff: #ffffff;
-    --account-pf-5b21b6: #8FACFF;
-    --account-pf-6d28d9: #8FACFF;
-    --account-pf-7c3aed: #8FACFF;
+    --account-fg-c8c8d8: var(--foreground);
+    --account-fg-c9cdd3: var(--muted-foreground);
+    --account-fg-dc2626: var(--destructive-foreground);
+    --account-fg-e0e0f0: var(--foreground);
+    --account-fg-ef4444: var(--destructive-foreground);
+    --account-fg-f0f0f8: var(--foreground);
+    --account-fg-ffffff: var(--foreground);
+    --account-pf-5b21b6: var(--muted-foreground);
+    --account-pf-6d28d9: var(--muted-foreground);
+    --account-pf-7c3aed: var(--muted-foreground);
     --account-pf-7c3aed-a14: rgba(80, 126, 255, .14);
-    --account-pf-9b3dcc: #8FACFF;
-    --account-pf-a78bfa: #8FACFF;
-    --account-pf-c4b5fd: #8FACFF;
-    --account-shadow-7c3aed: #507EFF;
+    --account-pf-9b3dcc: var(--muted-foreground);
+    --account-pf-a78bfa: var(--muted-foreground);
+    --account-pf-c4b5fd: var(--muted-foreground);
+    --account-shadow-7c3aed: var(--ring);
     --account-shadow-7c3aed-a12: rgba(80, 126, 255, .12);
     --account-shadow-7c3aed-a30: rgba(80, 126, 255, .30);
-    --account-shadow-a78bfa: #507EFF;
+    --account-shadow-a78bfa: var(--ring);
     --account-shadow-a78bfa-a12: rgba(80, 126, 255, .12);
+}
+
+/* Data tables sit on the section's card surface instead of stacking another
+ * translucent layer on it. */
+html[data-brand="collab"] [data-slot="table-container"],
+html[data-brand="collab"] [data-slot="table"] {
+    background-color: transparent;
+}
+
+/* A page section nested in another (tab content) shows the outer section's surface. */
+html[data-brand="collab"] .pf-v5-c-page__main-section .pf-v5-c-page__main-section {
+    background-color: transparent;
 }
 
 /* Checked switches use the selection blue so the knob stays visible. */
@@ -1461,7 +1489,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] select,
 html[data-brand="collab"][data-kc-theme-type="login"] textarea {
     height: 46px;
     padding: 11px 16px;
-    border: 1px solid rgba(255, 255, 255, .18);
+    border: 1px solid var(--login-input-border);
     border-radius: 8px;
     background: rgba(255, 255, 255, .10);
     color: var(--foreground);
@@ -1472,7 +1500,7 @@ html[data-brand="collab"][data-kc-theme-type="login"] textarea {
 
 html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]::placeholder,
 html[data-brand="collab"][data-kc-theme-type="login"] input::placeholder {
-    color: var(--muted-foreground);
+    color: var(--login-placeholder);
 }
 
 html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]:hover,

@@ -37,8 +37,7 @@ guards below exist partly to narrow that gap. For console changes, check them by
 ## Screenshot tests
 
 Each brand in [`tests/visual.spec.ts`](../tests/visual.spec.ts) runs the ten login previews and a full-page
-capture, and Nebari adds a dark-mode sign-in and a dark full-page capture. Collab has one dark palette in both
-modes, so a dark capture of it would only repeat the light one. They are compared against baselines on every
+capture in light and dark mode; dark baselines carry a `-dark` suffix. They are compared against baselines on every
 pull request. Preview a brand in the dev server with `?theme=collab`.
 
 ```bash

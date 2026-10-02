@@ -19,10 +19,7 @@ const previews = [
  * baselines are stored under `tests/screenshots/<platform>/<theme>/`, so adding
  * a theme is one entry here. See `src/lib/branding.ts`.
  *
- * `colorSchemes` lists the schemes a theme actually renders differently. Collab
- * forces `color-scheme: dark` on one deep-blue ground, so a dark capture of it
- * would only duplicate the light one; Nebari has a real dark palette, and
- * dropping its dark captures would let a dark-mode regression pass CI.
+ * `colorSchemes` lists the schemes each theme is captured in.
  */
 const themes: {
     name: string;
@@ -39,7 +36,7 @@ const themes: {
     },
     {
         name: "collab",
-        colorSchemes: ["light"],
+        colorSchemes: ["light", "dark"],
         assertBrand: async page => {
             await expect(page.getByRole("img", { name: "Collab" })).toBeVisible();
             await expect(page.locator(".nebari-logo")).toHaveCount(0);
@@ -71,27 +68,23 @@ test("Nebari is the default theme", async ({ page }) => {
 
 for (const theme of themes) {
     test.describe(`${theme.name} theme`, () => {
-        for (const preview of previews) {
-            test(`${preview} page`, async ({ page }) => {
-                await openPreview(page, theme.name, preview);
-                await theme.assertBrand(page);
-                await expect(page.locator(".nebari-login-card")).toHaveScreenshot(
-                    [theme.name, `${preview}.png`],
-                    { animations: "disabled" }
-                );
-            });
-        }
+        // Light captures are named `<preview>.png` and dark ones `<preview>-dark.png`.
+        for (const colorScheme of theme.colorSchemes) {
+            const dark = colorScheme === "dark";
 
-        if (theme.colorSchemes.includes("dark")) {
-            test("dark login page", async ({ page }) => {
-                await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-                await openPreview(page, theme.name, "login");
-                await theme.assertBrand(page);
-                await expect(page.locator(".nebari-login-card")).toHaveScreenshot(
-                    [theme.name, "login-dark.png"],
-                    { animations: "disabled" }
-                );
-            });
+            for (const preview of previews) {
+                test(dark ? `dark ${preview} page` : `${preview} page`, async ({ page }) => {
+                    if (dark) {
+                        await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+                    }
+                    await openPreview(page, theme.name, preview);
+                    await theme.assertBrand(page);
+                    await expect(page.locator(".nebari-login-card")).toHaveScreenshot(
+                        [theme.name, dark ? `${preview}-dark.png` : `${preview}.png`],
+                        { animations: "disabled" }
+                    );
+                });
+            }
         }
 
         // The captures above crop to the card. These full-page ones include the
