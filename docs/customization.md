@@ -11,10 +11,12 @@ All tokens live in [`src/theme.css`](../src/theme.css), in three groups:
 | `--header-background`, `--header-foreground`, `--header-border`, `--header-action-hover` | This repo; the registry doesn't ship them | You are changing the console header only |
 
 Light and dark values sit side by side in the same file. Change both, and check the result in both modes &mdash;
-the [screenshot tests](development.md#screenshot-tests) cover Nebari's dark mode on the sign-in page only.
+the [screenshot tests](development.md#screenshot-tests) cover both modes on the login pages only, not the consoles.
 
-Collab overrides these tokens in the `html[data-brand="collab"]` block at the end of the file. It has one
-deep-blue palette and forces `color-scheme: dark`, so it has no separate light and dark values.
+Collab overrides these tokens in the `[data-brand="collab"]` section at the end of the file: a deep-blue
+light palette, and a midnight (`#000F3A`) dark palette that only redefines tokens. The Account
+console's colours are `--account-*` variables in `src/account/nebari-account.css` and `src/nebari-brand.css`:
+Nebari uses each variable's fallback, and the Collab block sets them.
 
 PatternFly components that stay on PatternFly pick these tokens up through the bridge in
 [`src/admin/index.css`](../src/admin/index.css), so a token change reaches them too.

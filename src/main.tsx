@@ -31,6 +31,11 @@ function getInitialTheme(): "light" | "dark" {
 // Applying it before React renders prevents the login page flashing light.
 if (document.documentElement.dataset.theme === undefined) {
     document.documentElement.dataset.theme = getInitialTheme();
+
+    // Without a saved light or dark preference, follow the system setting as it changes.
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        document.documentElement.dataset.theme = getInitialTheme();
+    });
 }
 
 // Keycloak injects window.kcContext in production. The standalone Vite app,

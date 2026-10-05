@@ -13,7 +13,7 @@ Keycloak 26 image on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-t
 - The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
 - The brands share one build and one stylesheet. `src/main.tsx` stamps the theme name on `<html>` as
   `data-brand`; logo paths live only in [`src/lib/branding.ts`](src/lib/branding.ts), and Collab's styling is
-  the `html[data-brand="collab"]` block in `src/theme.css`, scoped by `data-kc-theme-type` as well.
+  the `[data-brand="collab"]` section of `src/theme.css`, scoped by `data-kc-theme-type` as well.
 - The consoles are ~520 views vendored from Keycloak by `keycloakify sync-extensions`. They are **not rewritten**.
   They are restyled by swapping the components they import underneath them, through one owned re-export shim.
 
