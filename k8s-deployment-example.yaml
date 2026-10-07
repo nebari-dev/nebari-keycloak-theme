@@ -20,7 +20,7 @@ spec:
       - name: ghcr-creds
       initContainers:
       - name: install-keycloak-theme
-        image: ghcr.io/nebari-dev/nebari-keycloak-theme:1.1.0
+        image: ghcr.io/nebari-dev/nebari-keycloak-theme:1.1.1
         command: ["sh", "-c", "cp /opt/keycloak/providers/*.jar /theme-providers/"]
         securityContext:
           runAsUser: 0
