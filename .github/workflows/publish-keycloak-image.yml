@@ -120,7 +120,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            KEYCLOAK_VERSION=26.0
+            KEYCLOAK_VERSION=26.5.0
             THEME_JAR=nebari-keycloak-theme-for-kc-all-other-versions.jar
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
@@ -143,7 +143,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            KEYCLOAK_VERSION=26.0
+            KEYCLOAK_VERSION=26.5.0
             THEME_JAR=collab-keycloak-theme-for-kc-all-other-versions.jar
           tags: ${{ steps.collab-metadata.outputs.tags }}
           labels: ${{ steps.collab-metadata.outputs.labels }}

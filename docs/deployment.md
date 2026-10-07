@@ -31,7 +31,7 @@ Every push to `main` publishes one complete Keycloak image per brand, each with 
 | Nebari | `ghcr.io/nebari-dev/nebari-keycloak-theme` |
 | Collab | `ghcr.io/nebari-dev/collab-keycloak-theme` |
 
-Both are based on `quay.io/keycloak/keycloak:26.0` and use the brand's Keycloak 26 JAR. Each gets three tags:
+Both are based on `quay.io/keycloak/keycloak:26.5.0` and use the brand's Keycloak 26 JAR. Each gets three tags:
 
 | Tag | Moves? |
 | --- | --- |
@@ -49,11 +49,11 @@ The image's entrypoint is `kc.sh`, so pass `start` (or `start-dev`) and your usu
 If you already build a Keycloak image, add the JAR as a provider and rebuild:
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.0 AS builder
+FROM quay.io/keycloak/keycloak:26.5.0 AS builder
 COPY nebari-keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/
 RUN /opt/keycloak/bin/kc.sh build
 
-FROM quay.io/keycloak/keycloak:26.0
+FROM quay.io/keycloak/keycloak:26.5.0
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 ```
 
