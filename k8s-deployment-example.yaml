@@ -29,7 +29,7 @@ spec:
           mountPath: /theme-providers
       containers:
       - name: keycloak
-        image: quay.io/keycloak/keycloak:26.0
+        image: quay.io/keycloak/keycloak:26.8.0
         # Plain `start`, not `--optimized`, so Keycloak rebuilds with the theme.
         args:
           - start
