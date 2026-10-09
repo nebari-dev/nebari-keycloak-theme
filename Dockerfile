@@ -1,4 +1,4 @@
-ARG KEYCLOAK_VERSION=26.0
+ARG KEYCLOAK_VERSION=26.8.0
 # Which theme JARs to install. The default takes every theme that was built, so
 # a local `docker compose up --build` can switch a realm between them. Narrow it
 # to one file to publish an image carrying a single theme.

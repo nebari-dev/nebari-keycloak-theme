@@ -177,6 +177,7 @@ new record that marks the old one superseded.
 | [0002](docs/adr/0002-restyle-the-consoles-through-a-shim.md) | Restyle the consoles through a PatternFly shim, not by forking views |
 | [0003](docs/adr/0003-pin-the-cascade-layer-order.md) | Pin one cascade-layer order and wrap PatternFly in its own layer |
 | [0004](docs/adr/0004-keep-owned-files-few-and-guarded.md) | Keep owned files few, and guard the ones that stay owned |
+| [0005](docs/adr/0005-run-the-server-ahead-of-the-console-sources.md) | Run the Keycloak server ahead of the vendored console sources |
 
 ## License
 
