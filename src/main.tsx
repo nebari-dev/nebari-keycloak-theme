@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { getBrandLogos, isBrandName } from "@/lib/branding";
 import type { KcContext } from "./kc.gen";
 import { KcPage } from "./kc.gen";
-import { getKcContextMockForPreview } from "./login/KcContext";
+import { getKcContextMockForPageId, getKcContextMockForPreview } from "./login/KcContext";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/inter-tight";
 import "@fontsource/ibm-plex-mono/400.css";
@@ -38,14 +38,17 @@ if (document.documentElement.dataset.theme === undefined) {
     });
 }
 
-// Keycloak injects window.kcContext in production. The preview query is used
-// only when running the standalone Vite app, including visual tests.
+// Keycloak injects window.kcContext in production. The standalone Vite app,
+// including the tests, picks a mock instead: `?pageId=` by Keycloak's page id
+// (e.g. `login-reset-password.ftl`), or `?preview=` for the named variants that
+// share one page, such as `login-providers`.
 const searchParams = new URLSearchParams(window.location.search);
 const injectedKcContext = window.kcContext as KcContext | undefined;
 const previewThemeName = searchParams.get("theme");
 const kcContext: KcContext =
     injectedKcContext ?? {
-        ...getKcContextMockForPreview(searchParams.get("preview")),
+        ...(getKcContextMockForPageId(searchParams.get("pageId")) ??
+            getKcContextMockForPreview(searchParams.get("preview"))),
         themeName: isBrandName(previewThemeName) ? previewThemeName : "nebari"
     };
 

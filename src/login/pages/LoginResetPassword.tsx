@@ -61,8 +61,10 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
                     </a>
                     {/* `type` is baked into the render element: Base UI merges the
                         render element's props last, so `Button`'s default
-                        `<button type="button" />` would win over a `type` prop. */}
-                    <Button className="w-full" render={<button type="submit" />}>
+                        `<button type="button" />` would win over a `type` prop.
+                        `flex-1`, not `w-full`: the button shares the row with the
+                        link, and 100% of the row plus the link overflowed the card. */}
+                    <Button className="flex-1" render={<button type="submit" />}>
                         {msgStr("doSubmit")}
                     </Button>
                 </div>

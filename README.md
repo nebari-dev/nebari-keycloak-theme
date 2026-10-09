@@ -27,7 +27,7 @@
 
 <p align="center">
   <a href="https://github.com/nebari-dev/nebari-keycloak-theme/actions/workflows/playwright.yml"><img
-  src="https://github.com/nebari-dev/nebari-keycloak-theme/actions/workflows/playwright.yml/badge.svg" alt="Screenshots CI"></a>
+  src="https://github.com/nebari-dev/nebari-keycloak-theme/actions/workflows/playwright.yml/badge.svg" alt="Playwright CI"></a>
   <a href="https://github.com/nebari-dev/nebari-keycloak-theme/actions/workflows/publish-keycloak-image.yml"><img
   src="https://github.com/nebari-dev/nebari-keycloak-theme/actions/workflows/publish-keycloak-image.yml/badge.svg" alt="Publish"></a>
   <a href="https://github.com/nebari-dev/nebari-keycloak-theme/releases/latest"><img
@@ -119,6 +119,23 @@ context at http://localhost:5173/?preview=login. Add `&theme=collab` to preview 
 http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/quick-start.md) covers both loops and why
 `master` still shows the stock consoles.
 
+## Accessibility tests
+
+Every login page and the main Admin and Account console screens are checked against WCAG 2.2 AA in each brand,
+light and dark: an axe scan (contrast, labels, ARIA, landmarks) plus keyboard checks (Tab reaches every control,
+focus is always visible, nothing traps focus).
+
+```bash
+npm run test:a11y            # login pages, from the dev server
+npm run test:a11y:consoles   # Admin and Account consoles; needs the compose Keycloak above
+```
+
+A failure names the rule and the element &mdash; for contrast, the two colours and the ratio &mdash; or, for
+keyboard checks, the controls by role and name. Problems already tracked are listed in
+[`tests/a11y/known-violations.ts`](tests/a11y/known-violations.ts) with the issue that will fix each one.
+Both run in CI on every pull request. [Development](docs/development.md#accessibility-tests) covers what each
+check catches and how to read a failure.
+
 ## Project layout
 
 | Path | What lives there |
@@ -133,7 +150,7 @@ http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/
 | `src/theme.css` | Tokens, the cascade-layer order, login-page styles, and the Collab `data-brand` rules |
 | `themes.json` | The brands to build; one JAR pair per brand |
 | `scripts/` | The per-brand JAR build, and upgrade guards that catch silent breakage on a Keycloak bump |
-| `tests/` | Playwright screenshot tests and their Linux baselines, one folder per brand |
+| `tests/` | Playwright screenshot tests and their Linux baselines, one folder per brand; accessibility tests in `tests/a11y/` |
 | `docs/` | Everything below |
 
 ## Documentation
@@ -141,7 +158,7 @@ http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/
 | Guide | What is in it |
 | --- | --- |
 | [Quick start](docs/quick-start.md) | The two dev loops, the seeded realm, and which URL to open |
-| [Development](docs/development.md) | Scripts, previews, screenshot baselines, upgrade guards and what CI runs |
+| [Development](docs/development.md) | Scripts, previews, screenshot baselines, accessibility tests, upgrade guards and what CI runs |
 | [Architecture](docs/architecture.md) | The three themes, the component shim, cascade layers and theme state |
 | [Ownership](docs/ownership.md) | Which Keycloak files this theme forks, why, and what keeps them honest |
 | [Customization](docs/customization.md) | Tokens, logo, translations, login pages and design-system components |
