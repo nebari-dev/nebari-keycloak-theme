@@ -46,9 +46,7 @@ const themes: {
                 .poll(() =>
                     page
                         .locator(".collab-logo-symbol")
-                        .evaluate(
-                            (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
-                        )
+                        .evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)
                 )
                 .toBe(true);
         }
@@ -97,10 +95,10 @@ for (const theme of themes) {
                 await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
                 await openPreview(page, theme.name, "login");
                 await theme.assertBrand(page);
-                await expect(page).toHaveScreenshot(
-                    [theme.name, `full-page-${colorScheme}.png`],
-                    { fullPage: true, animations: "disabled" }
-                );
+                await expect(page).toHaveScreenshot([theme.name, `full-page-${colorScheme}.png`], {
+                    fullPage: true,
+                    animations: "disabled"
+                });
             });
         }
     });

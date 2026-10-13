@@ -73,10 +73,7 @@ export function getBrandLogos(brand: BrandName = getBrandName()): {
 }
 
 /** The single logo URL appropriate for the given colour scheme. */
-export function getBrandLogo(
-    isDarkMode: boolean,
-    brand: BrandName = getBrandName()
-): string {
+export function getBrandLogo(isDarkMode: boolean, brand: BrandName = getBrandName()): string {
     const logos = getBrandLogos(brand);
 
     return isDarkMode ? logos.dark : logos.light;

@@ -132,6 +132,7 @@ http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/
 | `src/lib/branding.ts` | Each brand's logo paths |
 | `src/theme.css` | Tokens, the cascade-layer order, login-page styles, and the Collab `data-brand` rules |
 | `themes.json` | The brands to build; one JAR pair per brand |
+| `biome.json` | Lint and format rules, and the files each one skips &mdash; see [Development](docs/development.md#lint-and-format) |
 | `scripts/` | The per-brand JAR build, and upgrade guards that catch silent breakage on a Keycloak bump |
 | `tests/` | Playwright screenshot tests and their Linux baselines, one folder per brand |
 | `docs/` | Everything below |

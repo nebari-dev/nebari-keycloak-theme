@@ -45,10 +45,7 @@ function installedMajor() {
   try {
     raw = readFileSync(PKG, "utf8");
   } catch (cause) {
-    throw new Error(
-      `Cannot read ${fileURLToPath(PKG)} — run \`npm ci\`.`,
-      { cause },
-    );
+    throw new Error(`Cannot read ${fileURLToPath(PKG)} — run \`npm ci\`.`, { cause });
   }
   const { version } = JSON.parse(raw);
   const major = Number(version.split(".")[0]);

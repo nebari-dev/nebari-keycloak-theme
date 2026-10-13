@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-export default function Register(
-    props: PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n>
-) {
+export default function Register(props: PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
     const { url, messagesPerField, realm, passwordRequired, recaptchaRequired, recaptchaSiteKey } = kcContext;
@@ -47,8 +45,7 @@ export default function Register(
             infoNode={
                 <div>
                     <span>
-                        {msg("alreadyHaveAnAccount")}{" "}
-                        <a href={url.loginUrl}>{msg("doLogIn")}</a>
+                        {msg("alreadyHaveAnAccount")} <a href={url.loginUrl}>{msg("doLogIn")}</a>
                     </span>
                 </div>
             }

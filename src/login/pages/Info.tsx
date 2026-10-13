@@ -6,27 +6,28 @@ import type { I18n } from "../i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-export default function Info(
-    props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>
-) {
+export default function Info(props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
     const { msgStr, msg } = i18n;
 
-    const { messageHeader, message, requiredActions, skipLink, pageRedirectUri, actionUri, client } = kcContext;
+    const { messageHeader, message, requiredActions, skipLink, pageRedirectUri, actionUri, client } =
+        kcContext;
 
     /* Keycloak offers at most one continue target, in this order of preference. */
-    const continueHref = !skipLink && pageRedirectUri !== undefined
-        ? pageRedirectUri
-        : actionUri !== undefined
-            ? actionUri
-            : !skipLink
+    const continueHref =
+        !skipLink && pageRedirectUri !== undefined
+            ? pageRedirectUri
+            : actionUri !== undefined
+              ? actionUri
+              : !skipLink
                 ? client.baseUrl
                 : undefined;
 
-    const continueLabel = actionUri !== undefined && pageRedirectUri === undefined
-        ? msg("proceedWithAction")
-        : msg("backToApplication");
+    const continueLabel =
+        actionUri !== undefined && pageRedirectUri === undefined
+            ? msg("proceedWithAction")
+            : msg("backToApplication");
 
     return (
         <Template
@@ -35,13 +36,7 @@ export default function Info(
             doUseDefaultCss={doUseDefaultCss}
             classes={classes}
             displayMessage={false}
-            headerNode={
-                messageHeader !== undefined ? (
-                    <>{messageHeader}</>
-                ) : (
-                    <>{message.summary}</>
-                )
-            }
+            headerNode={messageHeader !== undefined ? <>{messageHeader}</> : <>{message.summary}</>}
         >
             <div id="kc-info-message">
                 <Alert>
@@ -57,9 +52,7 @@ export default function Info(
                                         // is asserted to the message-key union
                                         // rather than widened to `any`.
                                         msgStr(
-                                            `requiredAction.${requiredAction}` as Parameters<
-                                                typeof msgStr
-                                            >[0]
+                                            `requiredAction.${requiredAction}` as Parameters<typeof msgStr>[0]
                                         )
                                     )
                                     .join(", ")}

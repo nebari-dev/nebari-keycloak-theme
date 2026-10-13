@@ -16,10 +16,7 @@ import JSZip from "jszip";
 
 // Shared with vite.config.ts — see themes.json.
 const themes = JSON.parse(readFileSync(new URL("../themes.json", import.meta.url), "utf8"));
-const generatedJars = [
-    "keycloak-theme-for-kc-all-other-versions.jar",
-    "keycloak-theme-for-kc-22-to-25.jar"
-];
+const generatedJars = ["keycloak-theme-for-kc-all-other-versions.jar", "keycloak-theme-for-kc-22-to-25.jar"];
 const outputDirectory = "dist_keycloak";
 const generatedThemeNamesFile = "src/kc.gen.tsx";
 
@@ -119,10 +116,7 @@ async function assertIsolatedThemeJar(jarPath, expectedThemeName) {
         }
     }
 
-    if (
-        packagedThemeNames.size !== 1 ||
-        !packagedThemeNames.has(expectedThemeName)
-    ) {
+    if (packagedThemeNames.size !== 1 || !packagedThemeNames.has(expectedThemeName)) {
         throw new Error(
             `${jarPath} contains theme directories [${[...packagedThemeNames].join(", ")}], expected only ${expectedThemeName}`
         );
@@ -137,10 +131,7 @@ async function assertIsolatedThemeJar(jarPath, expectedThemeName) {
     const metadata = JSON.parse(await metadataEntry.async("string"));
     const advertisedThemeNames = metadata.themes?.map(({ name }) => name) ?? [];
 
-    if (
-        advertisedThemeNames.length !== 1 ||
-        advertisedThemeNames[0] !== expectedThemeName
-    ) {
+    if (advertisedThemeNames.length !== 1 || advertisedThemeNames[0] !== expectedThemeName) {
         throw new Error(
             `${jarPath} advertises themes [${advertisedThemeNames.join(", ")}], expected only ${expectedThemeName}`
         );
@@ -169,10 +160,7 @@ try {
 
             await assertIsolatedThemeJar(join(outputDirectory, jar), themeName);
 
-            copyFileSync(
-                join(outputDirectory, jar),
-                join(stagingDirectory, `${themeName}-${basename(jar)}`)
-            );
+            copyFileSync(join(outputDirectory, jar), join(stagingDirectory, `${themeName}-${basename(jar)}`));
         }
 
         console.log(`Verified isolated ${themeName} JARs`);
@@ -209,8 +197,7 @@ try {
         // not just write belongs to a theme that no longer exists.
         const supersededByThisBuild =
             buildSucceeded &&
-            (requestedThemes.length === 0 ||
-                selectedThemes.some(theme => jar.startsWith(`${theme}-`)));
+            (requestedThemes.length === 0 || selectedThemes.some(theme => jar.startsWith(`${theme}-`)));
 
         if (!supersededByThisBuild && !existsSync(join(outputDirectory, jar))) {
             copyFileSync(join(preservedDirectory, jar), join(outputDirectory, jar));

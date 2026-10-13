@@ -37,7 +37,7 @@ class DefaultPageErrorBoundary extends Component<
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Info = lazy(() => import("./pages/Info"));
-const Error = lazy(() => import("./pages/Error"));
+const ErrorPage = lazy(() => import("./pages/Error"));
 const LoginResetPassword = lazy(() => import("./pages/LoginResetPassword"));
 const LoginUpdatePassword = lazy(() => import("./pages/LoginUpdatePassword"));
 const LoginVerifyEmail = lazy(() => import("./pages/LoginVerifyEmail"));
@@ -49,9 +49,7 @@ const Fallback = () => (
     <div className="nebari-login-wrapper">
         <div className="nebari-login-container">
             <div className="nebari-login-card">
-                <div style={{ textAlign: "center", padding: "20px" }}>
-                    Loading...
-                </div>
+                <div style={{ textAlign: "center", padding: "20px" }}>Loading...</div>
             </div>
         </div>
     </div>
@@ -91,7 +89,7 @@ export default function KcPage(props: { kcContext: KcContext }) {
                         );
                     case "error.ftl":
                         return (
-                            <Error
+                            <ErrorPage
                                 {...{ kcContext, i18n, Template }}
                                 classes={undefined}
                                 doUseDefaultCss={false}
@@ -144,7 +142,9 @@ export default function KcPage(props: { kcContext: KcContext }) {
                                     classes={undefined}
                                     Template={Template}
                                     doUseDefaultCss={true}
-                                    UserProfileFormFields={lazy(() => import("keycloakify/login/UserProfileFormFields"))}
+                                    UserProfileFormFields={lazy(
+                                        () => import("keycloakify/login/UserProfileFormFields")
+                                    )}
                                     doMakeUserConfirmPassword={true}
                                 />
                             </DefaultPageErrorBoundary>

@@ -72,9 +72,7 @@ export default defineConfig({
             // Development exposes every variant. The packaging script sets the
             // environment variable so each published JAR contains one theme.
             themeName: packagedThemeName ?? themeNames,
-            extraThemeProperties: [
-                "parentTheme=keycloak.v2"
-            ]
+            extraThemeProperties: ["parentTheme=keycloak.v2"]
         })
     ],
     resolve: {

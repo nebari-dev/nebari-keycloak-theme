@@ -1,6 +1,7 @@
 import { createGetKcContextMock } from "keycloakify/login/KcContext";
 import type { KcContext as KcContextBase } from "keycloakify/login/KcContext";
 
+// biome-ignore lint/complexity/noBannedTypes: an empty extension leaves KcContextBase unchanged
 export type KcContextExtension = {
     // Add any custom context properties here if needed
     // For example:
@@ -62,8 +63,7 @@ export function getKcContextMockForPreview(previewName: string | null): KcContex
             overrides: {
                 login: { username: "user@example.com" },
                 messagesPerField: {
-                    existsError: (fieldName: string) =>
-                        fieldName === "username" || fieldName === "password",
+                    existsError: (fieldName: string) => fieldName === "username" || fieldName === "password",
                     get: (fieldName: string) =>
                         fieldName === "username" || fieldName === "password"
                             ? "Invalid username or password."

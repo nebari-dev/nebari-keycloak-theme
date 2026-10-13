@@ -915,5 +915,5 @@ function DataTable<TData extends Record<string, unknown>>({
 export type { DataTableColumnDef, DataTableInstance, DataTableProps };
 // Registry components intentionally export their feature bundle for consumers
 // that need to compose a compatible TanStack table instance.
-// eslint-disable-next-line react-refresh/only-export-components
+// react-refresh/only-export-components
 export { DataTable, dataTableFeatures };

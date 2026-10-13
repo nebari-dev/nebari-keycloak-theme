@@ -16,9 +16,7 @@ const socialIconSrc: Record<string, string> = {
     github: "github-mark.svg"
 };
 
-export default function Login(
-    props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>
-) {
+export default function Login(props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
     const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
@@ -76,17 +74,16 @@ export default function Login(
             }
         >
             {realm.password && (
-                <form
-                    id="kc-form-login"
-                    onSubmit={onSubmit}
-                    action={url.loginAction}
-                    method="post"
-                >
+                <form id="kc-form-login" onSubmit={onSubmit} action={url.loginAction} method="post">
                     {/* Username / Email Field */}
                     {!usernameHidden && (
                         <Field>
                             <FieldLabel htmlFor="username">
-                                {!realm.loginWithEmailAllowed ? msg("username") : !realm.registrationEmailAsUsername ? msg("usernameOrEmail") : msg("email")}
+                                {!realm.loginWithEmailAllowed
+                                    ? msg("username")
+                                    : !realm.registrationEmailAsUsername
+                                      ? msg("usernameOrEmail")
+                                      : msg("email")}
                             </FieldLabel>
                             <Input
                                 tabIndex={2}
@@ -112,7 +109,11 @@ export default function Login(
                         <div className="nebari-label-row">
                             <FieldLabel htmlFor="password">{msg("password")}</FieldLabel>
                             {realm.resetPasswordAllowed && (
-                                <a tabIndex={5} href={url.loginResetCredentialsUrl} className="nebari-forgot-link">
+                                <a
+                                    tabIndex={5}
+                                    href={url.loginResetCredentialsUrl}
+                                    className="nebari-forgot-link"
+                                >
                                     {msg("doForgotPassword")}
                                 </a>
                             )}

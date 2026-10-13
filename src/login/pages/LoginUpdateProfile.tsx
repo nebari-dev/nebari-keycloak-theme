@@ -20,7 +20,7 @@ const kcClassesMap = {
     kcButtonPrimaryClass: "nebari-button-primary nebari-button-full",
     kcButtonDefaultClass: "nebari-button nebari-button-secondary",
     kcButtonLargeClass: "",
-    kcButtonBlockClass: "",
+    kcButtonBlockClass: ""
 } as const;
 
 type Props = PageProps<Extract<KcContext, { pageId: "login-update-profile.ftl" }>, I18n> & {
@@ -49,7 +49,7 @@ export default function LoginUpdateProfile(props: Props) {
                     kcContext={kcContext}
                     i18n={i18n}
                     kcClsx={kcClsx}
-                    onIsFormSubmittableValueChange={() => { }}
+                    onIsFormSubmittableValueChange={() => {}}
                     doMakeUserConfirmPassword={doMakeUserConfirmPassword}
                 />
 

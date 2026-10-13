@@ -29,6 +29,8 @@ npm install                          # also re-syncs the vendored console source
 npm run dev                          # login pages at :5173, e.g. /?preview=login
 npm run check                        # upgrade guards
 npm run typecheck                    # tsc --noEmit
+npm run lint                         # Biome lint + format check, not run in CI
+npm run format                       # Biome formatter, writes in place
 npm run test:screenshots             # compare login pages against Linux baselines, per brand
 npm run build-keycloak-theme         # guards + tsc + vite build + one JAR pair per brand in dist_keycloak/
 docker compose up -d --build keycloak   # consoles, on the nebari realm

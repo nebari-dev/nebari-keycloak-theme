@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-export default function LoginResetPassword(props: PageProps<Extract<KcContext, { pageId: "login-reset-password.ftl" }>, I18n>) {
+export default function LoginResetPassword(
+    props: PageProps<Extract<KcContext, { pageId: "login-reset-password.ftl" }>, I18n>
+) {
     const { kcContext, i18n, Template } = props;
     const { url, realm, auth, messagesPerField } = kcContext;
     const { msg, msgStr } = i18n;
@@ -15,8 +17,8 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
     const labelKey = !realm.loginWithEmailAllowed
         ? "username"
         : !realm.registrationEmailAsUsername
-            ? "usernameOrEmail"
-            : "email";
+          ? "usernameOrEmail"
+          : "email";
 
     const hasError = messagesPerField.existsError("username");
 
@@ -30,9 +32,7 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
             displayMessage={!hasError}
             headerNode={msg("emailForgotTitle")}
             infoNode={
-                realm.duplicateEmailsAllowed
-                    ? msg("emailInstructionUsername")
-                    : msg("emailInstruction")
+                realm.duplicateEmailsAllowed ? msg("emailInstructionUsername") : msg("emailInstruction")
             }
         >
             <form id="kc-reset-password-form" action={url.loginAction} method="post">

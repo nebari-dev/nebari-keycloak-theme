@@ -13,10 +13,36 @@ Setting up is covered in [Quick start](quick-start.md). This page is the referen
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run test:screenshots` | Compares the login pages against the committed baselines |
 | `npm run test:screenshots:update` | Accepts the current rendering as the new baselines |
-| `npm run lint` | ESLint with `--max-warnings 0` |
+| `npm run lint` | Biome lint and format check, failing on warnings |
+| `npm run format` | Biome formatter, writing changes in place |
 
-`npm run lint` is not part of CI and currently reports problems in generated, gitignored console files that
-this repo doesn't author. Run it on the files you touched rather than treating the whole-repo result as a gate.
+`npm run lint` is not part of CI. See [Lint and format](#lint-and-format).
+
+## Lint and format
+
+[Biome](https://biomejs.dev/) lints and formats the tracked JavaScript and TypeScript, configured in
+[`biome.json`](../biome.json). It skips gitignored files, so the vendored console sources are never checked, and
+it skips the generated `src/kc.gen.tsx`.
+
+The rules are listed one by one in `biome.json` rather than taken from Biome's `recommended` preset. They cover
+general correctness, TypeScript, the rules of hooks (`useHookAtTopLevel`, `useExhaustiveDependencies`) and
+Fast Refresh boundaries (`useComponentExportOnlyModules`). `noExplicitAny`, `useExhaustiveDependencies` and
+`useComponentExportOnlyModules` are warnings, and `npm run lint` fails on warnings too.
+
+The formatter writes 4-space indents, double quotes, no trailing commas and 110-column lines. It leaves some files
+in their own style:
+
+| Files | Formatter | Linter | Why |
+| --- | --- | --- | --- |
+| `src/components/ui/`, `src/lib/utils.ts`, `src/hooks/theme-provider.tsx`, `src/hooks/use-theme-preference.ts` | Off | Off | Registry files. `shadcn add` overwrites them |
+| `src/account/`, `src/admin/`, `src/shared/`, `public/keycloak-theme/` | Off | On | Owned files keep upstream's formatting so they still diff cleanly against the originals |
+| `scripts/check-*.mjs` | 2-space, trailing commas | On | Formatted in the style they were written in |
+
+A `// biome-ignore <rule>: <reason>` comment suppresses one diagnostic. Biome reports a suppression that no longer
+matches anything.
+
+`@biomejs/biome` is pinned exactly. A Biome minor can change formatter output, so a version bump can make
+`npm run lint` fail without a code change. Run `npm run format` when taking one.
 
 ## What CI checks
 
@@ -102,7 +128,7 @@ the guard and still be wrong.
 
 ## Owned files and `@ts-nocheck`
 
-Most owned files keep the `/* eslint-disable */` and `// @ts-nocheck` they were vendored with, so the type check
+Most owned files keep the `// @ts-nocheck` they were vendored with, so the type check
 skips them. For a file that has been substantially rewritten &mdash; `PageNav.tsx`, `KeycloakDataTable.tsx`
 &mdash; that means your changes aren't type-checked either. Test those changes in the compose loop.
 [Ownership](ownership.md) covers the rest.

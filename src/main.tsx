@@ -43,11 +43,10 @@ if (document.documentElement.dataset.theme === undefined) {
 const searchParams = new URLSearchParams(window.location.search);
 const injectedKcContext = window.kcContext as KcContext | undefined;
 const previewThemeName = searchParams.get("theme");
-const kcContext: KcContext =
-    injectedKcContext ?? {
-        ...getKcContextMockForPreview(searchParams.get("preview")),
-        themeName: isBrandName(previewThemeName) ? previewThemeName : "nebari"
-    };
+const kcContext: KcContext = injectedKcContext ?? {
+    ...getKcContextMockForPreview(searchParams.get("preview")),
+    themeName: isBrandName(previewThemeName) ? previewThemeName : "nebari"
+};
 
 /* Which mark the pages carry: the theme Keycloak is rendering, `nebari` or
    `collab`. Stamping it on <html> is what lets CSS and the console mastheads see
@@ -60,10 +59,7 @@ document.documentElement.dataset.brand = kcContext.themeName;
    cannot be swapped by the bundler. Publishing the active theme's symbol as a
    custom property lets CSS substitute it, and keeps `branding.ts` the only place
    a logo path is written down. */
-document.documentElement.style.setProperty(
-    "--brand-symbol",
-    `url("${getBrandLogos().dark}")`
-);
+document.documentElement.style.setProperty("--brand-symbol", `url("${getBrandLogos().dark}")`);
 /* The theme type, so a rule can be scoped to one console. `data-brand` alone is
    not enough — it is set for every theme type, because the login page and both
    console mastheads all need to read it — and the Admin dashboard's hero-mark

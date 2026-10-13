@@ -79,9 +79,15 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
 
                 <CardHeader className="nebari-header px-0">
                     {headerNode !== undefined ? (
-                        headerHasOwnTitleMarkup ? headerNode : <h1 className="nebari-title">{headerNode}</h1>
+                        headerHasOwnTitleMarkup ? (
+                            headerNode
+                        ) : (
+                            <h1 className="nebari-title">{headerNode}</h1>
+                        )
                     ) : (
-                        <h1 className="nebari-title">{msg("loginTitleHtml", kcContext.realm.displayNameHtml)}</h1>
+                        <h1 className="nebari-title">
+                            {msg("loginTitleHtml", kcContext.realm.displayNameHtml)}
+                        </h1>
                     )}
                 </CardHeader>
 
@@ -110,13 +116,9 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                     </div>
                 )}
 
-                {socialProvidersNode && (
-                    <div className="nebari-social-section">{socialProvidersNode}</div>
-                )}
+                {socialProvidersNode && <div className="nebari-social-section">{socialProvidersNode}</div>}
 
-                {displayInfo && infoNode && (
-                    <div className="nebari-info-section">{infoNode}</div>
-                )}
+                {displayInfo && infoNode && <div className="nebari-info-section">{infoNode}</div>}
             </Card>
         </main>
     );

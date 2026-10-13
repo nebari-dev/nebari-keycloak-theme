@@ -32,7 +32,7 @@ const SIZE_MAP = {
     lg: "lg"
 } as const satisfies Record<string, NebariSize>;
 
-type PatternFlyButtonProps = {
+export type PatternFlyButtonProps = {
     variant?: PatternFlyVariant;
     size?: keyof typeof SIZE_MAP;
     /** PatternFly's disabled flag. Mapped onto the native `disabled`. */
@@ -161,5 +161,3 @@ export function Button({
         </NebariButton>
     );
 }
-
-export type { PatternFlyButtonProps };

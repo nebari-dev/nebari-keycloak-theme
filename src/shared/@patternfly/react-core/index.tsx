@@ -5,8 +5,6 @@
  * $ npx keycloakify own --path "shared/@patternfly/react-core/index.tsx" --revert
  */
 
-/* eslint-disable react-refresh/only-export-components */
-
 /*
  * Every Admin Console view imports PatternFly through this module — 356 of them,
  * and none reach for `@patternfly/react-core` directly. That makes this the one
