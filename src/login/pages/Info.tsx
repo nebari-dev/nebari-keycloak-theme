@@ -11,7 +11,7 @@ export default function Info(
 ) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-    const { msgStr, msg } = i18n;
+    const { msgStr, msg, advancedMsgStr } = i18n;
 
     const { messageHeader, message, requiredActions, skipLink, pageRedirectUri, actionUri, client } = kcContext;
 
@@ -35,13 +35,7 @@ export default function Info(
             doUseDefaultCss={doUseDefaultCss}
             classes={classes}
             displayMessage={false}
-            headerNode={
-                messageHeader !== undefined ? (
-                    <>{messageHeader}</>
-                ) : (
-                    <>{message.summary}</>
-                )
-            }
+            headerNode={messageHeader !== undefined ? advancedMsgStr(messageHeader) : message.summary}
         >
             <div id="kc-info-message">
                 <Alert>
