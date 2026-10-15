@@ -49,12 +49,10 @@ export default function LoginUpdatePassword(
                         name="password-new"
                         showLabel={msgStr("showPassword")}
                     />
-                    {newPasswordError !== undefined && (
-                        <FieldError
-                            aria-live="polite"
-                            dangerouslySetInnerHTML={{ __html: kcSanitize(newPasswordError) }}
-                            match={true}
-                        />
+                    {newPasswordError && (
+                        <FieldError aria-live="polite" match={true}>
+                            <span dangerouslySetInnerHTML={{ __html: kcSanitize(newPasswordError) }} />
+                        </FieldError>
                     )}
                 </Field>
 
@@ -69,11 +67,9 @@ export default function LoginUpdatePassword(
                         showLabel={msgStr("showPassword")}
                     />
                     {confirmError !== undefined && (
-                        <FieldError
-                            aria-live="polite"
-                            dangerouslySetInnerHTML={{ __html: kcSanitize(confirmError) }}
-                            match={true}
-                        />
+                        <FieldError aria-live="polite" match={true}>
+                            <span dangerouslySetInnerHTML={{ __html: kcSanitize(confirmError) }} />
+                        </FieldError>
                     )}
                 </Field>
 

@@ -47,11 +47,13 @@ export default function LoginResetPassword(
                         type="text"
                     />
                     {hasError && (
-                        <FieldError
-                            aria-live="polite"
-                            dangerouslySetInnerHTML={{ __html: kcSanitize(messagesPerField.get("username")) }}
-                            match={true}
-                        />
+                        <FieldError aria-live="polite" match={true}>
+                            <span
+                                dangerouslySetInnerHTML={{
+                                    __html: kcSanitize(messagesPerField.get("username"))
+                                }}
+                            />
+                        </FieldError>
                     )}
                 </Field>
 
