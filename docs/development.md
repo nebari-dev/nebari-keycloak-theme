@@ -16,7 +16,7 @@ Setting up is covered in [Quick start](quick-start.md). This page is the referen
 | `npm run lint` | Biome lint and format check, failing on warnings |
 | `npm run format` | Biome formatter, writing changes in place |
 
-`npm run lint` is not part of CI. See [Lint and format](#lint-and-format).
+CI runs the same check as `biome ci --error-on-warnings .`. See [Lint and format](#lint-and-format).
 
 ## Lint and format
 
@@ -42,7 +42,7 @@ A `// biome-ignore <rule>: <reason>` comment suppresses one diagnostic. Biome re
 matches anything.
 
 `@biomejs/biome` is pinned exactly. A Biome minor can change formatter output, so a version bump can make
-`npm run lint` fail without a code change. Run `npm run format` when taking one.
+`npm run lint` and CI fail without a code change. Run `npm run format` when taking one.
 
 ## What CI checks
 
@@ -50,7 +50,8 @@ Every pull request runs [`playwright.yml`](../.github/workflows/playwright.yml):
 
 1. **Theme guards** &mdash; `npm run check`
 2. **Type check** &mdash; `npm run typecheck`
-3. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<brand>/`
+3. **Lint and format check** &mdash; `biome ci --error-on-warnings .`, the CI form of `npm run lint`
+4. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<brand>/`
 
 Pushes to `main` also run the publisher, which builds through `npm run build` and so runs the guards again.
 See [Releasing](releasing.md).
