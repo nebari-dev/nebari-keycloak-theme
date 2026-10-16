@@ -87,7 +87,8 @@ export function ImageCropDialog({
     const [viewportElement, setViewportElement] = useState<HTMLDivElement | null>(null);
     const [sourceUrl, setSourceUrl] = useState("");
     const [viewportSize, setViewportSize] = useState<Size>({ width: 0, height: 0 });
-    const [aspectChoice, setAspectChoice] = useState<AspectChoice>("original");
+    const initialAspect: AspectChoice = kind === "icon" ? "square" : "original";
+    const [aspectChoice, setAspectChoice] = useState<AspectChoice>(initialAspect);
     const [zoom, setZoom] = useState(1);
     const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
     const [dragging, setDragging] = useState(false);
@@ -103,7 +104,7 @@ export function ImageCropDialog({
         const url = URL.createObjectURL(file);
 
         setSourceUrl(url);
-        setAspectChoice("original");
+        setAspectChoice(initialAspect);
         setZoom(1);
         setPosition({ x: 0, y: 0 });
         setError("");
@@ -135,9 +136,11 @@ export function ImageCropDialog({
     const aspect =
         aspectChoice === "original" ? originalAspect : ASPECT_VALUES[aspectChoice];
     const aspectOptions: AspectChoice[] =
-        kind === "logo"
-            ? ["original", "wordmark", "square", "landscape"]
-            : ["original", "landscape", "standard", "square"];
+        kind === "icon"
+            ? ["square"]
+            : kind === "logo"
+              ? ["original", "wordmark", "square", "landscape"]
+              : ["original", "landscape", "standard", "square"];
 
     const geometry = useMemo(() => {
         if (
@@ -258,7 +261,7 @@ export function ImageCropDialog({
     };
 
     const reset = () => {
-        setAspectChoice("original");
+        setAspectChoice(initialAspect);
         setZoom(1);
         setPosition({ x: 0, y: 0 });
     };

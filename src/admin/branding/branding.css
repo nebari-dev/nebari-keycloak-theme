@@ -701,3 +701,48 @@
     line-height: 1rem;
     color: var(--muted-foreground);
 }
+
+/* ---- Advanced settings in the preview ----
+   The same attributes and properties the login shells read; see the ADVANCED
+   BRANDING block in src/theme.css. */
+.branding-preview__logo-wrap:has(.branding-preview__wordmark) {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.branding-preview__wordmark {
+    color: var(--foreground);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: -0.01em;
+}
+
+/* The font property is only set when a realm picks one. */
+.branding-preview .branding-preview__card {
+    font-family: var(--font-sans, "Geist Variable", "Geist", sans-serif);
+}
+
+.branding-preview[data-card-glass] .branding-preview__card {
+    background: color-mix(in srgb, var(--card) var(--branding-card-opacity, 100%), transparent);
+    -webkit-backdrop-filter: blur(var(--branding-card-blur, 0px));
+    backdrop-filter: blur(var(--branding-card-blur, 0px));
+}
+
+.branding-preview[data-button-shape="rounded"] :is(button, .branding-preview__providers > div) {
+    border-radius: 8px;
+}
+
+.branding-preview[data-button-shape="pill"] :is(button, .branding-preview__providers > div) {
+    border-radius: 9999px;
+}
+
+.branding-preview[data-button-shape="square"] :is(button, .branding-preview__providers > div) {
+    border-radius: 0;
+}
+
+.branding-preview[data-button-arrow] .branding-preview__primary::after {
+    content: " \2192";
+}

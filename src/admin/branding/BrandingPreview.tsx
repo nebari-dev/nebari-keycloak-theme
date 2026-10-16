@@ -1,8 +1,11 @@
+import { useEffect } from "react";
 import type { BrandingConfig } from "../../branding/brandingConfig";
 import {
     getBrandingCssVariables,
+    getBrandingDataAttributes,
     getBrandingImage
 } from "../../branding/brandingConfig";
+import { loadBrandingFont } from "../../branding/fonts";
 import {
     getThemeDefinition,
     getThemeLogo,
@@ -60,6 +63,12 @@ export function BrandingPreview({
        the admin REST representation — so a realm that has disabled password
        authentication outright will show a password form here that the real page
        omits. */
+    const { wordmark } = branding.advanced;
+
+    useEffect(() => {
+        loadBrandingFont(branding.advanced.font);
+    }, [branding.advanced.font]);
+
     const showPasswordForm =
         branding.loginMode === "password-and-providers" ||
         identityProviders?.length === 0;
@@ -69,6 +78,7 @@ export function BrandingPreview({
             className="branding-preview"
             data-preview-mode={mode}
             data-brand-theme={themeName}
+            {...getBrandingDataAttributes(branding.advanced)}
             style={{
                 ...getBrandingCssVariables(branding, mode),
                 ...backgroundStyle
@@ -78,18 +88,25 @@ export function BrandingPreview({
                 {/* A theme may ship no artwork at all (the `template` theme
                     is deliberately unbranded), in which case the header is
                     omitted entirely until a logo is uploaded. */}
-                {(logo || defaultLogo) && (
+                {(logo || defaultLogo || wordmark) && (
                     <div className="branding-preview__logo-wrap">
-                        <img
-                            className="branding-preview__logo"
-                            src={logo || defaultLogo?.src}
-                            alt={
-                                branding.companyName
-                                    ? `${branding.companyName} logo`
-                                    : "Company logo"
-                            }
-                            style={logo ? undefined : defaultLogo?.style}
-                        />
+                        {(logo || (defaultLogo && !wordmark)) && (
+                            <img
+                                className="branding-preview__logo"
+                                src={logo || defaultLogo?.src}
+                                alt={
+                                    wordmark
+                                        ? ""
+                                        : branding.companyName
+                                          ? `${branding.companyName} logo`
+                                          : "Company logo"
+                                }
+                                style={logo ? undefined : defaultLogo?.style}
+                            />
+                        )}
+                        {wordmark && (
+                            <span className="branding-preview__wordmark">{wordmark}</span>
+                        )}
                     </div>
                 )}
                 <h2>Sign in to your account</h2>
@@ -107,7 +124,9 @@ export function BrandingPreview({
                             <input type="checkbox" readOnly />
                             Remember me
                         </label>
-                        <button type="button">Sign in</button>
+                        <button className="branding-preview__primary" type="button">
+                            Sign in
+                        </button>
                     </>
                 )}
 
