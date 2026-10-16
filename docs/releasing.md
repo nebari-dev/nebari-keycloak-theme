@@ -5,17 +5,34 @@
 Every push to `main` runs [`publish-keycloak-image.yml`](../.github/workflows/publish-keycloak-image.yml). It
 can also be run by hand from the Actions tab.
 
-1. Builds the theme with `npm run build-keycloak-theme`. That runs the [upgrade guards](development.md#upgrade-guards)
-   and the type check first, so a failure stops the publish.
-2. Uploads each brand's two JARs as a workflow artifact, so they can be downloaded from every run.
-3. Builds and pushes one Keycloak image per brand, each carrying only its own theme:
-   `ghcr.io/nebari-dev/nebari-keycloak-theme` and `ghcr.io/nebari-dev/collab-keycloak-theme`.
-4. **If no release exists yet for the current version,** cuts a GitHub release `v<version>` with all four JARs
-   attached. The notes link to [the screenshots](screenshots.md) at that commit rather than embedding them. If one exists, it skips this step and logs a
-   notice.
+1. Builds the themes once with `npm run build-keycloak-theme`. That runs the
+   [upgrade guards](development.md#upgrade-guards) and the type check first, so a failure stops the publish.
+   The JARs are uploaded as a workflow artifact, so they can be downloaded from every run.
+2. Builds the Nebari image from those JARs, without the Collab JARs, on native `amd64` and `arm64` runners and
+   pushes each by digest to `quay.io/nebari/nebari-keycloak-theme`.
+3. Joins the two into one multi-arch manifest tagged `latest` and `sha-<commit>`, plus `<version>` when step 5
+   is about to cut a release.
+4. **Temporarily,** builds and pushes the Collab image `ghcr.io/nebari-dev/collab-keycloak-theme` as before, so
+   Collab deployments are unaffected. This job goes away when the Collab theme is removed from `themes.json`.
+5. **If no release exists yet for the current version,** cuts a GitHub release `v<version>` with every JAR
+   attached. The notes list the JARs per theme in `themes.json` and link to [the screenshots](screenshots.md) at
+   that commit rather than embedding them. If one exists, it skips this step and logs a notice.
 
-Runs are never cancelled midway, so a half-pushed image or release can't happen; a second push waits for the
-first.
+Runs on `main` are never cancelled midway, so a half-pushed image or release can't happen; a second push waits
+for the first. A manual run from the Actions tab publishes only from `main`; on any other branch it builds and
+stops.
+
+Pull requests run the same workflow up to the image build, for both architectures, without logging in or
+pushing. Fork pull requests get no secrets, and none are needed.
+
+### Quay setup
+
+The workflow logs in with the organization secrets `QUAY_USERNAME` and `QUAY_TOKEN`, a Quay robot account.
+Quay creates a repository as **private** on its first push, and a robot can only push where it has write
+access. So before the first publish, a Quay admin of the `nebari` organization has to, once:
+
+1. Create `quay.io/nebari/nebari-keycloak-theme` as a **public** repository.
+2. Grant the robot behind `QUAY_USERNAME` **write** on it.
 
 ## Cutting a release
 
@@ -28,18 +45,18 @@ from `version` in `package.json` too, so there is no second number to keep in st
 
 | What | Moves after it is published? |
 | --- | --- |
-| GitHub release `v1.0.0` and its JARs | No |
+| GitHub release `v1.2.0` and its JARs | No |
+| Image tag `1.2.0` | No &mdash; pushed once, with the release |
 | Image tag `sha-<commit>` | No |
-| Image tag `1.0.0` | **Yes** &mdash; republished by every push until the version is bumped |
 | Image tag `latest` | Yes |
 
-So the release `v1.0.0` and the image `:1.0.0` can point at different commits. Anyone who needs a reproducible
-image should pin `sha-<commit>`. Making the version tag immutable &mdash; publishing it only alongside a new
-release &mdash; would close this gap.
+The release `v1.2.0` and the image `:1.2.0` always come from the same commit. Releases up to `v1.1.2` were
+published to `ghcr.io/nebari-dev/nebari-keycloak-theme`, where the version tag did move; that package gets no
+new versions.
 
 ## Dependencies
 
-Dependabot runs monthly for npm and GitHub Actions, configured in
+Dependabot runs monthly for npm, GitHub Actions and the Keycloak base image in the Dockerfile, configured in
 [`.github/dependabot.yml`](../.github/dependabot.yml). The policy:
 
 - **Minor and patch updates** arrive grouped in one pull request. `@typescript-eslint/*` gets its own group,

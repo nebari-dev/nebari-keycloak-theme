@@ -78,7 +78,7 @@ masthead and the Admin dashboard's hero mark read it from there.
 | Theme name | `nebari` | `collab` |
 | JAR, Keycloak 26+ | `nebari-keycloak-theme-for-kc-all-other-versions.jar` | `collab-keycloak-theme-for-kc-all-other-versions.jar` |
 | JAR, Keycloak 22 to 25 | `nebari-keycloak-theme-for-kc-22-to-25.jar` | `collab-keycloak-theme-for-kc-22-to-25.jar` |
-| Image | `ghcr.io/nebari-dev/nebari-keycloak-theme` | `ghcr.io/nebari-dev/collab-keycloak-theme` |
+| Image | `quay.io/nebari/nebari-keycloak-theme` (amd64 and arm64) | `ghcr.io/nebari-dev/collab-keycloak-theme` (until Collab is removed) |
 
 Collab takes its look from the openteams.com landing page: a deep-blue ground, Inter Tight, a glass card and
 pill buttons. Those rules are the `[data-brand="collab"]` section of [`src/theme.css`](src/theme.css),

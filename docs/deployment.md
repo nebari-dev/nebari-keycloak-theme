@@ -24,23 +24,19 @@ Each release on GitHub attaches all four JARs, so you don't need to build them y
 
 ### The published image
 
-Every push to `main` publishes one complete Keycloak image per brand, each with only its own theme built in:
+Every push to `main` publishes a complete Keycloak image, `quay.io/nebari/nebari-keycloak-theme`, for
+`linux/amd64` and `linux/arm64`, with the Nebari theme's Keycloak 26 JAR. It is based on
+`quay.io/keycloak/keycloak:26.8.0` and leaves the Collab theme out. Until the Collab theme is removed from this
+repo, Collab keeps its own amd64 image, `ghcr.io/nebari-dev/collab-keycloak-theme`, with the old tag scheme
+(its version tag moves until the version is bumped). The Nebari image's tags:
 
-| Brand | Image |
-| --- | --- |
-| Nebari | `ghcr.io/nebari-dev/nebari-keycloak-theme` |
-| Collab | `ghcr.io/nebari-dev/collab-keycloak-theme` |
+| Tag | Published | Moves? |
+| --- | --- | --- |
+| `sha-<commit>` | Every push to `main` | Never. **Pin this one** for anything reproducible |
+| `<version>`, e.g. `1.2.0` | Once, with the GitHub release for that version | Never |
+| `latest` | Every push to `main` | Yes |
 
-Both are based on `quay.io/keycloak/keycloak:26.8.0` and use the brand's Keycloak 26 JAR. Each gets three tags:
-
-| Tag | Moves? |
-| --- | --- |
-| `sha-<commit>` | Never. **Pin this one** for anything reproducible |
-| `<version>`, e.g. `1.0.0` | Yes &mdash; republished on every push until the version is bumped |
-| `latest` | Yes, on every push |
-
-`<version>` looks immutable and isn't: a new commit on `main` overwrites it without changing the number. See
-[Releasing](releasing.md#versions-and-tags).
+See [Releasing](releasing.md#versions-and-tags).
 
 The image's entrypoint is `kc.sh`, so pass `start` (or `start-dev`) and your usual configuration.
 
@@ -116,5 +112,5 @@ Adopting it means two changes on the NIC side:
 - **The Keycloak 22 to 25 JAR is built but not tested.** CI and the screenshots run against Keycloak 26, and
   the consoles are built from Keycloak 26.5 sources.
 - **[`k8s-deployment-example.yaml`](../k8s-deployment-example.yaml) is a sketch.** It runs stock
-  `quay.io/keycloak/keycloak` and copies the theme JAR in from this image with an init container. It pins a
-  version tag for readability; pin a `sha-<commit>` tag in a real deployment.
+  `quay.io/keycloak/keycloak` and copies the theme JARs in from this image with an init container. It uses
+  `latest` for readability; pin a `sha-<commit>` or version tag in a real deployment.
