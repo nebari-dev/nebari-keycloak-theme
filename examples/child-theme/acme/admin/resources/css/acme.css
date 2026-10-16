@@ -1,0 +1,9 @@
+/* The Acme brand, layered on the Nebari theme. Rules are scoped to
+   data-brand="acme" so they only apply when this theme is active. */
+:root[data-brand="acme"] {
+    --primary: #0f766e;
+    --primary-hover: #115e59;
+    --ring: #0f766e;
+    --header-background: #0f766e;
+    --header-foreground: #ffffff;
+}
