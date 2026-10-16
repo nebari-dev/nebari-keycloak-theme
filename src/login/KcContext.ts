@@ -81,6 +81,17 @@ export function getKcContextMockForPreview(
         }), themeName);
     }
 
+    /* Keycloakify's mock header is the literal `<Message header>`. The info page
+       sanitizes headers as HTML, as Keycloak's own info.ftl does, so that
+       placeholder is stripped as an unknown tag and the preview loses its
+       heading. A plain-text header shows what a real one looks like. */
+    if (name === "info") {
+        return withThemeName(getKcContextMock({
+            pageId: "info.ftl",
+            overrides: { messageHeader: "Your account has been updated" }
+        }), themeName);
+    }
+
     return withThemeName(
         getKcContextMock({ pageId: previewPageIds[name] ?? "login.ftl" }),
         themeName
