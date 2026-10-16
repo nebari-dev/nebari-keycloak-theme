@@ -30,6 +30,5 @@ ENV KC_METRICS_ENABLED=true
 
 # Change the port to 8080 (non-root)
 ENV KC_HTTP_PORT=8080
-ENV KC_HOSTNAME_STRICT=false
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]

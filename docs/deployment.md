@@ -111,8 +111,8 @@ Adopting it means two changes on the NIC side:
   on port `9000`, not `8080`. Point readiness probes there.
 - **Behind a TLS-terminating proxy,** set `KC_PROXY_HEADERS=xforwarded`, and `KC_HTTP_ENABLED=true` for a
   non-dev `start`. The image sets neither, because both depend on your ingress.
-- **The image sets `KC_HOSTNAME_STRICT=false`.** Set `KC_HOSTNAME` in production; without it Keycloak derives its
-  hostname from incoming requests.
+- **Set `KC_HOSTNAME` to the public URL.** The image keeps Keycloak's strict hostname default, so `start` fails
+  without it. Nebari Infrastructure Core already sets it; only the local compose file turns strict checking off.
 - **The Keycloak 22 to 25 JAR is built but not tested.** CI and the screenshots run against Keycloak 26, and
   the consoles are built from Keycloak 26.5 sources.
 - **[`k8s-deployment-example.yaml`](../k8s-deployment-example.yaml) is a sketch.** It runs stock
