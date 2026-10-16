@@ -66,3 +66,18 @@ test("an unbranded realm keeps the Nebari login page as it is", async ({ page })
     await page.goto("/?preview=login&theme=nebari");
     await expect(page.locator(".nebari-login-wrapper")).not.toHaveAttribute("data-branded", /.*/);
 });
+
+test("the template theme's labels follow its palette, not the Nebari typography", async ({ page }) => {
+    // A dark palette makes the leak visible: the Nebari label colour is near-black.
+    const template = {
+        ...branding,
+        light: { ...branding.light, text: "#ffffff" }
+    };
+    await page.goto(
+        `/?preview=login&theme=template&branding=${encodeURIComponent(JSON.stringify(template))}`
+    );
+    await expect(page.locator('[data-login-theme="template"] [data-slot="field-label"]').first()).toHaveCSS(
+        "color",
+        "rgb(255, 255, 255)"
+    );
+});

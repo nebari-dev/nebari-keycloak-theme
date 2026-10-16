@@ -994,7 +994,7 @@ a.nebari-button.nebari-button-primary:visited {
 
 /* Input labels */
 .nebari-label,
-[data-slot="field-label"],
+[data-slot="field-label"]:where(:not([data-login-theme="template"] *)),
 :where(.nebari-login-wrapper) .kcLabelClass,
 .nebari-label-wrapper .nebari-label {
     color: var(--color-foreground-default, #262628);
@@ -1030,22 +1030,22 @@ a.nebari-button.nebari-button-primary:visited {
 }
 
 /* Login inputs: border-only focus. */
-[data-slot="input"]:focus {
+[data-slot="input"]:focus:where(:not([data-login-theme="template"] *)) {
     border-width: 2px;
     border-color: var(--ring);
     box-shadow: none;
 }
 
 /* Validation uses a 1px destructive border at rest and 2px while focused. */
-[data-slot="input"][aria-invalid="true"],
-[data-slot="input"][data-invalid] {
+[data-slot="input"][aria-invalid="true"]:where(:not([data-login-theme="template"] *)),
+[data-slot="input"][data-invalid]:where(:not([data-login-theme="template"] *)) {
     border-width: 1px;
     border-color: var(--color-foreground-destructive, #d2161c);
     box-shadow: none;
 }
 
-[data-slot="input"][aria-invalid="true"]:focus,
-[data-slot="input"][data-invalid]:focus {
+[data-slot="input"][aria-invalid="true"]:focus:where(:not([data-login-theme="template"] *)),
+[data-slot="input"][data-invalid]:focus:where(:not([data-login-theme="template"] *)) {
     border-width: 2px;
     border-color: var(--color-foreground-destructive, #d2161c);
     box-shadow: none;
