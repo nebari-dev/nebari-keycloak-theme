@@ -1,4 +1,4 @@
-import { getBrandingImage } from "./brandingConfig";
+import { getBrandingImage, type BrandingConfig } from "./brandingConfig";
 import { getThemeDefinition, getThemeLogo, parseThemeBrandingConfig } from "../themes/themeCatalog";
 
 /**
@@ -38,4 +38,15 @@ export function getConsoleLogo(params: {
     );
 
     return published || getThemeLogo(theme, mode, baseUrl)?.src;
+}
+
+/**
+ * The realm's published branding as a console sees it: absent or unparseable
+ * falls back to the theme's defaults, which apply nothing.
+ */
+export function getConsoleBranding(params: {
+    themeName: string | undefined;
+    publishedConfig: string | undefined;
+}): BrandingConfig {
+    return parseThemeBrandingConfig(getThemeDefinition(params.themeName), params.publishedConfig);
 }
