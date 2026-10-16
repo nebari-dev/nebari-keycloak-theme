@@ -6,9 +6,9 @@ Working agreement for coding agents in this repo. Read it before touching code.
 
 A Keycloakify v11 theme with two brands, `nebari` and `collab` (OpenTeams Collab), listed in
 [`themes.json`](themes.json). Each brand is packaged in its own JAR with three Keycloak themes under that brand's
-name: the **login** pages, the **Account** console and the **Admin** console. Each is published as its own
-Keycloak 26 image on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-theme` and
-`ghcr.io/nebari-dev/collab-keycloak-theme`.
+name: the **login** pages, the **Account** console and the **Admin** console. Every push to `main` publishes
+the multi-arch Nebari image `quay.io/nebari/nebari-keycloak-theme`, which leaves Collab out, and, until the
+Collab theme is removed, the Collab image `ghcr.io/nebari-dev/collab-keycloak-theme`.
 
 - The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
 - The brands share one build and one stylesheet. `src/main.tsx` stamps the theme name on `<html>` as
