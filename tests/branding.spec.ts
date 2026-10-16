@@ -179,14 +179,14 @@ test.describe("advanced settings", () => {
                 advanced: {
                     // U+202E reverses what follows; a wordmark could display as
                     // something other than what is stored.
-                    wordmark: "‮Collab\u0000 and a much longer tail that runs past forty chars",
+                    wordmark: "\u202eAcme\u0000 and a much, much longer tail, that runs past forty chars",
                     registerTitle: "<img src=x onerror=alert(1)>"
                 }
             },
             defaults
         ).advanced;
 
-        expect(advanced.wordmark).toBe("Collab and a much longer tail that runs");
+        expect(advanced.wordmark).toBe("Acme and a much, much longer tail, that");
         expect(advanced.wordmark.length).toBeLessThanOrEqual(40);
         // Kept as text: it is rendered as a React text node, never as HTML.
         expect(advanced.registerTitle).toBe("<img src=x onerror=alert(1)>");
