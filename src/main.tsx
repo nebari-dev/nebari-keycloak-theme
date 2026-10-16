@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { getChildBrand, getChildStylesheets, loadChildStylesheets } from "./themes/childTheme";
 import { getThemeDefinition, getThemeLogo, matchThemeName } from "./themes/themeCatalog";
 import type { KcContext } from "./kc.gen";
 import { KcPage } from "./kc.gen";
@@ -52,12 +53,26 @@ const kcContext: KcContext =
         searchParams.get("branding")
     );
 
+/* `theme.properties` as Keycloak resolved it, child theme first. */
+const themeProperties = (kcContext as { properties?: Record<string, string | undefined> }).properties;
+
 /* The theme Keycloak is rendering, stamped on <html> so CSS and tests can tell
-   which theme a page belongs to. */
-document.documentElement.dataset.brand = kcContext.themeName;
+   which theme a page belongs to. A child theme's `brand` wins: the theme name
+   compiled into this build is always the parent's. See `src/themes/childTheme.ts`. */
+document.documentElement.dataset.brand = getChildBrand(themeProperties) ?? kcContext.themeName;
 /* The theme type, so a rule can be scoped to one page type: `data-brand` is set
    for the login page and both consoles alike. */
 document.documentElement.dataset.kcThemeType = kcContext.themeType;
+/* A child theme's own stylesheets. The Admin Console's loader already injects
+   them, so only the login pages and the Account Console are handled here. */
+if (kcContext.themeType === "login") {
+    loadChildStylesheets(kcContext.url.resourcesPath, getChildStylesheets(themeProperties));
+} else if (kcContext.themeType === "account") {
+    /* `serverBaseUrl` is missing from some older Keycloak versions' context,
+       where `resourceUrl` is already usable on its own. */
+    const serverBaseUrl = "serverBaseUrl" in kcContext ? kcContext.serverBaseUrl : "";
+    loadChildStylesheets(`${serverBaseUrl}${kcContext.resourceUrl}`, getChildStylesheets(themeProperties));
+}
 /* The Admin Console's dashboard renders its hero mark from an asset imported by
    upstream's vendored `Dashboard.tsx`, which one build cannot swap per theme. The
    Collab rules in `theme.css` substitute this property instead. Goes with the
