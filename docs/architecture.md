@@ -35,21 +35,19 @@ server the `?preview=` mock stands in for it, and `?theme=collab` picks the bran
 
 ## Brands
 
-Both brands come from the same bundle, so the brand is decided at runtime from the theme Keycloak is rendering.
-`src/main.tsx` stamps `kcContext.themeName` on `<html>` as `data-brand` and `kcContext.themeType` as
-`data-kc-theme-type`, and publishes the brand's symbol as the `--brand-symbol` custom property.
+The theme is decided at runtime from the theme Keycloak is rendering. `src/main.tsx` stamps
+`kcContext.themeName` on `<html>` as `data-brand` and `kcContext.themeType` as `data-kc-theme-type`, so CSS
+and tests can tell which theme and which page type they are looking at. Each theme's logo, default palette
+and editor switch are defined in [`src/themes/themeCatalog.ts`](../src/themes/themeCatalog.ts), which the
+login pages and both console mastheads read. A realm can override the logo and palette at runtime; see
+[Theme customization](theme-customization.md).
 
-- **Logos** are resolved by [`src/lib/branding.ts`](../src/lib/branding.ts), the only place a logo path is
-  written down. The login template and both console mastheads read it. Collab has no light-on-dark wordmark,
-  so its lockup is the symbol plus the name set as text.
-- **Styling** for Collab is the `[data-brand="collab"]` section at the end of
-  [`src/theme.css`](../src/theme.css). Its rules are scoped by theme type as well as brand, because
-  `data-brand` is set on every theme type: login-only rules must not reach the consoles. The Account console's
-  colours are `--account-*` variables in `nebari-account.css` and `nebari-brand.css`; Nebari uses their
-  fallbacks and the Collab block sets them. The rules are unlayered, like the rest of the login styles.
-- **The Admin dashboard's hero mark** is imported by the vendored `Dashboard.tsx`, so it can't be swapped per
-  brand in the bundle. A CSS `content: var(--brand-symbol)` rule replaces it instead of owning the file.
-- **Product names** in login strings are keyed by theme in [`src/login/i18n.ts`](../src/login/i18n.ts).
+**Collab** is the one theme with its own code paths, and it is moving out of this repo to a Theme
+customization preset. Its styling is the `[data-brand="collab"]` section at the end of
+[`src/theme.css`](../src/theme.css), scoped by theme type as well as brand. Its catalogued mark is a symbol with
+no name, so the login template and both console mastheads set "Collab" beside it. The Admin dashboard's hero
+mark is imported by the vendored `Dashboard.tsx`, so a CSS `content: var(--brand-symbol)` rule swaps it instead
+of owning the file; `src/main.tsx` sets that property from the catalog.
 
 ## The consoles: swapping components underneath
 

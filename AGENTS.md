@@ -11,9 +11,13 @@ Keycloak 26 image on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-t
 `ghcr.io/nebari-dev/collab-keycloak-theme`.
 
 - The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
-- The brands share one build and one stylesheet. `src/main.tsx` stamps the theme name on `<html>` as
-  `data-brand`; logo paths live only in [`src/lib/branding.ts`](src/lib/branding.ts), and Collab's styling is
-  the `[data-brand="collab"]` section of `src/theme.css`, scoped by `data-kc-theme-type` as well.
+- `src/main.tsx` stamps the theme name on `<html>` as `data-brand` and the theme type as `data-kc-theme-type`.
+  Each theme's logo, default palette and editor switch live in the catalog,
+  [`src/themes/themeCatalog.ts`](src/themes/themeCatalog.ts), checked against `themes.json` at build time.
+  Collab's styling is the `[data-brand="collab"]` section of `src/theme.css`; it is moving out of this repo.
+- **Runtime branding input is untrusted.** Anything that reaches the login page from the Theme customization
+  editor, an imported JSON file or the realm's localization messages goes through `normalizeBrandingConfig`.
+  Never render it as HTML or CSS text; see [`docs/theme-customization.md`](docs/theme-customization.md).
 - The consoles are ~520 views vendored from Keycloak by `keycloakify sync-extensions`. They are **not rewritten**.
   They are restyled by swapping the components they import underneath them, through one owned re-export shim.
 

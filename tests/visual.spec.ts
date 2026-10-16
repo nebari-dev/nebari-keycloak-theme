@@ -47,7 +47,7 @@ const previews = [
  * Every theme in themes.json, with how to tell its mark apart from the others.
  * Each theme runs through the same previews and the same assertions, and its
  * baselines are stored under `tests/screenshots/<platform>/<theme>/`, so adding
- * a theme is one entry here. See `src/lib/branding.ts`.
+ * a theme is one entry here. See `src/themes/themeCatalog.ts`.
  *
  * `colorSchemes` lists the schemes each theme is captured in.
  */
