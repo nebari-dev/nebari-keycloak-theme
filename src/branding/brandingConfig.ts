@@ -158,9 +158,12 @@ function safeImage(value: unknown): string {
     if (typeof value !== "string" || value.length > 900_000) return "";
     if (SAFE_DATA_IMAGE.test(value)) return value;
 
+    /* HTTPS only. The login page is served to unauthenticated visitors, so a
+       cleartext image would be mixed content on an HTTPS deployment and could be
+       swapped in transit. */
     try {
         const url = new URL(value);
-        return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+        return url.protocol === "https:" ? url.href : "";
     } catch {
         return "";
     }

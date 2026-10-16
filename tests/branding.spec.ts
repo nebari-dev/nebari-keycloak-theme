@@ -107,3 +107,18 @@ test("keeps a console logo distinct from the login logo", () => {
     /* An empty appearance still resolves from its sibling. */
     expect(getBrandingImage(normalized.consoleLogo, "dark")).toBe(DARK_LOGO);
 });
+
+test("drops image URLs that are not HTTPS", () => {
+    const branding = normalizeBrandingConfig(
+        {
+            ...TEMPLATE_BRANDING_CONFIG,
+            logo: { light: "http://assets.example.com/logo.png", dark: "javascript:alert(1)" },
+            backgroundImage: { light: "data:image/svg+xml;base64,PHN2Zz4=", dark: LIGHT_LOGO }
+        },
+        TEMPLATE_BRANDING_CONFIG
+    );
+
+    expect(branding.logo).toEqual({ light: "", dark: "" });
+    // SVG can carry script, so only raster data URIs are accepted.
+    expect(branding.backgroundImage).toEqual({ light: "", dark: LIGHT_LOGO });
+});

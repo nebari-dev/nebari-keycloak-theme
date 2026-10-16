@@ -185,7 +185,8 @@ pointer dragging, keyboard positioning, and 100–300% zoom. Applying the crop
 converts the source-pixel selection to WebP and bounds it to 640×240 for logos or
 1600×1000 for backgrounds. Logos use a smaller storage budget because two may
 be stored alongside the backgrounds. Hosted image URLs bypass local cropping
-and are used as supplied.
+and are used as supplied; they must be HTTPS. Anything else, and SVG data URIs, are dropped during
+validation.
 
 Each asset has **Light appearance** and **Dark appearance** values. An empty
 variant falls back to its sibling, so a deployment can upload one universal
