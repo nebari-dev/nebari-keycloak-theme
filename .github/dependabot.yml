@@ -60,3 +60,14 @@ updates:
         applies-to: version-updates
         patterns:
           - "*"
+
+  # The Keycloak base image in the Dockerfile. The Keycloak version is also the
+  # server the published image runs, so review each bump against
+  # docs/adr/0005-run-the-server-ahead-of-the-console-sources.md.
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "08:00"
+      timezone: "US/Eastern"
