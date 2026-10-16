@@ -1206,6 +1206,118 @@ a.nebari-button.nebari-button-primary:visited {
     mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.733%205.076a10.744%2010.744%200%200%201%2011.205%206.575%201%201%200%200%201%200%20.696%2010.747%2010.747%200%200%201-1.444%202.49%22%2F%3E%3Cpath%20d%3D%22M14.084%2014.158a3%203%200%200%201-4.242-4.242%22%2F%3E%3Cpath%20d%3D%22M17.479%2017.499a10.75%2010.75%200%200%201-15.417-5.151%201%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%204.446-5.143%22%2F%3E%3Cpath%20d%3D%22m2%202%2020%2020%22%2F%3E%3C%2Fsvg%3E");
 }
 
+/* ========================
+   RUNTIME BRANDING (Theme customization)
+   ========================
+   A realm that publishes branding gets `data-branded` on the login wrapper, and
+   `getBrandingCssVariables` sets the palette there as inline custom properties.
+   The Nebari login rules above use literal colours matched to the Figma file,
+   so tokens alone cannot reach them; this block re-states each of those
+   declarations from the tokens, for branded realms only. An unbranded realm
+   never matches, so it renders exactly as before.
+
+   Every selector starts with `:root .nebari-login-wrapper[data-branded]`
+   (0,3,0), which outranks the `[data-theme="dark"]` variants (0,2,x) by
+   specificity rather than by source order. Error and required-field reds stay
+   as they are: they carry meaning, not brand. */
+
+:root .nebari-login-wrapper[data-branded] {
+    background-color: var(--background);
+    /* A custom background image arrives as an inline style and still wins. */
+    background-image: none;
+    color: var(--foreground);
+}
+
+/* The purple, teal and amber glows are Nebari's, not the realm's. */
+:root .nebari-login-wrapper[data-branded]::before,
+:root .nebari-login-wrapper[data-branded]::after {
+    content: none;
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-login-card {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--card-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-title,
+:root .nebari-login-wrapper[data-branded] .nebari-subtitle,
+:root .nebari-login-wrapper[data-branded] .nebari-label,
+:root .nebari-login-wrapper[data-branded] [data-slot="field-label"],
+:root .nebari-login-wrapper[data-branded] .kcLabelClass,
+:root .nebari-login-wrapper[data-branded] [data-slot="checkbox"] + *,
+:root .nebari-login-wrapper[data-branded] label {
+    color: var(--foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-forgot-link,
+:root .nebari-login-wrapper[data-branded] .nebari-link,
+:root .nebari-login-wrapper[data-branded] .nebari-info-section,
+:root .nebari-login-wrapper[data-branded] .nebari-required-notice {
+    color: var(--muted-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-input,
+:root .nebari-login-wrapper[data-branded] [data-slot="input"],
+:root .nebari-login-wrapper[data-branded] input[type="text"],
+:root .nebari-login-wrapper[data-branded] input[type="email"],
+:root .nebari-login-wrapper[data-branded] input[type="password"],
+:root .nebari-login-wrapper[data-branded] input[type="tel"],
+:root .nebari-login-wrapper[data-branded] select,
+:root .nebari-login-wrapper[data-branded] textarea {
+    background-color: var(--muted);
+    border-color: var(--input);
+    color: var(--foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-input::placeholder,
+:root .nebari-login-wrapper[data-branded] input::placeholder {
+    color: var(--muted-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-input:focus,
+:root .nebari-login-wrapper[data-branded] [data-slot="input"]:focus,
+:root .nebari-login-wrapper[data-branded] input:focus,
+:root .nebari-login-wrapper[data-branded] select:focus,
+:root .nebari-login-wrapper[data-branded] textarea:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 25%, transparent);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-primary,
+:root .nebari-login-wrapper[data-branded] button[type="submit"],
+:root .nebari-login-wrapper[data-branded] input[type="submit"],
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:visited {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-primary:hover,
+:root .nebari-login-wrapper[data-branded] button[type="submit"]:hover,
+:root .nebari-login-wrapper[data-branded] input[type="submit"]:hover,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:hover,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:focus {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: var(--primary-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-secondary,
+:root .nebari-login-wrapper[data-branded] .nebari-social-button {
+    background: var(--card);
+    border-color: var(--input);
+    color: var(--foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-secondary:hover,
+:root .nebari-login-wrapper[data-branded] .nebari-social-button:hover {
+    background: var(--muted);
+    border-color: var(--ring);
+    color: var(--foreground);
+}
+
 /* ==========================================================================
    COLLAB THEME
    ========================================================================== */

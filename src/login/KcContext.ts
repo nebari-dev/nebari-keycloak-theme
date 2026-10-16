@@ -32,9 +32,38 @@ function withThemeName(kcContext: KcContext, themeName: string | null): KcContex
     return themeName === null ? kcContext : { ...kcContext, themeName };
 }
 
+/**
+ * A preview with a published branding config, as a realm would serve it: the
+ * config reaches the login page as a realm localization message, which
+ * Keycloakify exposes through `x-keycloakify.messages`. The value goes through
+ * the same validation as a real one, so the preview cannot render anything a
+ * realm could not. Only the standalone dev server uses this; Keycloak always
+ * injects its own `kcContext`.
+ */
 export function getKcContextMockForPreview(
     previewName: string | null,
-    themeName: string | null = null
+    themeName: string | null = null,
+    publishedBranding: string | null = null
+): KcContext {
+    const kcContext = getUnbrandedKcContextMock(previewName, themeName);
+
+    if (publishedBranding === null) return kcContext;
+
+    return {
+        ...kcContext,
+        "x-keycloakify": {
+            ...kcContext["x-keycloakify"],
+            messages: {
+                ...kcContext["x-keycloakify"].messages,
+                nebariBrandingConfig: publishedBranding
+            }
+        }
+    };
+}
+
+function getUnbrandedKcContextMock(
+    previewName: string | null,
+    themeName: string | null
 ): KcContext {
     const name = (previewName ?? "login") as PreviewName;
 

@@ -46,7 +46,11 @@ const injectedKcContext = window.kcContext as KcContext | undefined;
 const previewThemeName = matchThemeName(searchParams.get("theme") ?? undefined) ?? "nebari";
 const kcContext: KcContext =
     injectedKcContext ??
-    getKcContextMockForPreview(searchParams.get("preview"), previewThemeName);
+    getKcContextMockForPreview(
+        searchParams.get("preview"),
+        previewThemeName,
+        searchParams.get("branding")
+    );
 
 /* The theme Keycloak is rendering, stamped on <html> so CSS and tests can tell
    which theme a page belongs to. */

@@ -294,6 +294,11 @@ so an unconfigured template realm must actively establish its neutral defaults
 instead of inheriting purple. Its variables remain local to the login shell and
 do not need the Nebari-specific `[data-branded]` CSS bridge.
 
+To preview a published config without Keycloak, pass it to the dev server as JSON:
+`/?preview=login&theme=nebari&branding=<url-encoded config>`. It goes through the same validation as a realm's,
+and [`tests/branded-login.spec.ts`](../tests/branded-login.spec.ts) uses it to check that a palette really
+recolours the page.
+
 Add branded styling under `.nebari-login-wrapper[data-branded]`, never to the
 unscoped selectors. The login stylesheet's own element selectors
 (`input[type="text"]`, `button[type="submit"]`) are unlayered, so they outrank a
