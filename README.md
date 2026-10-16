@@ -32,7 +32,6 @@
   src="https://github.com/nebari-dev/nebari-keycloak-theme/actions/workflows/publish-keycloak-image.yml/badge.svg" alt="Publish"></a>
   <a href="https://github.com/nebari-dev/nebari-keycloak-theme/releases/latest"><img
   src="https://img.shields.io/github/v/release/nebari-dev/nebari-keycloak-theme?logo=github&label=release" alt="Latest release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
   <a href="https://www.keycloak.org"><img src="https://img.shields.io/badge/Keycloak-26-4d4d4d?logo=keycloak&logoColor=white" alt="Keycloak 26"></a>
   <a href="https://www.keycloakify.dev"><img src="https://img.shields.io/badge/Keycloakify-11-6a5acd" alt="Keycloakify 11"></a>
 </p>
