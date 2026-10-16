@@ -38,6 +38,7 @@ coverage/
 playwright-report/
 test-results/
 test-results-capture/
+test-results-console/
 theme-screenshots/
 
 # Temporary

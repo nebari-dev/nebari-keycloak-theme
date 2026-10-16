@@ -6,6 +6,11 @@ rebuilding the theme: company name, light and dark logos and backgrounds, palett
 scheme and which login methods are shown. Changes are previewed before they are published, and a draft can be
 exported to and imported from JSON.
 
+<img src="images/theme-customization/editor.png" alt="The Theme customization page: the Brand identity card beside a live preview of the login page, with Discard changes, Publish theme and an options menu at the top" width="900">
+
+The images on this page show a made-up brand, "Example". How they are produced and kept current is in
+[Development](development.md#screenshot-tests).
+
 This page explains the two login themes the editor works with, how a published theme is stored, and the
 constraints anyone changing it needs to know.
 
@@ -21,6 +26,10 @@ Keycloak's **Login theme** setting:
 | --- | --- | --- | --- |
 | `template` | stock shadcn/ui (Radix) | none | the default — a starting point to customize |
 | `nebari` | Nebari registry (Base UI) | Nebari logo and palette | Nebari's own deployments |
+
+| `template`, unbranded | `nebari` |
+| --- | --- |
+| <img src="../tests/screenshots/linux/template/full-page-light.png" alt="The template theme's sign-in page: neutral palette, no logo" width="420"> | <img src="../tests/screenshots/linux/nebari/full-page-light.png" alt="The nebari theme's sign-in page: Nebari logo and purple palette" width="420"> |
 
 ### The registry
 
@@ -133,6 +142,9 @@ The Admin Console masthead takes the first of:
    both consoles, so a theme cannot brand one and not the other;
 5. otherwise the realm's display name, as a wordmark.
 
+The masthead in the image at the top of this page is step 3: the realm's published "Example" logo, reused from
+the login card, with its wordmark beside it.
+
 Steps 1–4 are resolved by
 [`src/branding/consoleLogo.ts`](../src/branding/consoleLogo.ts), shared by both
 consoles so they cannot disagree.
@@ -182,6 +194,21 @@ background image, card radius, default color scheme, and available login
 methods. Logos and backgrounds can differ between light and dark appearances.
 Changes are previewed before they are published.
 
+The settings are grouped into cards:
+
+| Brand identity | Color palette | Layout |
+| --- | --- | --- |
+| <img src="images/theme-customization/brand-identity.png" alt="Brand identity card: company name, login card logos, console header logos and background images, each with light and dark variants" width="280"> | <img src="images/theme-customization/color-palette.png" alt="Color palette card: a light/dark switch and a colour picker for each palette role" width="280"> | <img src="images/theme-customization/layout.png" alt="Layout card: card corner radius, default appearance and login method presentation" width="280"> |
+| Company name; login card, console header and background artwork, each with a light and a dark variant | The eight palette roles, set separately for light and dark | Card corner radius, the default appearance (light, dark or the visitor's system setting) and which login methods are shown |
+
+The **Live preview** beside them renders the draft with the same components as the login page, in whichever
+palette the Color palette card's **Light palette** / **Dark palette** switch is editing. **Publish theme** writes the draft to the realm; **Discard changes** returns
+to what is published.
+
+| Live preview | Published, light | Published, dark |
+| --- | --- | --- |
+| <img src="images/theme-customization/preview.png" alt="The live preview panel showing the Example brand's login card" width="240"> | <img src="../tests/screenshots/linux/theme-customization/palette-light.png" alt="The nebari login page with the Example palette and logo, light mode" width="300"> | <img src="../tests/screenshots/linux/theme-customization/palette-dark.png" alt="The nebari login page with the Example palette and logo, dark mode" width="300"> |
+
 Uploaded PNG, JPEG and WebP files open in a crop editor before they enter the
 draft. It supports original, wordmark, square and common landscape frames,
 pointer dragging, keyboard positioning, and 100–300% zoom. Applying the crop
@@ -191,11 +218,24 @@ be stored alongside the backgrounds. Hosted image URLs bypass local cropping
 and are used as supplied; they must be HTTPS. Anything else, and SVG data URIs, are dropped during
 validation.
 
+<img src="images/theme-customization/crop-dialog.png" alt="The crop dialog for a background image: a draggable crop frame over the image, a crop frame picker, a zoom slider, and Cancel, Use full image and Apply crop buttons" width="520">
+
 Each asset has **Light appearance** and **Dark appearance** values. An empty
 variant falls back to its sibling, so a deployment can upload one universal
 asset or a contrast-safe pair. The editor preview and both login component sets
 resolve the same fallback, preventing a white wordmark from disappearing on a
 light card without requiring every realm to upload two files.
+
+A background image is drawn under the palette's page background at 85% opacity, so the card and its text stay
+readable over any image. Only bold shapes and colours show through; a subtle image barely shows at all. The
+images under [Advanced settings](#advanced-settings) show a background in use.
+
+**Login method presentation** decides whether the password form is shown alongside the identity providers or
+only the providers:
+
+| Password and providers (default) | Providers only |
+| --- | --- |
+| <img src="../tests/screenshots/linux/nebari/login-providers.png" alt="Login card with the username and password form above the Google and GitHub buttons" width="300"> | <img src="../tests/screenshots/linux/theme-customization/providers-only.png" alt="Login card with only the Google and GitHub buttons" width="300"> |
 
 Published settings are stored in the realm's localization messages under the
 `nebariBrandingConfig` key and are applied to subsequent login page loads
@@ -227,6 +267,26 @@ field lives in `BrandingConfig.advanced` and goes through `normalizeAdvanced` in
 | Admin welcome mark | Same as the browser icon | Admin Console welcome tab |
 
 The defaults reproduce the theme exactly, so a realm that never opens the card stays unbranded.
+
+<img src="images/theme-customization/advanced-settings.png" alt="The Advanced settings card expanded: font, card opacity and blur sliders, button shape, sign-in arrow, wordmark, register page title, browser icon and admin welcome mark" width="420">
+
+The same palette, logo and background image, before and after the settings in that card (Inter Tight, a 35%
+card with a 16 px blur, pill buttons with an arrow, and the wordmark "Example"):
+
+| Advanced settings at their defaults | Advanced settings applied |
+| --- | --- |
+| <img src="../tests/screenshots/linux/theme-customization/advanced-off.png" alt="The nebari login page in dark mode over a background image, with the theme's font, an opaque card and a plain sign-in button" width="420"> | <img src="../tests/screenshots/linux/theme-customization/advanced-on.png" alt="The same page with Inter Tight, a translucent blurred card, the wordmark Example beside the logo, and a pill-shaped sign-in button with an arrow" width="420"> |
+
+Button shapes and the arrow, on the `nebari` theme. **Theme** keeps the login theme's own radius, which for
+`nebari` is close to **Rounded**:
+
+| Theme | Rounded | Pill | Square | Theme, with arrow |
+| --- | --- | --- | --- | --- |
+| <img src="../tests/screenshots/linux/theme-customization/button-theme.png" alt="Sign In button, theme shape" width="160"> | <img src="../tests/screenshots/linux/theme-customization/button-rounded.png" alt="Sign In button, rounded" width="160"> | <img src="../tests/screenshots/linux/theme-customization/button-pill.png" alt="Sign In button, pill" width="160"> | <img src="../tests/screenshots/linux/theme-customization/button-square.png" alt="Sign In button, square" width="160"> | <img src="../tests/screenshots/linux/theme-customization/button-arrow.png" alt="Sign In button with a trailing arrow" width="160"> |
+
+The settings apply to both login themes. The same config on `template`:
+
+<img src="../tests/screenshots/linux/theme-customization/template-advanced-on.png" alt="The template theme's login page with the same advanced settings: translucent card, wordmark, pill button with arrow" width="420">
 
 **Why there is no "custom CSS" box.** The config is written by anyone with `manage-realm` and rendered to every
 unauthenticated visitor of the login page, so a free-form field would be a stored injection point on the page
@@ -340,6 +400,8 @@ hazards follow from it — all covered by
   load. Folding the two together is what would let a transient outage present
   as an unbranded realm and invite an overwrite.
 
+<img src="images/theme-customization/options-menu.png" alt="The options menu next to Publish theme, with Export theme as JSON and Import theme" width="292">
+
 **⋮ → Export theme as JSON** is what closes that gap. Save the file into
 [`custom_themes/`](../custom_themes/README.md) at the project root and commit it: it
 ships inside the theme JAR, ready to re-import into any realm. The directory is
@@ -355,6 +417,8 @@ Firefox and Safari fall back to an ordinary download that has to be moved.
 previews the selected theme with the same `BrandingPreview` the editor uses
 before anything is applied. Importing replaces the *draft* only; publishing stays
 a separate step, so an import can still be discarded.
+
+<img src="images/theme-customization/import-dialog.png" alt="The Import theme dialog: the shipped Nebari default and Template default presets and a Choose a JSON file button on the left, a preview of the selected preset on the right" width="600">
 
 Imported JSON is untrusted and always goes through `normalizeBrandingConfig`,
 which is the same validator the published config passes through.

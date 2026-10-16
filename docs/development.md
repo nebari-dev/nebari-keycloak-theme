@@ -13,6 +13,7 @@ Setting up is covered in [Quick start](quick-start.md). This page is the referen
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run test:screenshots` | Compares the login pages against the committed baselines |
 | `npm run test:screenshots:update` | Accepts the current rendering as the new baselines |
+| `npm run docs:console-images` | Recaptures the Admin Console images in [Theme customization](theme-customization.md) from the compose loop |
 | `npm run lint` | ESLint with `--max-warnings 0` |
 
 `npm run lint` is not part of CI and currently reports problems in generated, gitignored console files that
@@ -51,6 +52,18 @@ npm run test:screenshots:update   # accept the current rendering
 them, so it always shows what `main` renders. [`tests/screenshot-gallery.spec.ts`](../tests/screenshot-gallery.spec.ts)
 fails when the page's list of screenshots no longer matches the baselines, and `test:screenshots:update` rewrites
 the page along with them.
+
+[Theme customization](theme-customization.md) shows two kinds of image:
+
+- **What a setting does to the login page.** [`tests/theme-customization-gallery.spec.ts`](../tests/theme-customization-gallery.spec.ts)
+  renders an example brand, kept in [`tests/fixtures/branding/`](../tests/fixtures/branding/), and stores the
+  results as ordinary baselines under `tests/screenshots/linux/theme-customization/`. The doc links them, so CI
+  keeps them current like the rest.
+- **The editor itself.** It is part of the Admin Console, which the dev server can't render, so
+  [`tests/console/theme-customization.capture.ts`](../tests/console/theme-customization.capture.ts) captures it from
+  the compose loop into `docs/images/theme-customization/`. It seeds the example brand into the `nebari` realm
+  through the Admin API, captures, and removes it again. CI doesn't run it: after changing the editor, run
+  `docker compose up -d --build keycloak`, then `npm run docs:console-images`, and commit the images.
 
 ### Regenerate baselines on Linux
 
