@@ -1,8 +1,17 @@
 {
   "name": "nebari-keycloak-theme",
   "version": "1.1.2",
+  "description": "Keycloak login, account and admin themes in the Nebari design system, built with Keycloakify.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nebari-dev/nebari-keycloak-theme.git"
+  },
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "^20.19 || >=22.12"
+  },
   "scripts": {
     "postinstall": "keycloakify sync-extensions",
     "dev": "vite",
@@ -22,6 +31,8 @@
     "@dagrejs/dagre": "^1.1.8",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/inter-tight": "^5.3.0",
+    "@fontsource/dm-mono": "^5.3.0",
+    "@fontsource/dm-sans": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@keycloak/keycloak-admin-client": "26.5.2",
     "@keycloakify/keycloak-account-ui": "~260502.0.2",
@@ -40,20 +51,20 @@
     "flat": "^6.0.1",
     "i18next": "^25.7.3",
     "i18next-fetch-backend": "^6.0.0",
-    "jszip": "^3.10.2",
+    "jszip": "^3.10.1",
     "lodash-es": "^4.17.22",
     "lucide-react": "^1.48.0",
     "oidc-spa": "~10.0.5",
-    "p-debounce": "^5.1.1",
+    "p-debounce": "^5.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.70.0",
     "react-i18next": "^16.5.1",
-    "react-router-dom": "^6.30.6",
+    "react-router-dom": "^6.30.2",
     "reactflow": "^11.11.4",
     "tailwind-merge": "^3.7.0",
     "use-react-router-breadcrumbs": "^4.0.1",
-    "yaml": "^2.9.1"
+    "yaml": "^2.8.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

@@ -41,9 +41,15 @@ capture in light and dark mode; dark baselines carry a `-dark` suffix. They are 
 pull request. Preview a brand in the dev server with `?theme=collab`.
 
 ```bash
+npx playwright install chromium   # once, and again after a Playwright upgrade
 npm run test:screenshots          # compare
 npm run test:screenshots:update   # accept the current rendering
 ```
+
+[`docs/screenshots.md`](screenshots.md) shows every baseline. It links the baseline files rather than copying
+them, so it always shows what `main` renders. [`tests/screenshot-gallery.spec.ts`](../tests/screenshot-gallery.spec.ts)
+fails when the page's list of screenshots no longer matches the baselines, and `test:screenshots:update` rewrites
+the page along with them.
 
 ### Regenerate baselines on Linux
 
@@ -51,13 +57,17 @@ Baselines are stored per platform and brand in `tests/screenshots/<platform>/<br
 rasterises fonts slightly differently. CI runs on Linux, so **only the `linux/` baselines count**. Updating on macOS or Windows writes to
 a different directory and won't satisfy the check.
 
-If you aren't on Linux, run the update inside the Playwright container that matches the pinned version:
+If you aren't on Linux, run the update inside the Playwright container. Its tag must match the installed
+`@playwright/test` version (`npx playwright --version`), or the browser build won't match the one CI uses:
 
 ```bash
-docker run --rm -v "$PWD":/work -w /work --ipc=host \
-  mcr.microsoft.com/playwright:v1.62.1-noble \
-  npm run test:screenshots:update
+docker run --rm -v "$PWD":/work -v /work/node_modules -w /work --ipc=host \
+  mcr.microsoft.com/playwright:v1.63.0-noble \
+  sh -c "npm ci && npm run test:screenshots:update"
 ```
+
+The second `-v` gives the container its own `node_modules`, so it installs Linux binaries without touching
+yours.
 
 ### Rebaselining is a review decision, not a formality
 
@@ -100,12 +110,12 @@ different one. **Treat a failure as a port, not a version bump** &mdash; Pattern
 `--pf-v5-global--*` token family outright rather than renaming it, so a mechanical find-and-replace will pass
 the guard and still be wrong.
 
-## Owned files and `@ts-nocheck`
+## What the type check covers
 
-Most owned files keep the `/* eslint-disable */` and `// @ts-nocheck` they were vendored with, so the type check
-skips them. For a file that has been substantially rewritten &mdash; `PageNav.tsx`, `KeycloakDataTable.tsx`
-&mdash; that means your changes aren't type-checked either. Test those changes in the compose loop.
-[Ownership](ownership.md) covers the rest.
+`npm run typecheck` checks everything under `src/`, including the owned console files such as `PageNav.tsx` and
+`KeycloakDataTable.tsx`. The only file that opts out with `// @ts-nocheck` is the generated `src/kc.gen.tsx`.
+Nothing under `tests/` is type-checked: Playwright transpiles the specs without checking them.
+[Ownership](ownership.md) covers the owned files.
 
 ## Next
 

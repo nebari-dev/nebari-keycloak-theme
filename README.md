@@ -3,7 +3,7 @@
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/standard/Nebari-Logo-Horizontal-Lockup-White-text.png">
       <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/standard/Nebari-Logo-Horizontal-Lockup.png">
-      <img alt="Nebari" src="public/logo/Nebari-Logo-Horizontal-Lockup.png" width="300">
+      <img alt="Nebari" src="https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/standard/Nebari-Logo-Horizontal-Lockup.png" width="300">
     </picture>
   </a>
 </p>
@@ -43,6 +43,7 @@
   <a href="docs/architecture.md">Architecture</a> &middot;
   <a href="docs/deployment.md">Deployment</a> &middot;
   <a href="docs/customization.md">Customization</a> &middot;
+  <a href="docs/screenshots.md">Screenshots</a> &middot;
   <a href="AGENTS.md">AGENTS.md</a>
 </p>
 
@@ -146,6 +147,7 @@ http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/
 | [Ownership](docs/ownership.md) | Which Keycloak files this theme forks, why, and what keeps them honest |
 | [Customization](docs/customization.md) | Tokens, logo, translations, login pages and design-system components |
 | [Deployment](docs/deployment.md) | JARs, the published image, and selecting the theme on a realm |
+| [Screenshots](docs/screenshots.md) | Every login page in light and dark mode, as `main` renders it |
 | [Releasing](docs/releasing.md) | The publish workflow, versioning and dependency policy |
 | [AGENTS.md](AGENTS.md) | Working agreement for coding agents, including mistakes already made here |
 

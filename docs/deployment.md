@@ -107,12 +107,14 @@ Adopting it means two changes on the NIC side:
 
 ## Known issues in the shipped configuration
 
-- **Health checks moved in Keycloak 26.** With `KC_HEALTH_ENABLED=true`, `/health/ready` is served on the
-  management port, `9000`, not on `8080`. Point readiness probes there. The compose healthcheck in this repo
-  still targets `8080` and uses `curl`, which the Keycloak image doesn't ship, so it never reports healthy &mdash;
-  it doesn't stop Keycloak from starting.
-- **`KC_PROXY=edge` is a Keycloak 25-and-earlier option.** Keycloak 26 still starts with it but logs an error.
-  Behind a TLS-terminating proxy, use `KC_PROXY_HEADERS=xforwarded`, and `KC_HTTP_ENABLED=true` for a non-dev
-  `start`.
-- **[`k8s-deployment-example.yaml`](../k8s-deployment-example.yaml) predates Keycloak 26** and doesn't use this
-  image. Treat it as a sketch, not a working manifest.
+- **Health checks are on the management port.** The image enables them, and Keycloak 26 serves `/health/ready`
+  on port `9000`, not `8080`. Point readiness probes there.
+- **Behind a TLS-terminating proxy,** set `KC_PROXY_HEADERS=xforwarded`, and `KC_HTTP_ENABLED=true` for a
+  non-dev `start`. The image sets neither, because both depend on your ingress.
+- **Set `KC_HOSTNAME` to the public URL.** The image keeps Keycloak's strict hostname default, so `start` fails
+  without it. Nebari Infrastructure Core already sets it; only the local compose file turns strict checking off.
+- **The Keycloak 22 to 25 JAR is built but not tested.** CI and the screenshots run against Keycloak 26, and
+  the consoles are built from Keycloak 26.5 sources.
+- **[`k8s-deployment-example.yaml`](../k8s-deployment-example.yaml) is a sketch.** It runs stock
+  `quay.io/keycloak/keycloak` and copies the theme JAR in from this image with an init container. It pins a
+  version tag for readability; pin a `sha-<commit>` tag in a real deployment.

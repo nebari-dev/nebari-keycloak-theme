@@ -4,19 +4,17 @@
  * Imported by the Account console only (`KcAccountUi.tsx`). The Admin console
  * loads `admin/index.css` instead — do not assume a rule added here reaches it.
  *
- * Design system: NIC dashboard (nebari-dashboard.html reference)
+ * Palette:
  *   Accent  light: #7c3aed  (violet)
  *   Accent  dark:  #a78bfa
  *   BG      light: #f4f4f6   surface: #ffffff   border: #e3e3ea
  *   BG      dark:  #0d0d14   surface: #17171f   border: #26262f
- *   Font: DM Sans (300–800) + DM Mono
+ *   Font: DM Sans (300–800) + DM Mono, self-hosted from @fontsource in
+ *   `KcAccountUi.tsx`
  *
- * Key insight: PatternFly dark mode sets vars inside `.pf-v5-theme-dark`
- * which has higher specificity than `:root`. We must override inside both.
+ * PatternFly dark mode sets its variables inside `.pf-v5-theme-dark`, which
+ * is more specific than `:root`, so every override is made in both.
  */
-
-/* DM Sans + DM Mono — NIC dashboard font stack */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LIGHT MODE (default PatternFly behaviour — no .pf-v5-theme-dark class)
@@ -87,7 +85,7 @@
     --pf-v5-c-button--m-link--Color: var(--account-fg-7c3aed, #7c3aed);
     --pf-v5-c-button--m-link--hover--Color: var(--account-fg-6d28d9, #6d28d9);
 
-    /* ── NIC dashboard surface tokens mapped to PF vars ───────────────────── */
+    /* ── Nebari surface tokens mapped to PF vars ──────────────────────────── */
     --pf-v5-c-page--BackgroundColor: var(--account-bg-f4f4f6, #f4f4f6);
     --pf-v5-c-page__main-section--m-light--BackgroundColor: var(--account-bg-ffffff, #ffffff);
     --pf-v5-c-page__main-section--BackgroundColor: var(--account-bg-f4f4f6, #f4f4f6);
@@ -141,7 +139,7 @@
     --pf-v5-c-radio__description--Color: var(--account-fg-8888a0, #8888a0);
     --pf-v5-c-check__description--Color: var(--account-fg-8888a0, #8888a0);
 
-    /* ── NIC dashboard dark surface tokens ────────────────────────────────── */
+    /* ── Nebari dark surface tokens ───────────────────────────────────────── */
     --pf-v5-c-page--BackgroundColor: var(--account-bg-0d0d14, #0d0d14);
     --pf-v5-c-page__main-section--m-light--BackgroundColor: var(--account-bg-17171f, #17171f);
     --pf-v5-c-page__main-section--BackgroundColor: var(--account-bg-0d0d14, #0d0d14);
@@ -208,7 +206,7 @@ samp,
  * Account rendered a white bar while Admin rendered `--header-background`. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   CARDS — 12px radius, NIC shadow-sm, 1px border
+   CARDS — 12px radius, small shadow, 1px border
    ═══════════════════════════════════════════════════════════════════════════ */
 .pf-v5-c-card {
     border-radius: 12px;

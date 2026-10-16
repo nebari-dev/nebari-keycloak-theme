@@ -149,20 +149,12 @@ jobs:
           labels: ${{ steps.collab-metadata.outputs.labels }}
 
       # The only release assets are the JARs — that is all a consumer needs. The
-      # screenshots are referenced from this commit rather than attached, so the
-      # release page shows what the theme looks like without adding weight to
-      # it. They are the images the Playwright workflow gates on every pull
-      # request.
-      #
-      # Inline images require the repository to be public: raw.githubusercontent
-      # does not accept browser session cookies, and GitHub proxies external
-      # images server-side without the viewer's credentials. The link below the
-      # table keeps the notes useful while the repository is private.
+      # notes carry no screenshots: docs/screenshots.md shows them, linked here
+      # at the release commit.
       - name: Compose release notes
         if: steps.release.outputs.exists == 'false'
         env:
-          RAW: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/tests/screenshots/linux
-          TREE: https://github.com/${{ github.repository }}/tree/${{ github.sha }}/tests/screenshots/linux
+          SCREENSHOTS: https://github.com/${{ github.repository }}/blob/${{ github.sha }}/docs/screenshots.md
           VERSION: ${{ steps.version.outputs.version }}
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           COLLAB_IMAGE: ${{ env.REGISTRY }}/${{ env.COLLAB_IMAGE_NAME }}
@@ -170,27 +162,7 @@ jobs:
           {
             echo "## Nebari and Collab Keycloak themes $VERSION"
             echo
-            echo "| Nebari | Collab |"
-            echo "| --- | --- |"
-            echo "| <img src=\"$RAW/nebari/full-page-light.png\" width=\"320\"> | <img src=\"$RAW/collab/full-page-light.png\" width=\"320\"> |"
-            echo
-            echo "[Browse every login page screenshot for this release]($TREE)"
-            # One collapsible gallery per theme, from its baseline directory.
-            for dir in tests/screenshots/linux/*/; do
-              theme="$(basename "$dir")"
-              echo
-              echo "<details><summary>All $theme login pages</summary>"
-              echo
-              for shot in "$dir"*.png; do
-                name="$(basename "$shot" .png)"
-                case "$name" in
-                  full-page-*) continue ;;
-                esac
-                echo "<img src=\"$RAW/$theme/$name.png\" width=\"280\" alt=\"$theme $name\">"
-              done
-              echo
-              echo "</details>"
-            done
+            echo "See [what the theme looks like]($SCREENSHOTS) in this release."
             echo
             echo "### Install the theme"
             echo
