@@ -89,7 +89,7 @@ for (const theme of themes) {
 
         // The captures above crop to the card. These full-page ones include the
         // page background, so they show what a deployment actually looks like —
-        // they are the images shown on a release. The background glows are
+        // they are the images the README and docs/screenshots.md lead with. The background glows are
         // animated, but the reduced-motion rule in theme.css stops them, keeping
         // the capture stable.
         for (const colorScheme of theme.colorSchemes) {

@@ -45,6 +45,11 @@ npm run test:screenshots          # compare
 npm run test:screenshots:update   # accept the current rendering
 ```
 
+[`docs/screenshots.md`](screenshots.md) shows every baseline. It links the baseline files rather than copying
+them, so it always shows what `main` renders. [`tests/screenshot-gallery.spec.ts`](../tests/screenshot-gallery.spec.ts)
+fails when the page's list of screenshots no longer matches the baselines, and `test:screenshots:update` rewrites
+the page along with them.
+
 ### Regenerate baselines on Linux
 
 Baselines are stored per platform and brand in `tests/screenshots/<platform>/<brand>/`, because each OS
