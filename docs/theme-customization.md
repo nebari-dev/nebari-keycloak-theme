@@ -259,11 +259,52 @@ relying on it:
 | | |
 |---|---|
 | Container restart | **Survives** — the data is in the Postgres volume |
-| Fresh database / new deployment | **Lost** — falls back to `DEFAULT_BRANDING_CONFIG` |
+| Fresh database / new deployment | **Lost**, unless the deployment seeds it (below) |
 | In the theme JAR or the repo | **No** |
 
-`--import-realm` only seeds an empty database, and `realm-export.json` carries no
-`localizationTexts`, so a clean instance always starts unbranded.
+#### Seeding a preset so a realm starts branded
+
+A deployment can put a preset into the realm itself, so a fresh database comes up
+branded with nobody opening the editor. The value is the preset's `config` object,
+base64-encoded behind a `base64:` prefix, which is the same format **Publish** writes:
+
+```bash
+VALUE="base64:$(jq -c .config my-preset.json | base64 -w0)"
+```
+
+It goes under the `nebariBrandingConfig` key of the realm's localization texts,
+in every locale the realm supports plus `en`.
+
+**A new realm**, created from a realm JSON (`kcadm.sh create realms -f`, or
+Keycloak's `--import-realm` at startup):
+
+```json
+{
+  "realm": "my-realm",
+  "loginTheme": "nebari",
+  "accountTheme": "nebari",
+  "adminTheme": "nebari",
+  "localizationTexts": {
+    "en": { "nebariBrandingConfig": "base64:..." }
+  }
+}
+```
+
+**An existing realm**, one call per locale. `--import-realm` skips realms that
+already exist, so this is the route for them:
+
+```bash
+jq -n --arg v "$VALUE" '{nebariBrandingConfig: $v}' > branding.json
+kcadm.sh create realms/my-realm/localization/en -f branding.json
+```
+
+Both were checked on Keycloak 26.8 deployed by Nebari Infrastructure Core, with a
+54 KB preset that embeds its images. The login page and both consoles render the
+preset on first load. The editor opens the realm with the preset as its published
+state, with nothing pending to publish. A Keycloak restart keeps it.
+
+The value is validated when it is read, like a published one, so a bad seed falls
+back to the theme's defaults rather than breaking the page.
 
 ### It is stored once per locale, and the copies can disagree
 
