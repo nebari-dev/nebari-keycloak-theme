@@ -1,10 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { getBrandLogos, isBrandName } from "@/lib/branding";
+import { getThemeDefinition, getThemeLogo, matchThemeName } from "./themes/themeCatalog";
 import type { KcContext } from "./kc.gen";
 import { KcPage } from "./kc.gen";
 import { getKcContextMockForPreview } from "./login/KcContext";
 import "@fontsource-variable/geist";
+// The Collab theme's font. Goes with the Collab theme.
 import "@fontsource-variable/inter-tight";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
@@ -41,33 +42,34 @@ if (document.documentElement.dataset.theme === undefined) {
 // only when running the standalone Vite app, including visual tests.
 const searchParams = new URLSearchParams(window.location.search);
 const injectedKcContext = window.kcContext as KcContext | undefined;
-const previewThemeName = searchParams.get("theme");
+// The dev preview shows Nebari unless `?theme=` names another theme in themes.json.
+const previewThemeName = matchThemeName(searchParams.get("theme") ?? undefined) ?? "nebari";
 const kcContext: KcContext =
-    injectedKcContext ?? {
-        ...getKcContextMockForPreview(searchParams.get("preview")),
-        themeName: isBrandName(previewThemeName) ? previewThemeName : "nebari"
-    };
+    injectedKcContext ??
+    getKcContextMockForPreview(
+        searchParams.get("preview"),
+        previewThemeName,
+        searchParams.get("branding")
+    );
 
-/* Which mark the pages carry: the theme Keycloak is rendering, `nebari` or
-   `collab`. Stamping it on <html> is what lets CSS and the console mastheads see
-   it. See `src/lib/branding.ts`. */
+/* The theme Keycloak is rendering, stamped on <html> so CSS and tests can tell
+   which theme a page belongs to. */
 document.documentElement.dataset.brand = kcContext.themeName;
-/* The Admin Console's dashboard renders its hero mark from `admin/assets/icon.svg`,
-   imported as a module URL inside upstream's vendored `Dashboard.tsx`. One `vite
-   build` serves every theme (see `scripts/build-keycloak-themes.mjs`), so that
-   import resolves to the same file whichever theme is packaged, and the mark
-   cannot be swapped by the bundler. Publishing the active theme's symbol as a
-   custom property lets CSS substitute it, and keeps `branding.ts` the only place
-   a logo path is written down. */
-document.documentElement.style.setProperty(
-    "--brand-symbol",
-    `url("${getBrandLogos().dark}")`
-);
-/* The theme type, so a rule can be scoped to one console. `data-brand` alone is
-   not enough — it is set for every theme type, because the login page and both
-   console mastheads all need to read it — and the Admin dashboard's hero-mark
-   substitution in `theme.css` must not leak onto the login page. */
+/* The theme type, so a rule can be scoped to one page type: `data-brand` is set
+   for the login page and both consoles alike. */
 document.documentElement.dataset.kcThemeType = kcContext.themeType;
+/* The Admin Console's dashboard renders its hero mark from an asset imported by
+   upstream's vendored `Dashboard.tsx`, which one build cannot swap per theme. The
+   Collab rules in `theme.css` substitute this property instead. Goes with the
+   Collab theme. */
+const brandSymbol = getThemeLogo(
+    getThemeDefinition(kcContext.themeName),
+    "dark",
+    import.meta.env.BASE_URL
+)?.src;
+if (brandSymbol !== undefined) {
+    document.documentElement.style.setProperty("--brand-symbol", `url("${brandSymbol}")`);
+}
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>

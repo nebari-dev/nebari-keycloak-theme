@@ -1,0 +1,381 @@
+import type { CSSProperties } from "react";
+
+import { readableOn } from "./color";
+
+export const BRANDING_MESSAGE_KEY = "nebariBrandingConfig";
+const ENCODED_CONFIG_PREFIX = "base64:";
+
+export type BrandingPalette = {
+    primary: string;
+    primaryHover: string;
+    pageBackground: string;
+    cardBackground: string;
+    inputBackground: string;
+    text: string;
+    mutedText: string;
+    border: string;
+};
+
+export type BrandingColorScheme = "light" | "dark" | "system";
+export type BrandingLoginMode = "password-and-providers" | "providers-only";
+
+/** Appearance-specific artwork. An empty variant falls back to the other one. */
+export type BrandingImageSet = {
+    light: string;
+    dark: string;
+};
+
+export type BrandingConfig = {
+    version: 1 | 2;
+    companyName: string;
+    logo: BrandingImageSet;
+    /**
+     * Artwork for the Admin and Account console mastheads, used only when
+     * `useLoginLogoInConsole` is false.
+     *
+     * Separate from `logo` because the slots are different shapes: a masthead is
+     * short and wide, a login card taller. A deployment that has one mark for
+     * both leaves this empty and keeps the reuse flag on.
+     */
+    consoleLogo: BrandingImageSet;
+    /**
+     * Whether the console mastheads reuse `logo` instead of `consoleLogo`.
+     *
+     * Defaults to true, which is what a realm that published before this field
+     * existed gets — so adding it changed no existing realm's appearance.
+     */
+    useLoginLogoInConsole: boolean;
+    backgroundImage: BrandingImageSet;
+    cardRadius: number;
+    colorScheme: BrandingColorScheme;
+    loginMode: BrandingLoginMode;
+    light: BrandingPalette;
+    dark: BrandingPalette;
+};
+
+export const DEFAULT_BRANDING_CONFIG: BrandingConfig = {
+    version: 2,
+    companyName: "Nebari",
+    logo: { light: "", dark: "" },
+    consoleLogo: { light: "", dark: "" },
+    useLoginLogoInConsole: true,
+    backgroundImage: { light: "", dark: "" },
+    cardRadius: 12,
+    /* Defaults describe an unbranded realm, so they have to reproduce the
+       behaviour the theme already had: follow the OS colour preference (the
+       stylesheet's own `prefers-color-scheme` rules assume it), and show the
+       password form alongside any social providers. */
+    colorScheme: "system",
+    loginMode: "password-and-providers",
+    /* These are the design system's own tokens, rasterised to sRGB hex — the
+       palette has to stay in #rrggbb because the wrapper's background-image
+       gradient concatenates an alpha suffix onto `pageBackground`. Keeping them
+       equal to the tokens means an unbranded realm renders exactly like the
+       design system, and editing one colour does not drag the untouched ones
+       to some other approximation. */
+    light: {
+        primary: "#9547c0",
+        primaryHover: "#77399a",
+        pageBackground: "#f8f8f8",
+        cardBackground: "#ffffff",
+        inputBackground: "#eeeeef",
+        text: "#262628",
+        mutedText: "#70707a",
+        border: "#b7b7bb"
+    },
+    dark: {
+        primary: "#b053e2",
+        primaryHover: "#c575f4",
+        pageBackground: "#262628",
+        cardBackground: "#353538",
+        inputBackground: "#353538",
+        text: "#f8f8f8",
+        mutedText: "#9d9da6",
+        border: "#5a5a61"
+    }
+};
+
+/**
+ * Defaults for the `template` theme: stock shadcn/ui's `neutral` base, which is
+ * Tailwind's `neutral` scale rasterised to sRGB hex (the palette has to stay in
+ * `#rrggbb` — see the note on `DEFAULT_BRANDING_CONFIG`).
+ *
+ * Deliberately unbranded. There is no logo and no accent hue: the primary is a
+ * near-black in light mode and a near-white in dark mode, as an un-themed
+ * shadcn install renders. The form surfaces add a stronger neutral border so
+ * this is a usable login template rather than only a component-library demo. A
+ * customer picks their own colours from here instead of removing someone else's.
+ */
+export const TEMPLATE_BRANDING_CONFIG: BrandingConfig = {
+    version: 2,
+    companyName: "",
+    logo: { light: "", dark: "" },
+    consoleLogo: { light: "", dark: "" },
+    useLoginLogoInConsole: true,
+    backgroundImage: { light: "", dark: "" },
+    /* shadcn's own `--radius` is 0.625rem = 10px. */
+    cardRadius: 10,
+    colorScheme: "system",
+    loginMode: "password-and-providers",
+    light: {
+        primary: "#171717",
+        primaryHover: "#262626",
+        pageBackground: "#f5f5f5",
+        cardBackground: "#ffffff",
+        inputBackground: "#f5f5f5",
+        text: "#0a0a0a",
+        mutedText: "#737373",
+        /* neutral-500 keeps unfocused controls and cards distinguishable from
+           their neighbouring surfaces without introducing a brand colour. */
+        border: "#737373"
+    },
+    dark: {
+        primary: "#e5e5e5",
+        primaryHover: "#d4d4d4",
+        pageBackground: "#0a0a0a",
+        cardBackground: "#171717",
+        inputBackground: "#262626",
+        text: "#fafafa",
+        mutedText: "#a1a1a1",
+        border: "#737373"
+    }
+};
+
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+const SAFE_DATA_IMAGE = /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=]+$/i;
+
+function safeText(value: unknown, fallback: string, maxLength: number): string {
+    return typeof value === "string"
+        ? value.trim().slice(0, maxLength) || fallback
+        : fallback;
+}
+
+function safeColor(value: unknown, fallback: string): string {
+    return typeof value === "string" && HEX_COLOR.test(value) ? value : fallback;
+}
+
+function safeImage(value: unknown): string {
+    if (typeof value !== "string" || value.length > 900_000) return "";
+    if (SAFE_DATA_IMAGE.test(value)) return value;
+
+    /* HTTPS only. The login page is served to unauthenticated visitors, so a
+       cleartext image would be mixed content on an HTTPS deployment and could be
+       swapped in transit. */
+    try {
+        const url = new URL(value);
+        return url.protocol === "https:" ? url.href : "";
+    } catch {
+        return "";
+    }
+}
+
+/**
+ * Version 1 stored one image string. Treating it as both variants preserves its
+ * exact rendering after the version 2 migration. Version 2 may leave either
+ * variant empty; `getBrandingImage` supplies the runtime fallback.
+ */
+function normalizeImageSet(
+    value: unknown,
+    fallback: BrandingImageSet
+): BrandingImageSet {
+    if (typeof value === "string") {
+        const image = safeImage(value);
+
+        return { light: image, dark: image };
+    }
+
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+        return structuredClone(fallback);
+    }
+
+    const images = value as Partial<BrandingImageSet>;
+
+    return {
+        light: images.light === undefined ? fallback.light : safeImage(images.light),
+        dark: images.dark === undefined ? fallback.dark : safeImage(images.dark)
+    };
+}
+
+/** Resolve an appearance-specific image, falling back to its sibling variant. */
+export function getBrandingImage(
+    images: BrandingImageSet,
+    mode: "light" | "dark"
+): string {
+    return images[mode] || images[mode === "light" ? "dark" : "light"];
+}
+
+function normalizePalette(value: unknown, fallback: BrandingPalette): BrandingPalette {
+    const palette = typeof value === "object" && value !== null ? value as Partial<BrandingPalette> : {};
+
+    return {
+        primary: safeColor(palette.primary, fallback.primary),
+        primaryHover: safeColor(palette.primaryHover, fallback.primaryHover),
+        pageBackground: safeColor(palette.pageBackground, fallback.pageBackground),
+        cardBackground: safeColor(palette.cardBackground, fallback.cardBackground),
+        inputBackground: safeColor(palette.inputBackground, fallback.inputBackground),
+        text: safeColor(palette.text, fallback.text),
+        mutedText: safeColor(palette.mutedText, fallback.mutedText),
+        border: safeColor(palette.border, fallback.border)
+    };
+}
+
+export function normalizeBrandingConfig(
+    value: unknown,
+    defaults: BrandingConfig = DEFAULT_BRANDING_CONFIG
+): BrandingConfig {
+    const config = typeof value === "object" && value !== null ? value as Partial<BrandingConfig> : {};
+
+    return {
+        /* Normalization is also the v1 → v2 migration boundary. Published
+           legacy strings are expanded above before being serialized again. */
+        version: 2,
+        companyName: safeText(config.companyName, defaults.companyName, 80),
+        logo: normalizeImageSet(config.logo, defaults.logo),
+        consoleLogo: normalizeImageSet(config.consoleLogo, defaults.consoleLogo),
+        useLoginLogoInConsole:
+            typeof config.useLoginLogoInConsole === "boolean"
+                ? config.useLoginLogoInConsole
+                : defaults.useLoginLogoInConsole,
+        backgroundImage: normalizeImageSet(
+            config.backgroundImage,
+            defaults.backgroundImage
+        ),
+        cardRadius:
+            typeof config.cardRadius === "number" && Number.isFinite(config.cardRadius)
+                ? Math.min(32, Math.max(0, Math.round(config.cardRadius)))
+                : defaults.cardRadius,
+        colorScheme:
+            config.colorScheme === "light" ||
+            config.colorScheme === "dark" ||
+            config.colorScheme === "system"
+                ? config.colorScheme
+                : defaults.colorScheme,
+        loginMode:
+            config.loginMode === "password-and-providers" ||
+            config.loginMode === "providers-only"
+                ? config.loginMode
+                : defaults.loginMode,
+        light: normalizePalette(config.light, defaults.light),
+        dark: normalizePalette(config.dark, defaults.dark)
+    };
+}
+
+export function parseBrandingConfig(
+    value: string | undefined,
+    defaults: BrandingConfig = DEFAULT_BRANDING_CONFIG
+): BrandingConfig {
+    if (!value) return structuredClone(defaults);
+
+    try {
+        const json = value.startsWith(ENCODED_CONFIG_PREFIX)
+            ? decodeBase64Utf8(value.slice(ENCODED_CONFIG_PREFIX.length))
+            : value;
+
+        return normalizeBrandingConfig(JSON.parse(json), defaults);
+    } catch {
+        return structuredClone(defaults);
+    }
+}
+
+export function serializeBrandingConfig(
+    value: BrandingConfig,
+    defaults: BrandingConfig = DEFAULT_BRANDING_CONFIG
+): string {
+    return `${ENCODED_CONFIG_PREFIX}${encodeBase64Utf8(
+        JSON.stringify(normalizeBrandingConfig(value, defaults))
+    )}`;
+}
+
+function encodeBase64Utf8(value: string): string {
+    const bytes = new TextEncoder().encode(value);
+    let binary = "";
+    const chunkSize = 0x8000;
+
+    for (let index = 0; index < bytes.length; index += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+    }
+
+    return btoa(binary);
+}
+
+function decodeBase64Utf8(value: string): string {
+    const binary = atob(value);
+    const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+
+    return new TextDecoder().decode(bytes);
+}
+
+/**
+ * Whether a realm has actually branded itself, as opposed to falling back to the
+ * theme's defaults.
+ *
+ * This gates the whole branding layer. An unbranded realm gets no inline
+ * variables and no `[data-branded]` rules, so it renders exactly as the theme
+ * did before branding existed — which keeps the feature from quietly restyling
+ * every login page. Both sides go through `normalizeBrandingConfig` so the
+ * comparison does not depend on key order or on how the config was built.
+ */
+export function isBrandingCustomized(
+    config: BrandingConfig,
+    defaults: BrandingConfig
+): boolean {
+    return (
+        JSON.stringify(normalizeBrandingConfig(config, defaults)) !==
+        JSON.stringify(normalizeBrandingConfig(defaults, defaults))
+    );
+}
+
+export function getBrandingCssVariables(
+    config: BrandingConfig,
+    mode: "light" | "dark"
+): CSSProperties {
+    const palette = config[mode];
+
+    return {
+        /* Design-system tokens. These are what the components read, so setting
+           them is the whole mechanism — nothing here should restyle a component
+           directly. `--accent` and `--muted` intentionally share a value: the
+           design system uses the first for hover surfaces and the second for
+           sunken ones, and this palette has a single "input background". */
+        "--background": palette.pageBackground,
+        "--foreground": palette.text,
+        "--card": palette.cardBackground,
+        "--card-foreground": palette.text,
+        "--popover": palette.cardBackground,
+        "--popover-foreground": palette.text,
+        "--primary": palette.primary,
+        "--primary-hover": palette.primaryHover,
+        "--primary-foreground": readableOn(palette.primary),
+        "--secondary": palette.inputBackground,
+        "--secondary-foreground": palette.text,
+        "--muted": palette.inputBackground,
+        "--muted-foreground": palette.mutedText,
+        "--muted-foreground-strong": palette.text,
+        "--accent": palette.inputBackground,
+        "--accent-foreground": palette.text,
+        "--border": palette.border,
+        "--border-strong": palette.border,
+        "--input": palette.border,
+        "--ring": palette.primary,
+        "--radius": `${config.cardRadius}px`,
+
+        /* Bridge to the older login stylesheet, which names the same colours
+           differently. These are aliases, not extra colours: each one mirrors a
+           token above, so a branded realm recolours the class-driven login
+           chrome (`.nebari-*`, and the class map `UserProfileFormFields` needs)
+           as well as the components. Prefer the names above for anything new —
+           when the last consumer of an alias goes, delete it here too. */
+        "--nebari-purple": palette.primary,
+        "--nebari-purple-dark": palette.primaryHover,
+        "--accent-dark": palette.primaryHover,
+        "--bg-primary": palette.pageBackground,
+        "--bg-secondary": palette.cardBackground,
+        "--bg-elevated": palette.inputBackground,
+        "--bg-hover": palette.inputBackground,
+        "--text-primary": palette.text,
+        "--text-secondary": palette.text,
+        "--text-muted": palette.mutedText,
+        "--border-color": palette.border,
+        "--border-subtle": palette.border
+    } as CSSProperties;
+}

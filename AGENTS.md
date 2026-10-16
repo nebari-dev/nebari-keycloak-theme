@@ -4,16 +4,20 @@ Working agreement for coding agents in this repo. Read it before touching code.
 
 ## What this is
 
-A Keycloakify v11 theme with two brands, `nebari` and `collab` (OpenTeams Collab), listed in
+A Keycloakify v11 theme with three brands, `nebari`, `template` and `collab` (OpenTeams Collab), listed in
 [`themes.json`](themes.json). Each brand is packaged in its own JAR with three Keycloak themes under that brand's
 name: the **login** pages, the **Account** console and the **Admin** console. Every push to `main` publishes
-the multi-arch Nebari image `quay.io/nebari/nebari-keycloak-theme`, which leaves Collab out, and, until the
+the multi-arch image `quay.io/nebari/nebari-keycloak-theme`, which carries every brand but Collab, and, until the
 Collab theme is removed, the Collab image `ghcr.io/nebari-dev/collab-keycloak-theme`.
 
 - The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
-- The brands share one build and one stylesheet. `src/main.tsx` stamps the theme name on `<html>` as
-  `data-brand`; logo paths live only in [`src/lib/branding.ts`](src/lib/branding.ts), and Collab's styling is
-  the `[data-brand="collab"]` section of `src/theme.css`, scoped by `data-kc-theme-type` as well.
+- `src/main.tsx` stamps the theme name on `<html>` as `data-brand` and the theme type as `data-kc-theme-type`.
+  Each theme's logo, default palette and editor switch live in the catalog,
+  [`src/themes/themeCatalog.ts`](src/themes/themeCatalog.ts), checked against `themes.json` at build time.
+  Collab's styling is the `[data-brand="collab"]` section of `src/theme.css`; it is moving out of this repo.
+- **Runtime branding input is untrusted.** Anything that reaches the login page from the Theme customization
+  editor, an imported JSON file or the realm's localization messages goes through `normalizeBrandingConfig`.
+  Never render it as HTML or CSS text; see [`docs/theme-customization.md`](docs/theme-customization.md).
 - The consoles are ~520 views vendored from Keycloak by `keycloakify sync-extensions`. They are **not rewritten**.
   They are restyled by swapping the components they import underneath them, through one owned re-export shim.
 

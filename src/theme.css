@@ -246,6 +246,21 @@
         margin: 0;
         padding: 0;
     }
+
+    /* Stock shadcn's initializer assigns `border-border` to every element, and
+     * its generated Card, Alert and outline Button rely on that default instead
+     * of repeating a colour utility. Scope the same foundation to the template
+     * login shell so those components render correctly without recolouring the
+     * Nebari theme or either Keycloak console. Explicit component utilities
+     * such as `border-input` remain later in the cascade and still win. */
+    :where(
+        [data-login-theme="template"],
+        [data-login-theme="template"] *,
+        [data-login-theme="template"] *::before,
+        [data-login-theme="template"] *::after
+    ) {
+        border-color: var(--border);
+    }
 }
 
 html,
@@ -734,9 +749,24 @@ a.nebari-button.nebari-button-primary:visited {
     .nebari-login-card { padding: 24px; }
 }
 
-/* ---- Keycloakify default pages ---- */
+/* Helper text that `UserProfileFormFields` renders around an attribute when the
+   realm's User Profile declares one. */
+.nebari-field-hint {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
 
-.kcLabelClass {
+/* ---- Keycloakify default pages ----
+ * Scoped with :where(.nebari-login-wrapper): `kcClsx` always prepends these
+ * logical names, so an unscoped rule here styles every theme that renders
+ * Keycloak's built-in form markup, including the unbranded `template` theme,
+ * whose Tailwind utilities sit in @layer utilities and lose to an unlayered
+ * class rule. :where() adds no specificity, so these stay at (0,1,0) and the
+ * .nebari-* rules that depend on beating them keep doing so. */
+
+:where(.nebari-login-wrapper) .kcLabelClass {
     display: block;
     margin-bottom: 0.375rem;
     font-size: 0.875rem;
@@ -744,7 +774,7 @@ a.nebari-button.nebari-button-primary:visited {
     color: var(--text-secondary);
 }
 
-.kcInputClass {
+:where(.nebari-login-wrapper) .kcInputClass {
     width: 100%;
     padding: 0.625rem 0.875rem;
     font-size: 0.9375rem;
@@ -757,13 +787,13 @@ a.nebari-button.nebari-button-primary:visited {
     font-weight: 500;
 }
 
-.kcInputClass:focus {
+:where(.nebari-login-wrapper) .kcInputClass:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
 }
 
-.kcInputErrorMessageClass {
+:where(.nebari-login-wrapper) .kcInputErrorMessageClass {
     display: block;
     margin-top: 0.375rem;
     font-size: 0.8125rem;
@@ -771,7 +801,7 @@ a.nebari-button.nebari-button-primary:visited {
     font-weight: 400;
 }
 
-.kcButtonClass {
+:where(.nebari-login-wrapper) .kcButtonClass {
     width: 100%;
     padding: 0.625rem 1.25rem;
     font-size: 0.9375rem;
@@ -783,16 +813,16 @@ a.nebari-button.nebari-button-primary:visited {
     font-family: inherit;
 }
 
-.kcButtonPrimaryClass {
+:where(.nebari-login-wrapper) .kcButtonPrimaryClass {
     background: var(--accent);
     color: white;
 }
 
-.kcButtonPrimaryClass:hover {
+:where(.nebari-login-wrapper) .kcButtonPrimaryClass:hover {
     background: var(--accent-dark);
 }
 
-.kcFormOptionsClass {
+:where(.nebari-login-wrapper) .kcFormOptionsClass {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -800,13 +830,13 @@ a.nebari-button.nebari-button-primary:visited {
     font-size: 0.875rem;
 }
 
-.kcFormSocialAccountSectionClass hr {
+:where(.nebari-login-wrapper) .kcFormSocialAccountSectionClass hr {
     border: none;
     border-top: 1px solid var(--border-color);
     margin: 1.5rem 0;
 }
 
-.kcFormSocialAccountListClass {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListClass {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -815,7 +845,7 @@ a.nebari-button.nebari-button-primary:visited {
     gap: 0.5rem;
 }
 
-.kcFormSocialAccountListButtonClass {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListButtonClass {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -831,7 +861,7 @@ a.nebari-button.nebari-button-primary:visited {
     transition: var(--transition-fast);
 }
 
-.kcFormSocialAccountListButtonClass:hover {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListButtonClass:hover {
     border-color: var(--accent);
     background: var(--bg-hover);
     text-decoration: none;
@@ -964,8 +994,8 @@ a.nebari-button.nebari-button-primary:visited {
 
 /* Input labels */
 .nebari-label,
-[data-slot="field-label"],
-.kcLabelClass,
+[data-slot="field-label"]:where(:not([data-login-theme="template"] *)),
+:where(.nebari-login-wrapper) .kcLabelClass,
 .nebari-label-wrapper .nebari-label {
     color: var(--color-foreground-default, #262628);
     font-family: var(--Font-Sans, Geist);
@@ -1000,22 +1030,22 @@ a.nebari-button.nebari-button-primary:visited {
 }
 
 /* Login inputs: border-only focus. */
-[data-slot="input"]:focus {
+[data-slot="input"]:focus:where(:not([data-login-theme="template"] *)) {
     border-width: 2px;
     border-color: var(--ring);
     box-shadow: none;
 }
 
 /* Validation uses a 1px destructive border at rest and 2px while focused. */
-[data-slot="input"][aria-invalid="true"],
-[data-slot="input"][data-invalid] {
+[data-slot="input"][aria-invalid="true"]:where(:not([data-login-theme="template"] *)),
+[data-slot="input"][data-invalid]:where(:not([data-login-theme="template"] *)) {
     border-width: 1px;
     border-color: var(--color-foreground-destructive, #d2161c);
     box-shadow: none;
 }
 
-[data-slot="input"][aria-invalid="true"]:focus,
-[data-slot="input"][data-invalid]:focus {
+[data-slot="input"][aria-invalid="true"]:focus:where(:not([data-login-theme="template"] *)),
+[data-slot="input"][data-invalid]:focus:where(:not([data-login-theme="template"] *)) {
     border-width: 2px;
     border-color: var(--color-foreground-destructive, #d2161c);
     box-shadow: none;
@@ -1120,6 +1150,172 @@ a.nebari-button.nebari-button-primary:visited {
     transform: translateY(6px);
         }
     }
+}
+
+/*
+ * Password reveal toggle for `UserProfileFormFields`.
+ *
+ * Both themes have their own React password field with a lucide icon, but
+ * keycloakify's `UserProfileFormFields` renders the toggle itself — a `<button>`
+ * wrapping a bare `<i>` whose class it takes from `kcClsx`. Keycloak's own
+ * themes point that at an icon font, which this build does not ship, so the
+ * glyph is drawn here with a mask instead. Shared by both themes because the
+ * markup is keycloakify's, not either theme's.
+ *
+ * Used by `src/login/userProfileClasses.ts` and its template counterpart, which
+ * is also where the `Register` and `LoginUpdateProfile` forms pick it up.
+ */
+.kc-input-group {
+    position: relative;
+}
+
+.kc-input-group > input {
+    /* Keep the value from running under the toggle. */
+    padding-right: 2.5rem;
+}
+
+.kc-password-toggle {
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    display: flex;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+}
+
+.kc-password-toggle:hover {
+    color: var(--foreground);
+}
+
+.kc-password-icon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2.062%2012.348a1%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%2019.876%200%201%201%200%200%201%200%20.696%2010.75%2010.75%200%200%201-19.876%200%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2.062%2012.348a1%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%2019.876%200%201%201%200%200%201%200%20.696%2010.75%2010.75%200%200%201-19.876%200%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+}
+
+.kc-password-icon-hide {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.733%205.076a10.744%2010.744%200%200%201%2011.205%206.575%201%201%200%200%201%200%20.696%2010.747%2010.747%200%200%201-1.444%202.49%22%2F%3E%3Cpath%20d%3D%22M14.084%2014.158a3%203%200%200%201-4.242-4.242%22%2F%3E%3Cpath%20d%3D%22M17.479%2017.499a10.75%2010.75%200%200%201-15.417-5.151%201%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%204.446-5.143%22%2F%3E%3Cpath%20d%3D%22m2%202%2020%2020%22%2F%3E%3C%2Fsvg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.733%205.076a10.744%2010.744%200%200%201%2011.205%206.575%201%201%200%200%201%200%20.696%2010.747%2010.747%200%200%201-1.444%202.49%22%2F%3E%3Cpath%20d%3D%22M14.084%2014.158a3%203%200%200%201-4.242-4.242%22%2F%3E%3Cpath%20d%3D%22M17.479%2017.499a10.75%2010.75%200%200%201-15.417-5.151%201%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%204.446-5.143%22%2F%3E%3Cpath%20d%3D%22m2%202%2020%2020%22%2F%3E%3C%2Fsvg%3E");
+}
+
+/* ========================
+   RUNTIME BRANDING (Theme customization)
+   ========================
+   A realm that publishes branding gets `data-branded` on the login wrapper, and
+   `getBrandingCssVariables` sets the palette there as inline custom properties.
+   The Nebari login rules above use literal colours matched to the Figma file,
+   so tokens alone cannot reach them; this block re-states each of those
+   declarations from the tokens, for branded realms only. An unbranded realm
+   never matches, so it renders exactly as before.
+
+   Every selector starts with `:root .nebari-login-wrapper[data-branded]`
+   (0,3,0), which outranks the `[data-theme="dark"]` variants (0,2,x) by
+   specificity rather than by source order. Error and required-field reds stay
+   as they are: they carry meaning, not brand. */
+
+:root .nebari-login-wrapper[data-branded] {
+    background-color: var(--background);
+    /* A custom background image arrives as an inline style and still wins. */
+    background-image: none;
+    color: var(--foreground);
+}
+
+/* The purple, teal and amber glows are Nebari's, not the realm's. */
+:root .nebari-login-wrapper[data-branded]::before,
+:root .nebari-login-wrapper[data-branded]::after {
+    content: none;
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-login-card {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--card-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-title,
+:root .nebari-login-wrapper[data-branded] .nebari-subtitle,
+:root .nebari-login-wrapper[data-branded] .nebari-label,
+:root .nebari-login-wrapper[data-branded] [data-slot="field-label"],
+:root .nebari-login-wrapper[data-branded] .kcLabelClass,
+:root .nebari-login-wrapper[data-branded] [data-slot="checkbox"] + *,
+:root .nebari-login-wrapper[data-branded] label {
+    color: var(--foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-forgot-link,
+:root .nebari-login-wrapper[data-branded] .nebari-link,
+:root .nebari-login-wrapper[data-branded] .nebari-info-section,
+:root .nebari-login-wrapper[data-branded] .nebari-required-notice {
+    color: var(--muted-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-input,
+:root .nebari-login-wrapper[data-branded] [data-slot="input"],
+:root .nebari-login-wrapper[data-branded] input[type="text"],
+:root .nebari-login-wrapper[data-branded] input[type="email"],
+:root .nebari-login-wrapper[data-branded] input[type="password"],
+:root .nebari-login-wrapper[data-branded] input[type="tel"],
+:root .nebari-login-wrapper[data-branded] select,
+:root .nebari-login-wrapper[data-branded] textarea {
+    background-color: var(--muted);
+    border-color: var(--input);
+    color: var(--foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-input::placeholder,
+:root .nebari-login-wrapper[data-branded] input::placeholder {
+    color: var(--muted-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-input:focus,
+:root .nebari-login-wrapper[data-branded] [data-slot="input"]:focus,
+:root .nebari-login-wrapper[data-branded] input:focus,
+:root .nebari-login-wrapper[data-branded] select:focus,
+:root .nebari-login-wrapper[data-branded] textarea:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 25%, transparent);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-primary,
+:root .nebari-login-wrapper[data-branded] button[type="submit"],
+:root .nebari-login-wrapper[data-branded] input[type="submit"],
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:visited {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-primary:hover,
+:root .nebari-login-wrapper[data-branded] button[type="submit"]:hover,
+:root .nebari-login-wrapper[data-branded] input[type="submit"]:hover,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:hover,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:focus {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: var(--primary-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-secondary,
+:root .nebari-login-wrapper[data-branded] .nebari-social-button {
+    background: var(--card);
+    border-color: var(--input);
+    color: var(--foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-secondary:hover,
+:root .nebari-login-wrapper[data-branded] .nebari-social-button:hover {
+    background: var(--muted);
+    border-color: var(--ring);
+    color: var(--foreground);
 }
 
 /* ==========================================================================

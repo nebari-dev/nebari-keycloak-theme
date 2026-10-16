@@ -37,6 +37,10 @@ const UPSTREAM = new URL(
  */
 const NEBARI_ONLY = new Set([
   // "/software-packs",  // https://github.com/nebari-dev/nebari-keycloak-theme/issues/14
+  /* The Theme customization editor. `routes.tsx` drops the route when the theme
+     or the deployment disables it, and `LeftNav` renders nothing for a path it
+     cannot find among the routes, so this stays one static render site. */
+  "/branding",
 ]);
 
 /**

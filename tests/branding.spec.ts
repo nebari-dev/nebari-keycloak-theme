@@ -1,0 +1,124 @@
+import { expect, test } from "@playwright/test";
+import {
+    getBrandingImage,
+    normalizeBrandingConfig,
+    TEMPLATE_BRANDING_CONFIG
+} from "../src/branding/brandingConfig";
+import { calculateSourceCrop } from "../src/branding/imageUpload";
+
+const LIGHT_LOGO = "https://assets.example.com/logo-light.png";
+const DARK_LOGO = "https://assets.example.com/logo-dark.png";
+
+test("migrates version 1 single images to both appearances", () => {
+    const migrated = normalizeBrandingConfig(
+        {
+            ...TEMPLATE_BRANDING_CONFIG,
+            version: 1,
+            logo: LIGHT_LOGO,
+            backgroundImage: "https://assets.example.com/background.jpg"
+        },
+        TEMPLATE_BRANDING_CONFIG
+    );
+
+    expect(migrated.version).toBe(2);
+    expect(migrated.logo).toEqual({ light: LIGHT_LOGO, dark: LIGHT_LOGO });
+    expect(migrated.backgroundImage).toEqual({
+        light: "https://assets.example.com/background.jpg",
+        dark: "https://assets.example.com/background.jpg"
+    });
+});
+
+test("resolves an empty appearance from its sibling image", () => {
+    const branding = normalizeBrandingConfig(
+        {
+            ...TEMPLATE_BRANDING_CONFIG,
+            logo: { light: LIGHT_LOGO, dark: "" },
+            backgroundImage: { light: "", dark: DARK_LOGO }
+        },
+        TEMPLATE_BRANDING_CONFIG
+    );
+
+    expect(getBrandingImage(branding.logo, "light")).toBe(LIGHT_LOGO);
+    expect(getBrandingImage(branding.logo, "dark")).toBe(LIGHT_LOGO);
+    expect(getBrandingImage(branding.backgroundImage, "light")).toBe(DARK_LOGO);
+});
+
+test("converts a centered rendered crop to source pixels", () => {
+    const crop = calculateSourceCrop({
+        imageWidth: 1000,
+        imageHeight: 500,
+        viewportWidth: 200,
+        viewportHeight: 200,
+        renderedWidth: 400,
+        renderedHeight: 200,
+        scale: 0.4,
+        offsetX: 0,
+        offsetY: 0
+    });
+
+    expect(crop).toEqual({ x: 250, y: 0, width: 500, height: 500 });
+});
+
+test("preserves crop position when the image is moved", () => {
+    const crop = calculateSourceCrop({
+        imageWidth: 1000,
+        imageHeight: 500,
+        viewportWidth: 200,
+        viewportHeight: 200,
+        renderedWidth: 400,
+        renderedHeight: 200,
+        scale: 0.4,
+        offsetX: 100,
+        offsetY: 0
+    });
+
+    expect(crop).toEqual({ x: 0, y: 0, width: 500, height: 500 });
+});
+
+/**
+ * `consoleLogo` and `useLoginLogoInConsole` were added after realms had already
+ * published. A stored config without them has to normalize to "reuse the login
+ * logo", or adding the fields would have changed what those realms show.
+ */
+test("defaults a config published before the console logo existed to reuse", () => {
+    const legacy = { ...TEMPLATE_BRANDING_CONFIG } as Record<string, unknown>;
+    delete legacy.consoleLogo;
+    delete legacy.useLoginLogoInConsole;
+
+    const normalized = normalizeBrandingConfig(legacy, TEMPLATE_BRANDING_CONFIG);
+
+    expect(normalized.useLoginLogoInConsole).toBe(true);
+    expect(normalized.consoleLogo).toEqual({ light: "", dark: "" });
+});
+
+test("keeps a console logo distinct from the login logo", () => {
+    const normalized = normalizeBrandingConfig(
+        {
+            ...TEMPLATE_BRANDING_CONFIG,
+            logo: { light: LIGHT_LOGO, dark: LIGHT_LOGO },
+            consoleLogo: { light: DARK_LOGO, dark: "" },
+            useLoginLogoInConsole: false
+        },
+        TEMPLATE_BRANDING_CONFIG
+    );
+
+    expect(normalized.useLoginLogoInConsole).toBe(false);
+    expect(normalized.consoleLogo.light).toBe(DARK_LOGO);
+    /* An empty appearance still resolves from its sibling. */
+    expect(getBrandingImage(normalized.consoleLogo, "dark")).toBe(DARK_LOGO);
+});
+
+test("drops image URLs that are not HTTPS", () => {
+    const branding = normalizeBrandingConfig(
+        {
+            ...TEMPLATE_BRANDING_CONFIG,
+            logo: { light: "http://assets.example.com/logo.png", dark: "javascript:alert(1)" },
+            backgroundImage: { light: "data:image/svg+xml;base64,PHN2Zz4=", dark: LIGHT_LOGO }
+        },
+        TEMPLATE_BRANDING_CONFIG
+    );
+
+    expect(branding.logo).toEqual({ light: "", dark: "" });
+    // SVG can carry script, so only raster data URIs are accepted.
+    expect(branding.backgroundImage).toEqual({ light: "", dark: LIGHT_LOGO });
+});

@@ -200,6 +200,9 @@ export const PageNav = () => {
                             <SidebarGroup aria-label={t("configure")} role="group">
                                 <SidebarGroupLabel>{t("configure")}</SidebarGroupLabel>
                                 <SidebarMenu>
+                                    {/* Self-hiding: LeftNav finds no route when
+                                        the deployment or theme disabled it. */}
+                                    <LeftNav title="Theme customization" path="/branding" />
                                     <LeftNav title="realmSettings" path="/realm-settings" />
                                     <LeftNav title="authentication" path="/authentication" />
                                     {isFeatureEnabled(Feature.AdminFineGrainedAuthzV2) &&

@@ -8,6 +8,7 @@
 # admin/page-nav.css
 # admin/PageHeader.tsx
 # admin/PageNav.tsx
+# admin/routes.tsx
 # account/root/header.module.css
 # account/root/Header.tsx
 # admin/assets/icon.svg
@@ -31,7 +32,6 @@
 /admin/PageHeaderClearCachesModal.tsx
 /admin/PageNotFoundSection.tsx
 /admin/Root.tsx
-/admin/routes.tsx
 /admin/util.ts
 /admin/assets/favicon.svg
 /admin/assets/img_avatar.svg

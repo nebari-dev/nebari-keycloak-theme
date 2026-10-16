@@ -23,8 +23,10 @@ PatternFly components that stay on PatternFly pick these tokens up through the b
 
 ## Logo
 
-Each brand's logo paths are set in [`src/lib/branding.ts`](../src/lib/branding.ts), the only place a logo
-path is written down. The login card and both console mastheads read them from there:
+Each theme's logo paths are set in its entry in
+[`src/themes/themeCatalog.ts`](../src/themes/themeCatalog.ts). The login card and both console mastheads read
+them from there, unless a realm has published its own logo in
+[Theme customization](theme-customization.md):
 
 | Brand | Light mode | Dark mode |
 | --- | --- | --- |

@@ -3,18 +3,41 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { keycloakify } from "keycloakify/vite-plugin";
 import path from "node:path";
-// Shared with scripts/build-keycloak-themes.mjs so a new theme is added in one
-// place. The two lists silently disagreeing would mean a theme that builds in
-// dev but never gets packaged, or the reverse.
+// The single registry of theme names, shared with scripts/build-keycloak-themes.mjs
+// and src/themes/themeCatalog.ts so a new theme is added in one place. Separate
+// lists silently disagreeing would mean a theme that builds in dev but never
+// gets packaged, or the reverse.
 import themeNames from "./themes.json";
+/* Imported for its side effect: the catalog checks itself against themes.json
+   at module load, and pulling it in here promotes that from a blank login page
+   at runtime to a failed `vite build`. Only its type-erased branding modules
+   come with it, so this stays loadable in Node. */
+import { CUSTOM_THEME_NAMES, getThemeDefinition } from "./src/themes/themeCatalog";
 
+/* Set by the packaging script to build one theme at a time. Each published JAR
+   then contains exactly one theme, so a consumer downloads only what they use. */
 const packagedThemeName = process.env.KEYCLOAKIFY_THEME_NAME;
 
 if (packagedThemeName !== undefined && !themeNames.includes(packagedThemeName)) {
     throw new Error(
-        `Unknown KEYCLOAKIFY_THEME_NAME "${packagedThemeName}". Expected one of: ${themeNames.join(", ")}`
+        `Unknown KEYCLOAKIFY_THEME_NAME "${packagedThemeName}". Expected one of: ${CUSTOM_THEME_NAMES.join(", ")}`
     );
 }
+
+/**
+ * Baked into the packaged theme's `theme.properties`, which Keycloak hands to
+ * the Admin Console as `kcContext.properties`. Per-theme rather than global
+ * because each JAR is built on its own — a theme with no use for the editor
+ * ships without it. A combined development build has no single answer, so it
+ * exposes the page.
+ *
+ * `src/admin/themeCustomization.ts` reads this, and the environment variable
+ * below overrides it per deployment.
+ */
+const themeCustomizationDefault =
+    packagedThemeName === undefined
+        ? true
+        : getThemeDefinition(packagedThemeName).themeCustomization;
 
 /**
  * PatternFly ships its stylesheets unlayered, and unlayered CSS outranks every
@@ -68,11 +91,24 @@ export default defineConfig({
         tailwindcss(),
         keycloakify({
             accountThemeImplementation: "Single-Page",
-            // Development exposes every variant. The packaging script sets the
-            // environment variable so each published JAR contains one theme.
+            /* `template` is first in themes.json, so it is the theme
+               keycloakify treats as primary: an unconfigured realm gets the
+               unbranded starting point rather than Nebari's branding.
+
+               Development exposes every theme so previews can switch between
+               them; the packaging script pins one so each JAR ships alone. */
             themeName: packagedThemeName ?? themeNames,
+            kcContextExclusionsFtl: "src/login/kcContextExclusions.ftl",
+            /* Resolved by Keycloak from the container environment when the page
+               is rendered, so a deployment can flip this in its compose file or
+               Helm values without rebuilding the JAR. Empty means "no override,
+               use the theme's default". */
+            environmentVariables: [
+                { name: "NEBARI_THEME_CUSTOMIZATION", default: "" }
+            ],
             extraThemeProperties: [
-                "parentTheme=keycloak.v2"
+                "parentTheme=keycloak.v2",
+                `themeCustomizationDefault=${themeCustomizationDefault ? "enabled" : "disabled"}`
             ]
         })
     ],

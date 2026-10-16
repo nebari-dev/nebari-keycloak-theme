@@ -11,6 +11,11 @@
  * locally-owned controls use the Nebari React components directly.
  */
 
+/* Repeat the layer order. A `@layer` block orders itself at first use, so
+   without this statement the `patternfly` layer below would sort after
+   `utilities` in any bundle that does not already carry theme.css's ordering. */
+@layer theme, base, patternfly, components, utilities;
+
 :root,
 .pf-v5-theme-dark {
   --pf-v5-global--FontFamily--sans-serif: var(--font-sans);
