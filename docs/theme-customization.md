@@ -206,6 +206,50 @@ sits in. `branding.css` owns page layout plus the surfaces that have no matching
 component: the native colour swatch, preview panel, and crop viewport. Dialog,
 form-control, button, select, and slider states remain design-system owned.
 
+### Advanced settings
+
+A collapsed **Advanced settings** card under *Layout* covers what a brand needs beyond colours and artwork. Every
+field lives in `BrandingConfig.advanced` and goes through `normalizeAdvanced` in
+[`src/branding/brandingConfig.ts`](../src/branding/brandingConfig.ts):
+
+| Setting | Accepted values | Applies to |
+| --- | --- | --- |
+| Font | `theme`, `inter-tight`, `dm-sans`, `system` | Both login themes |
+| Card opacity, blur | 5 to 100 %, 0 to 40 px | Both login themes |
+| Button shape | `theme`, `rounded`, `pill`, `square` | Both login themes |
+| Arrow on the sign-in button | on or off | Both login themes |
+| Wordmark | Plain text, up to 40 characters | Login card, both console mastheads |
+| Register page title | Plain text, up to 80 characters; empty keeps the theme's | Both login themes |
+| Browser icon | HTTPS URL or PNG/JPEG/WebP data URI, up to 100 KB | Login pages, both consoles |
+| Admin welcome mark | Same as the browser icon | Admin Console welcome tab |
+
+The defaults reproduce the theme exactly, so a realm that never opens the card stays unbranded.
+
+**Why there is no "custom CSS" box.** The config is written by anyone with `manage-realm` and rendered to every
+unauthenticated visitor of the login page, so a free-form field would be a stored injection point on the page
+that collects passwords. Every setting is therefore closed vocabulary, and each kind of value has exactly one
+way onto the page:
+
+- **Fonts and shapes** are names from a fixed list. The CSS font stacks are written in the code, never taken from
+  the config, and each font is bundled and loaded on demand from the theme, so no visitor is sent to a font service.
+- **Numbers** are clamped integers before they become the `--branding-card-opacity` and `--branding-card-blur`
+  custom properties.
+- **Flags** become fixed data attributes (`data-button-shape`, `data-button-arrow`, `data-card-glass`) that the
+  stylesheets key off.
+- **Text** is stripped of control characters and bidirectional overrides (so a wordmark cannot display as something
+  other than what is stored), capped in length, and rendered only as a React text node. It never goes through the
+  HTML message path.
+- **Images** pass the same HTTPS-or-raster-data-URI check as logos, and are only assigned as an `href` or as a
+  quoted CSS string.
+
+Adding a setting means adding it to that list: a closed type, a normaliser case, and a test in
+[`tests/branding.spec.ts`](../tests/branding.spec.ts) that feeds it hostile input.
+[`tests/advanced-branding.spec.ts`](../tests/advanced-branding.spec.ts) checks that each setting reaches both login
+themes.
+
+**Not covered yet:** Admin and Account console colours. The Account console's stylesheet still uses literal
+colours rather than tokens, so it has to be converted first.
+
 ### Where a published theme lives, and how to make it survive
 
 Publishing writes the config into the realm's **localization messages**, so it

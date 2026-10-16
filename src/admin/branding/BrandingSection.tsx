@@ -333,7 +333,7 @@ function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSetting
                 <Button
                     aria-controls="branding-advanced-settings"
                     aria-expanded={expanded}
-                    className="self-start"
+                    className="w-fit"
                     onClick={() => setExpanded(current => !current)}
                     variant="outline"
                 >
