@@ -13,10 +13,8 @@ All tokens live in [`src/theme.css`](../src/theme.css), in three groups:
 Light and dark values sit side by side in the same file. Change both, and check the result in both modes &mdash;
 the [screenshot tests](development.md#screenshot-tests) cover both modes on the login pages only, not the consoles.
 
-Collab overrides these tokens in the `[data-brand="collab"]` section at the end of the file: a deep-blue
-light palette, and a midnight (`#000F3A`) dark palette that only redefines tokens. The Account
-console's colours are `--account-*` variables in `src/account/nebari-account.css` and `src/nebari-brand.css`:
-Nebari uses each variable's fallback, and the Collab block sets them.
+The Account console's colours are `--account-*` variables in `src/account/nebari-account.css` and
+`src/nebari-brand.css`, with Nebari's values as their fallbacks.
 
 PatternFly components that stay on PatternFly pick these tokens up through the bridge in
 [`src/admin/index.css`](../src/admin/index.css), so a token change reaches them too.
@@ -28,16 +26,14 @@ Each theme's logo paths are set in its entry in
 them from there, unless a realm has published its own logo in
 [Theme customization](theme-customization.md):
 
-| Brand | Light mode | Dark mode |
+| Theme | Light mode | Dark mode |
 | --- | --- | --- |
 | Nebari | `public/logo/nebari-logo-light.svg` | `public/logo/nebari-logo-dark.svg` |
-| Collab | `public/logo/collab-symbol.png` | `public/logo/collab-symbol.png` |
 
-Replace those files, or point the entries at new ones. Collab ships no light-on-dark wordmark, so its lockup is
-the symbol plus "Collab" set as text in the login template and the mastheads.
+The `template` theme ships no logo on purpose. Replace those files, or point the entries at new ones.
 
-The mark on the Admin welcome tab is a separate, owned asset at `src/admin/assets/icon.svg`. For Collab, a CSS
-rule in `src/theme.css` swaps it for the symbol through the `--brand-symbol` property that `src/main.tsx` sets.
+The mark on the Admin welcome tab is a separate, owned asset at `src/admin/assets/icon.svg`. A realm can replace
+it at runtime with the *Admin welcome mark* in [Theme customization](theme-customization.md#advanced-settings).
 
 ## Translations
 

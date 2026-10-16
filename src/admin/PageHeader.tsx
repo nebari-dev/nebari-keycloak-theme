@@ -117,14 +117,6 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
           : joinPath(environment["resourceUrl"], environment.logo))
       : themeLogo;
 
-  /* Goes with the Collab theme: its catalogued mark is a symbol with no name,
-     so the masthead sets "Collab" beside it. Any other logo (realm-configured,
-     published, or a preview) is shown on its own, as it is for every theme. */
-  const showCollabLockup =
-    getKcContext().kcContext.themeName === "collab" &&
-    resolvedLogo !== undefined &&
-    resolvedLogo.endsWith("logo/collab-symbol.png");
-
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
   const username = loggedInUserName(token, t("unknownUser"));
@@ -144,14 +136,7 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
       </PageToggleButton>
 
       <MenuBarBrand href={logoUrl} aria-label={t("logo")}>
-        {showCollabLockup ? (
-          <span className="collab-logo collab-logo--masthead" role="img" aria-label="Collab">
-            <img src={resolvedLogo} alt="" className="collab-logo-symbol" />
-            <span className="collab-logo-wordmark" aria-hidden="true">
-              Collab
-            </span>
-          </span>
-        ) : resolvedLogo ? (
+        {resolvedLogo ? (
           <>
             <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
             {wordmark !== "" && (
