@@ -18,6 +18,10 @@ Keycloak 26 image on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-t
 - **Runtime branding input is untrusted.** Anything that reaches the login page from the Theme customization
   editor, an imported JSON file or the realm's localization messages goes through `normalizeBrandingConfig`.
   Never render it as HTML or CSS text; see [`docs/theme-customization.md`](docs/theme-customization.md).
+- **The child-theme contract is public API.** `data-brand`, `data-kc-theme-type`, `data-theme`, the custom
+  properties on `:root` in `src/theme.css`, the `dist/logo/` paths and the `brand`, `styles` and
+  `messageOverrides` theme properties are what downstream themes build on. Renaming or removing one breaks them;
+  see [`docs/adr/0006-support-child-themes.md`](docs/adr/0006-support-child-themes.md).
 - The consoles are ~520 views vendored from Keycloak by `keycloakify sync-extensions`. They are **not rewritten**.
   They are restyled by swapping the components they import underneath them, through one owned re-export shim.
 

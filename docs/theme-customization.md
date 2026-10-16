@@ -9,6 +9,9 @@ exported to and imported from JSON.
 This page explains the two login themes the editor works with, how a published theme is stored, and the
 constraints anyone changing it needs to know.
 
+For changes beyond what the editor offers (a brand's own CSS, logo files or login wording), build a child theme
+in its own repository instead; see [Child themes](child-themes.md).
+
 ## Themes
 
 The build ships two login themes, **each in its own JAR**, selected per realm by

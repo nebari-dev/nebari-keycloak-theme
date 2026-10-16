@@ -142,6 +142,7 @@ http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/
 | [Customization](docs/customization.md) | Tokens, logo, translations, login pages and design-system components |
 | [Deployment](docs/deployment.md) | JARs, the published image, and selecting the theme on a realm |
 | [Theme customization](docs/theme-customization.md) | The runtime branding editor, the `template` theme, and adding a theme |
+| [Child themes](docs/child-themes.md) | Extending this theme from another repository: CSS, logos and login wording, without a fork |
 | [Screenshots](docs/screenshots.md) | Every login page in light and dark mode, as `main` renders it |
 | [Releasing](docs/releasing.md) | The publish workflow, versioning and dependency policy |
 | [AGENTS.md](AGENTS.md) | Working agreement for coding agents, including mistakes already made here |
@@ -158,6 +159,7 @@ new record that marks the old one superseded.
 | [0003](docs/adr/0003-pin-the-cascade-layer-order.md) | Pin one cascade-layer order and wrap PatternFly in its own layer |
 | [0004](docs/adr/0004-keep-owned-files-few-and-guarded.md) | Keep owned files few, and guard the ones that stay owned |
 | [0005](docs/adr/0005-run-the-server-ahead-of-the-console-sources.md) | Run the Keycloak server ahead of the vendored console sources |
+| [0006](docs/adr/0006-support-child-themes.md) | Support Keycloak child themes as the extension path beyond runtime branding |
 
 ## License
 
