@@ -16,12 +16,10 @@ spec:
       # The theme JAR is about 12 MB, too large for a ConfigMap. An init
       # container copies it out of the theme image instead. See
       # docs/deployment.md.
-      # Needed only while the ghcr.io package is private.
-      imagePullSecrets:
-      - name: ghcr-creds
       initContainers:
       - name: install-keycloak-theme
-        image: ghcr.io/nebari-dev/nebari-keycloak-theme:1.1.2
+        # Pin a sha-<commit> or version tag in a real deployment.
+        image: quay.io/nebari/nebari-keycloak-theme:latest
         command: ["sh", "-c", "cp /opt/keycloak/providers/*.jar /theme-providers/"]
         securityContext:
           runAsUser: 0
@@ -134,5 +132,4 @@ spec:
 ---
 # Secrets (create separately)
 # kubectl create secret generic keycloak-admin --from-literal=password=<admin-password>
-# kubectl create secret docker-registry ghcr-creds --docker-server=ghcr.io --docker-username=<github-user> --docker-password=<token-with-read:packages>
 # kubectl create secret generic keycloak-db --from-literal=username=<db-user> --from-literal=password=<db-password>
