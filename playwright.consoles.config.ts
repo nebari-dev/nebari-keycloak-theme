@@ -19,9 +19,7 @@ export default defineConfig({
         baseURL: KEYCLOAK_URL,
         colorScheme: "light",
         locale: "en-US",
-        // Not a top-level `use` option: Playwright only applies it through
-        // contextOptions, and silently ignores it anywhere else.
-        contextOptions: { reducedMotion: "reduce" },
+        reducedMotion: "reduce",
         serviceWorkers: "block"
     },
     projects: [

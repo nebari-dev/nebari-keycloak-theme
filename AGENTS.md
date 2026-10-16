@@ -28,7 +28,7 @@ Node `^20.19` or `>=22.12`.
 npm install                          # also re-syncs the vendored console sources
 npm run dev                          # login pages at :5173, e.g. /?preview=login
 npm run check                        # upgrade guards
-npm run typecheck                    # tsc --noEmit
+npm run typecheck                    # tsc --noEmit, on src/ and on tests/ + Playwright configs
 npm run test:screenshots             # compare login pages against Linux baselines, per brand
 npm run test:a11y                    # login-page accessibility (axe + keyboard), every brand and scheme
 npm run test:a11y:consoles           # Admin + Account accessibility; needs the compose Keycloak running

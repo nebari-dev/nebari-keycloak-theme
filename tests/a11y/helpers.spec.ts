@@ -12,7 +12,8 @@ import { expectKeyboardAccessible } from "./keyboard";
  */
 
 const nebari = { surface: "login", theme: "nebari" } as const;
-const collab = { surface: "login", theme: "collab" } as const;
+const nebariAdmin = { surface: "admin", theme: "nebari" } as const;
+const collabAdmin = { surface: "admin", theme: "collab" } as const;
 
 const FOCUS_STYLE = "<style>:focus-visible { outline: 2px solid blue; }</style>";
 
@@ -90,14 +91,15 @@ test.describe("axe scans", () => {
     });
 
     test("excuse a known violation only where it is known", async ({ page }) => {
-        // collab-primary-button-contrast in known-violations.ts.
-        await render(page, `<p style="color: #ffffff; background: #4d75fe">Primary</p>`);
-        await expectNoAxeViolations(page, collab);
+        // nebari-admin-dark-info-alert-title in known-violations.ts.
+        await render(page, `<p style="color: #2b9af3; background: #353538">Info</p>`);
+        await expectNoAxeViolations(page, nebariAdmin);
+        await expect(expectNoAxeViolations(page, collabAdmin)).rejects.toThrow(/color-contrast/);
         await expect(expectNoAxeViolations(page, nebari)).rejects.toThrow(/color-contrast/);
     });
 
     test("don't excuse a colour pair the allowlist doesn't name", async ({ page }) => {
-        await render(page, `<p style="color: #ffffff; background: #5d85ff">Near the primary</p>`);
-        await expect(expectNoAxeViolations(page, collab)).rejects.toThrow(/color-contrast/);
+        await render(page, `<p style="color: #2b9af3; background: #3d3d40">Near the info title</p>`);
+        await expect(expectNoAxeViolations(page, nebariAdmin)).rejects.toThrow(/color-contrast/);
     });
 });

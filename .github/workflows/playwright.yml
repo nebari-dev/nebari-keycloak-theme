@@ -52,7 +52,7 @@ jobs:
       # empties test-results/ and rewrites playwright-report/ when it starts, so
       # sharing them would replace the screenshot diff uploaded below.
       - name: Accessibility (login pages)
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-a11y
         run: npm run test:a11y -- --output=test-results-a11y

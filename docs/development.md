@@ -10,7 +10,7 @@ Setting up is covered in [Quick start](quick-start.md). This page is the referen
 | `npm run build-keycloak-theme` | Runs `build`, then packages the Keycloak JARs into `dist_keycloak/` |
 | `npm run build` | Upgrade guards, then `tsc`, then `vite build` |
 | `npm run check` | Both [upgrade guards](#upgrade-guards) |
-| `npm run typecheck` | `tsc --noEmit` |
+| `npm run typecheck` | `tsc --noEmit` on `src/`, then on `tests/` and the Playwright configs (`tsconfig.tests.json`) |
 | `npm run test:screenshots` | Compares the login pages against the committed baselines |
 | `npm run test:screenshots:update` | Accepts the current rendering as the new baselines |
 | `npm run test:a11y` | [Accessibility tests](#accessibility-tests) for the login pages, against the dev server |

@@ -60,63 +60,6 @@ export const knownViolations: readonly KnownViolation[] = [
         issue: PENDING_ISSUE
     },
 
-    // Collab palette. One cause each: a colour pair that doesn't reach 4.5:1.
-    {
-        id: "collab-primary-button-contrast",
-        rule: "color-contrast",
-        surfaces: ["login", "admin", "account"],
-        themes: ["collab"],
-        colors: [{ foreground: "#ffffff", background: "#4d75fe" }],
-        reason:
-            "White on Collab's primary blue #4d75fe is 3.96:1. It's the brand's primary action colour, " +
-            "so the fix — a darker primary or dark button text — is a design decision.",
-        issue: PENDING_ISSUE
-    },
-    {
-        id: "collab-login-alert-contrast",
-        rule: "color-contrast",
-        surfaces: ["login"],
-        themes: ["collab"],
-        colors: [
-            { foreground: "#b9c7f6", background: "#3b58aa" },
-            { foreground: "#ffad96", background: "#465098" },
-            { foreground: "#4d75fe", background: "#2545a0" }
-        ],
-        reason:
-            "On the verify-email, info and error pages: alert text is 3.97:1 (info) and 4.07:1 (error), and " +
-            "a link inside an alert is 2.17:1.",
-        issue: PENDING_ISSUE
-    },
-    {
-        id: "collab-admin-light-input-text",
-        rule: "color-contrast",
-        surfaces: ["admin"],
-        themes: ["collab"],
-        colors: [
-            { foreground: "#151515", background: "#022791" },
-            { foreground: "#151515", background: "#3250a6" },
-            { foreground: "#151515", background: "#4762af" },
-            { foreground: "#151515", background: "#556eb5" }
-        ],
-        reason:
-            "In the light scheme, some PatternFly inputs keep their default near-black text (#151515) on " +
-            "Collab's dark blue fields — as low as 1.47:1, effectively unreadable. Collab forces a dark " +
-            "palette but these fields still follow the light one.",
-        issue: PENDING_ISSUE
-    },
-    {
-        id: "collab-admin-muted-text",
-        rule: "color-contrast",
-        surfaces: ["admin"],
-        themes: ["collab"],
-        colors: [
-            { foreground: "#b9c7f6", background: "#3250a6" },
-            { foreground: "#e0e0e0", background: "#4762af" }
-        ],
-        reason: "Muted and empty-state text, 4.43:1 and 4.37:1: just under the threshold.",
-        issue: PENDING_ISSUE
-    },
-
     // Nebari palette.
     {
         id: "nebari-admin-dark-info-alert-title",

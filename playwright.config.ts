@@ -33,9 +33,7 @@ export default defineConfig({
         baseURL: "http://127.0.0.1:4173",
         colorScheme: "light",
         locale: "en-US",
-        // Not a top-level `use` option: Playwright only applies it through
-        // contextOptions, and silently ignores it anywhere else.
-        contextOptions: { reducedMotion: "reduce" },
+        reducedMotion: "reduce",
         serviceWorkers: "block"
     },
     webServer: {
