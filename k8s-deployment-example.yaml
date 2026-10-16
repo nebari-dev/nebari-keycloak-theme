@@ -14,8 +14,9 @@ spec:
         app: keycloak
     spec:
       # The theme JAR is about 12 MB, too large for a ConfigMap. An init
-      # container copies it out of the theme image instead. See "Deployment" in
-      # README.md.
+      # container copies it out of the theme image instead. See
+      # docs/deployment.md.
+      # Needed only while the ghcr.io package is private.
       imagePullSecrets:
       - name: ghcr-creds
       initContainers:

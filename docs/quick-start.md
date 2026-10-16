@@ -10,6 +10,7 @@ There are two ways to work on this theme, and which one you need depends on what
 ## Prerequisites
 
 - **Node.js `^20.19` or `>=22.12`.** Vite 7 refuses older versions. CI uses Node 20.
+- **Java 17+ and Maven**, for the console loop. `npm run build-keycloak-theme` calls them to assemble the JARs.
 - **Docker** with Compose, for the console loop.
 
 ```bash

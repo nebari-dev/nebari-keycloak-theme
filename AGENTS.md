@@ -59,8 +59,8 @@ docker compose up -d --build keycloak   # consoles, on the nebari realm
   `--build` makes it look like nothing changed.
 - **Nothing tests the consoles automatically.** CI covers login-page pixels, the type check and the guards. For a
   console change, check it in the compose loop and say in the pull request that you did.
-- **Most owned files carry `@ts-nocheck`.** Changes to `PageNav.tsx` or `KeycloakDataTable.tsx` are not
-  type-checked. Don't read a green type check as covering them.
+- **A green type check covers `src/` only.** The owned console files are type-checked, but nothing under
+  `tests/` or the Playwright config is: Playwright transpiles without checking types.
 - **A rebaselined screenshot is a claim that the new rendering is right.** Look at the diff before committing it.
   Regenerate baselines on Linux, or in the Playwright container documented in
   [`docs/development.md`](docs/development.md#regenerate-baselines-on-linux).

@@ -63,8 +63,8 @@ Then, in the same pull request:
 - Decide whether it needs a guard. Ask what happens if upstream changes this file and nobody notices. If the
   answer is "a feature silently disappears" rather than "a type error", it probably does &mdash; that is exactly
   what `check-page-nav-sync` exists for.
-- Owned files keep the `@ts-nocheck` they were vendored with. If you rewrite one substantially, consider removing
-  it so the type check covers your code.
+- Owned files are type-checked like the rest of `src/`. If a vendored file arrives with `// @ts-nocheck`,
+  remove it when you take ownership, so the type check covers your changes.
 
 ## Handing a file back
 
