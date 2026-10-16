@@ -16,6 +16,7 @@ import {
 } from "../branding/brandingConfig";
 import { applyBrandingFavicon } from "../branding/documentBranding";
 import { loadBrandingFont } from "../branding/fonts";
+import { getChildBrand } from "../themes/childTheme";
 import { getThemeDefinition, parseThemeBrandingConfig } from "../themes/themeCatalog";
 
 /** A realm pinned to one appearance overrides the visitor's preference. */
@@ -59,6 +60,10 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     const paletteMode = theme;
     /* Gate for the whole branding layer — see `isBrandingCustomized`. */
     const isBranded = isBrandingCustomized(branding, themeDefinition.defaultBranding);
+    /* A child theme with its own `brand` styles this page through the design
+       tokens, so it needs the token-driven rules too; the literal Figma colours
+       would otherwise ignore its overrides. See `src/themes/childTheme.ts`. */
+    const isTokenDriven = isBranded || getChildBrand(kcContext.properties) !== undefined;
 
     useLayoutEffect(() => {
         document.documentElement.dataset.theme = theme;
@@ -90,7 +95,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     return (
         <main
             className="nebari-login-wrapper"
-            data-branded={isBranded ? "" : undefined}
+            data-branded={isTokenDriven ? "" : undefined}
             {...(isBranded ? getBrandingDataAttributes(branding.advanced) : {})}
             data-has-custom-background={
                 isBranded && background !== "" ? "" : undefined
