@@ -7,10 +7,9 @@ can also be run by hand from the Actions tab.
 
 1. Builds the theme with `npm run build-keycloak-theme`. That runs the [upgrade guards](development.md#upgrade-guards)
    and the type check first, so a failure stops the publish.
-2. Uploads each brand's two JARs as a workflow artifact, so they can be downloaded from every run.
-3. Builds and pushes one Keycloak image per brand, each carrying only its own theme:
-   `ghcr.io/nebari-dev/nebari-keycloak-theme` and `ghcr.io/nebari-dev/collab-keycloak-theme`.
-4. **If no release exists yet for the current version,** cuts a GitHub release `v<version>` with all four JARs
+2. Uploads each theme's two JARs as a workflow artifact, so they can be downloaded from every run.
+3. Builds and pushes the Keycloak image `ghcr.io/nebari-dev/nebari-keycloak-theme`.
+4. **If no release exists yet for the current version,** cuts a GitHub release `v<version>` with every JAR
    attached. The notes link to [the screenshots](screenshots.md) at that commit rather than embedding them. If one exists, it skips this step and logs a
    notice.
 

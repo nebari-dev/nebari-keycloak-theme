@@ -22,7 +22,6 @@
     <source media="(prefers-color-scheme: light)" srcset="tests/screenshots/linux/nebari/full-page-light.png">
     <img src="tests/screenshots/linux/nebari/full-page-light.png" alt="The Nebari sign-in page" width="400">
   </picture>
-  <img src="tests/screenshots/linux/collab/full-page-light.png" alt="The Collab sign-in page" width="400">
 </p>
 
 <p align="center">
@@ -54,9 +53,9 @@
 
 ## What is in it
 
-The theme is built with [Keycloakify](https://www.keycloakify.dev/) and ships two brands, `nebari` and
-`collab` (OpenTeams Collab). Each brand is packaged in its own JAR and published as its own image, and each
-JAR contains three Keycloak themes under that brand's name:
+The theme is built with [Keycloakify](https://www.keycloakify.dev/). Each theme in
+[`themes.json`](themes.json) is packaged in its own JAR, and each JAR contains three Keycloak themes under that
+theme's name:
 
 | Theme | What it covers | How it is built |
 | --- | --- | --- |
@@ -76,7 +75,6 @@ where it stops, is in [Architecture](docs/architecture.md).
 | --- | --- | --- |
 | `nebari` | Nebari design-system components, Nebari logo and palette | Nebari's own deployments |
 | `template` | Stock shadcn/ui components, no logo, neutral palette | A starting point to brand |
-| `collab` | Nebari components, OpenTeams Collab look | Existing Collab deployments. Moving to a Theme customization preset, then out of this repo |
 
 Each JAR is named `<theme>-keycloak-theme-for-kc-all-other-versions.jar` (Keycloak 26+) or
 `<theme>-keycloak-theme-for-kc-22-to-25.jar`. The Admin Console's **Theme customization** page rebrands any
@@ -93,14 +91,12 @@ npm run build-keycloak-theme           # builds every theme's JARs into dist_key
 docker compose up -d --build keycloak  # Keycloak 26 with every theme and a seeded dev realm
 ```
 
-To build one brand only, run `npm run build-keycloak-theme -- --theme collab`; `-- --list` prints the
+To build one theme only, run `npm run build-keycloak-theme -- --theme nebari`; `-- --list` prints the
 available names. The `--` is needed so npm passes the flags on to the script. Building needs Java 17+ and
 Maven, which Keycloakify calls to assemble the JARs.
 
-The seeded realm selects `nebari`. To try Collab, switch the realm's themes to `collab` under
-**Realm settings &rarr; Themes**.
-
-Then sign in on the `nebari` realm:
+The seeded realm selects `nebari`. To try another theme, switch the realm's themes under
+**Realm settings &rarr; Themes**. Then sign in on the `nebari` realm:
 
 | Console | URL | Sign in as |
 | --- | --- | --- |
@@ -108,8 +104,8 @@ Then sign in on the `nebari` realm:
 | Account | http://localhost:8080/realms/nebari/account/ | `demo` / `demo` |
 
 For login-page work you don't need Keycloak at all &mdash; `npm run dev` serves every login page from a mock
-context at http://localhost:5173/?preview=login. Add `&theme=collab` to preview the Collab brand, for example
-http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/quick-start.md) covers both loops and why
+context at http://localhost:5173/?preview=login. Add `&theme=template` to preview another theme, for example
+http://localhost:5173/?preview=login-providers&theme=template. [Quick start](docs/quick-start.md) covers both loops and why
 `master` still shows the stock consoles.
 
 ## Project layout
@@ -125,7 +121,7 @@ http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/
 | `src/themes/` | The theme catalog: each theme's logo, default palette and editor setting |
 | `src/branding/` | Runtime branding: the published config, its validation, palette derivation, image upload |
 | `custom_themes/` | Branding presets the editor offers for import, shipped inside the JAR |
-| `src/theme.css` | Tokens, the cascade-layer order, login-page styles, and the Collab `data-brand` rules |
+| `src/theme.css` | Tokens, the cascade-layer order and login-page styles |
 | `themes.json` | The themes to build; one JAR pair per theme |
 | `scripts/` | The per-theme JAR build, and upgrade guards that catch silent breakage on a Keycloak bump |
 | `tests/` | Playwright screenshot tests and their Linux baselines, one folder per theme |

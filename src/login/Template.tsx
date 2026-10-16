@@ -138,20 +138,6 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                             )}
                             {wordmark !== "" && <span className="nebari-wordmark">{wordmark}</span>}
                         </div>
-                    ) : themeDefinition.name === "collab" ? (
-                        /* Goes with the Collab theme. Collab publishes no
-                           light-on-dark wordmark, so the lockup is the symbol as an
-                           image and the name as text, under one accessible name. */
-                        <div className="collab-logo" role="img" aria-label="Collab">
-                            <img
-                                src={publicAssetUrl("logo/collab-symbol.png")}
-                                alt=""
-                                className="collab-logo-symbol"
-                            />
-                            <span className="collab-logo-wordmark" aria-hidden="true">
-                                Collab
-                            </span>
-                        </div>
                     ) : (
                         <>
                             <img

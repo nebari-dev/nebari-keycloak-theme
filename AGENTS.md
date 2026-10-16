@@ -4,17 +4,18 @@ Working agreement for coding agents in this repo. Read it before touching code.
 
 ## What this is
 
-A Keycloakify v11 theme with two brands, `nebari` and `collab` (OpenTeams Collab), listed in
-[`themes.json`](themes.json). Each brand is packaged in its own JAR with three Keycloak themes under that brand's
-name: the **login** pages, the **Account** console and the **Admin** console. Each is published as its own
-Keycloak 26 image on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-theme` and
-`ghcr.io/nebari-dev/collab-keycloak-theme`.
+A Keycloakify v11 theme for Nebari. [`themes.json`](themes.json) lists the themes it builds, `nebari` and the
+unbranded `template`; each is packaged in its own JAR with three Keycloak themes under its name: the **login**
+pages, the **Account** console and the **Admin** console. The `nebari` image is published as a Keycloak 26 image
+on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-theme`.
 
 - The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
 - `src/main.tsx` stamps the theme name on `<html>` as `data-brand` and the theme type as `data-kc-theme-type`.
   Each theme's logo, default palette and editor switch live in the catalog,
   [`src/themes/themeCatalog.ts`](src/themes/themeCatalog.ts), checked against `themes.json` at build time.
-  Collab's styling is the `[data-brand="collab"]` section of `src/theme.css`; it is moving out of this repo.
+- **Downstream brands don't live here.** A brand built on this theme ships as a Theme customization preset or as
+  a child theme in its own repo; see [`docs/theme-customization.md`](docs/theme-customization.md) and
+  [`docs/child-themes.md`](docs/child-themes.md).
 - **Runtime branding input is untrusted.** Anything that reaches the login page from the Theme customization
   editor, an imported JSON file or the realm's localization messages goes through `normalizeBrandingConfig`.
   Never render it as HTML or CSS text; see [`docs/theme-customization.md`](docs/theme-customization.md).

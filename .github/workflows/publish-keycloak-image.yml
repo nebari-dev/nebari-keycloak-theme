@@ -13,9 +13,6 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  # The Collab theme is published as its own package, so a Collab deployment
-  # pulls an image that carries only the `collab` theme.
-  COLLAB_IMAGE_NAME: ${{ github.repository_owner }}/collab-keycloak-theme
 
 # Never cancel a publish midway — a half-pushed image or release is worse than
 # a queued one.
@@ -72,9 +69,8 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Produces separate Nebari and Collab JARs for each supported Keycloak
-      # version range. Each JAR carries exactly one theme — the build script
-      # verifies that — so each image below can install just its own.
+      # Produces one JAR per theme for each supported Keycloak version range.
+      # Each JAR carries exactly one theme; the build script verifies that.
       - name: Build Keycloak themes
         run: npm run build-keycloak-theme
 
@@ -85,13 +81,6 @@ jobs:
         with:
           name: nebari-keycloak-theme-${{ steps.version.outputs.version }}
           path: dist_keycloak/nebari-keycloak-theme-*.jar
-          if-no-files-found: error
-
-      - name: Publish Collab JAR artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: collab-keycloak-theme-${{ steps.version.outputs.version }}
-          path: dist_keycloak/collab-keycloak-theme-*.jar
           if-no-files-found: error
 
       - name: Log in to GitHub Container Registry
@@ -125,29 +114,6 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
 
-      # The `org.opencontainers.image.source` label this sets links the package
-      # to this repository, which is what lets GITHUB_TOKEN create and push it.
-      - name: Generate Collab image metadata
-        id: collab-metadata
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.COLLAB_IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=raw,value=${{ steps.version.outputs.version }}
-            type=sha,prefix=sha-
-
-      - name: Build and publish Collab image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          push: true
-          build-args: |
-            KEYCLOAK_VERSION=26.8.0
-            THEME_JAR=collab-keycloak-theme-for-kc-all-other-versions.jar
-          tags: ${{ steps.collab-metadata.outputs.tags }}
-          labels: ${{ steps.collab-metadata.outputs.labels }}
-
       # The only release assets are the JARs — that is all a consumer needs. The
       # notes carry no screenshots: docs/screenshots.md shows them, linked here
       # at the release commit.
@@ -157,10 +123,9 @@ jobs:
           SCREENSHOTS: https://github.com/${{ github.repository }}/blob/${{ github.sha }}/docs/screenshots.md
           VERSION: ${{ steps.version.outputs.version }}
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          COLLAB_IMAGE: ${{ env.REGISTRY }}/${{ env.COLLAB_IMAGE_NAME }}
         run: |
           {
-            echo "## Nebari and Collab Keycloak themes $VERSION"
+            echo "## Nebari Keycloak theme $VERSION"
             echo
             echo "See [what the theme looks like]($SCREENSHOTS) in this release."
             echo
@@ -173,16 +138,13 @@ jobs:
             echo "| --- | --- | --- |"
             echo "| Nebari | 26 and newer | \`nebari-keycloak-theme-for-kc-all-other-versions.jar\` |"
             echo "| Nebari | 22 to 25 | \`nebari-keycloak-theme-for-kc-22-to-25.jar\` |"
-            echo "| Collab | 26 and newer | \`collab-keycloak-theme-for-kc-all-other-versions.jar\` |"
-            echo "| Collab | 22 to 25 | \`collab-keycloak-theme-for-kc-22-to-25.jar\` |"
             echo
-            echo "Then select **nebari** or **collab** as the login, account and admin theme for your realm."
+            echo "Then select **nebari** as the login, account and admin theme for your realm."
             echo
             echo "### Or use the prebuilt image"
             echo
             echo '```bash'
-            echo "docker pull $IMAGE:$VERSION         # Nebari"
-            echo "docker pull $COLLAB_IMAGE:$VERSION  # Collab"
+            echo "docker pull $IMAGE:$VERSION"
             echo '```'
           } > release-notes.md
           cat release-notes.md
@@ -193,7 +155,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
-            --title "Nebari and Collab Keycloak themes ${{ steps.version.outputs.version }}" \
+            --title "Nebari Keycloak theme ${{ steps.version.outputs.version }}" \
             --notes-file release-notes.md \
             --target "${{ github.sha }}" \
             dist_keycloak/*.jar

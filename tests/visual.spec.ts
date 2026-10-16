@@ -74,26 +74,6 @@ const themes: {
         assertBrand: async page => {
             await expect(page.locator(".nebari-logo")).toHaveCount(0);
         }
-    },
-    {
-        name: "collab",
-        colorSchemes: ["light", "dark"],
-        card: ".nebari-login-card",
-        assertBrand: async page => {
-            await expect(page.getByRole("img", { name: "Collab" })).toBeVisible();
-            await expect(page.locator(".nebari-logo")).toHaveCount(0);
-            // The symbol is a raster image; capturing before it decodes would
-            // photograph an empty box and make the baseline flaky.
-            await expect
-                .poll(() =>
-                    page
-                        .locator(".collab-logo-symbol")
-                        .evaluate(
-                            (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
-                        )
-                )
-                .toBe(true);
-        }
     }
 ];
 

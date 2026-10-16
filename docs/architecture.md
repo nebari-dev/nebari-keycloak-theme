@@ -1,12 +1,12 @@
 # Architecture
 
-## Three themes per brand
+## Three Keycloak themes per JAR
 
-The repo ships two brands, `nebari` and `collab`, listed in [`themes.json`](../themes.json).
+The repo ships the themes listed in [`themes.json`](../themes.json), `nebari` and `template`.
 [`scripts/build-keycloak-themes.mjs`](../scripts/build-keycloak-themes.mjs) runs one `vite build`, then
-`keycloakify build` once per brand with `KEYCLOAKIFY_THEME_NAME` set, which
+`keycloakify build` once per theme with `KEYCLOAKIFY_THEME_NAME` set, which
 [`vite.config.ts`](../vite.config.ts) passes as `themeName`. So each JAR contains three Keycloak themes under
-one brand's name, and the script fails the build if a JAR contains more than one. The three themes are built
+one theme's name, and the script fails the build if a JAR contains more than one. The three themes are built
 very differently, because the problem is different for each:
 
 | Theme | Size of the problem | Approach |
@@ -31,9 +31,9 @@ built from the design-system components &mdash; `Field`, `Input`, `Button`, `Che
 [`PasswordField`](../src/components/nebari/PasswordField.tsx) for the reveal toggle.
 
 [`src/main.tsx`](../src/main.tsx) is the entry point. In production Keycloak injects the context; in the dev
-server the `?preview=` mock stands in for it, and `?theme=collab` picks the brand.
+server the `?preview=` mock stands in for it, and `?theme=<name>` picks a theme from `themes.json`.
 
-## Brands
+## Theme name
 
 The theme is decided at runtime from the theme Keycloak is rendering. `src/main.tsx` stamps
 `kcContext.themeName` on `<html>` as `data-brand` and `kcContext.themeType` as `data-kc-theme-type`, so CSS
@@ -41,13 +41,6 @@ and tests can tell which theme and which page type they are looking at. Each the
 and editor switch are defined in [`src/themes/themeCatalog.ts`](../src/themes/themeCatalog.ts), which the
 login pages and both console mastheads read. A realm can override the logo and palette at runtime; see
 [Theme customization](theme-customization.md).
-
-**Collab** is the one theme with its own code paths, and it is moving out of this repo to a Theme
-customization preset. Its styling is the `[data-brand="collab"]` section at the end of
-[`src/theme.css`](../src/theme.css), scoped by theme type as well as brand. Its catalogued mark is a symbol with
-no name, so the login template and both console mastheads set "Collab" beside it. The Admin dashboard's hero
-mark is imported by the vendored `Dashboard.tsx`, so a CSS `content: var(--brand-symbol)` rule swaps it instead
-of owning the file; `src/main.tsx` sets that property from the catalog.
 
 ## The consoles: swapping components underneath
 
