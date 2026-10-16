@@ -5,6 +5,7 @@
  * $ npx keycloakify own --path "admin/PageHeader.tsx" --revert
  */
 
+import { useEffect } from "react";
 import { CircleHelpIcon } from "lucide-react";
 import { ProfileMenu, ProfileMenuItem } from "@/components/nebari/ProfileMenu";
 import { useNebariTheme } from "@/hooks/use-nebari-theme";
@@ -15,7 +16,7 @@ import {
   MenuBarNav,
   NavigationMenu,
 } from "@/components/ui/navigation-menu";
-import { useEnvironment, useHelp } from "../shared/keycloak-ui-shared";
+import { label, useEnvironment, useHelp } from "../shared/keycloak-ui-shared";
 import { PageToggleButton } from "../shared/@patternfly/react-core";
 import { BarsIcon } from "../shared/@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
@@ -25,8 +26,12 @@ import { useAccess } from "./context/access/Access";
 import { useRealm } from "./context/realm-context/RealmContext";
 import { toDashboard } from "./dashboard/routes/Dashboard";
 import { usePreviewLogo } from "./realm-settings/themes/LogoContext";
+import { getConsoleBranding, getConsoleLogo } from "../branding/consoleLogo";
+import {
+  applyBrandingDashboardMark,
+  applyBrandingFavicon,
+} from "../branding/documentBranding";
 import { joinPath } from "./utils/joinPath";
-import { getBrandLogo, isCollabBrand } from "@/lib/branding";
 import useToggle from "./utils/useToggle";
 
 function loggedInUserName(token: Record<string, unknown>, fallback: string) {
@@ -52,7 +57,7 @@ const LIGHT_THEME: ConsoleTheme = {
 const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
   const { environment, keycloak } = useEnvironment();
   const { t } = useTranslation();
-  const { realm } = useRealm();
+  const { realm, realmRepresentation } = useRealm();
   const { hasAccess } = useAccess();
   const { enabled: helpEnabled, toggleHelp } = useHelp();
   const { themeMode, isDarkMode, setThemeMode, canChangeTheme } = theme;
@@ -67,15 +72,50 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
   const url = useHref(toDashboard({ realm }));
   const logoUrl = environment.logoUrl ? environment.logoUrl : url;
 
-  // Resolved from the active theme rather than hardcoded, so the Collab
-  // console does not fall back to Nebari branding.
-  const defaultLogo = getBrandLogo(isDarkMode);
+  /* The masthead mark, most specific source first:
+     1. the live preview while an admin edits in Realm settings -> Themes,
+     2. `logo` from the theme's own theme.properties, which is Keycloak's
+        standard hook and lets a deployment point at its own file without
+        touching this build,
+     3. the artwork the active theme ships, resolved from the same catalog the
+        login pages use, so a theme cannot brand one console and not the other.
+     A theme that ships none — the unbranded `template` — falls through to the
+     realm's display name as a wordmark, rather than borrowing another theme's
+     logo. */
+  /* `t` is typed to the console's own message catalogue, which does not know
+     this theme's custom key — the same reason `themeCustomization.ts` reads
+     `properties` through a cast. The value is validated by
+     `parseThemeBrandingConfig` either way. */
+  const publishedConfig = (t as unknown as (key: string) => string)(
+    "nebariBrandingConfig",
+  );
+
+  const themeLogo = getConsoleLogo({
+    themeName: getKcContext().kcContext.themeName,
+    mode: isDarkMode ? "dark" : "light",
+    baseUrl: import.meta.env.BASE_URL,
+    publishedConfig,
+  });
+
+  /* Theme customization's wordmark, favicon and welcome-tab mark. All three
+     come out of the same validated config as the logo above. */
+  const { wordmark, favicon, dashboardMark } = getConsoleBranding({
+    themeName: getKcContext().kcContext.themeName,
+    publishedConfig,
+  }).advanced;
+
+  useEffect(() => {
+    applyBrandingFavicon(favicon);
+    applyBrandingDashboardMark(dashboardMark);
+  }, [favicon, dashboardMark]);
 
   const resolvedLogo = customLogo
     ? (customLogo.startsWith("/") ? joinPath(environment["resourceUrl"], customLogo) : customLogo)
-    : defaultLogo;
-
-  const showCollabLockup = isCollabBrand() && !customLogo;
+    : environment.logo
+      ? (/^(https?:)?\/\//.test(environment.logo)
+          ? environment.logo
+          : joinPath(environment["resourceUrl"], environment.logo))
+      : themeLogo;
 
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
@@ -96,20 +136,17 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
       </PageToggleButton>
 
       <MenuBarBrand href={logoUrl} aria-label={t("logo")}>
-        {/* Collab publishes no light-on-dark wordmark, so the masthead assembles
-            the lockup the way the login page does — symbol as an image, name as
-            text, one `role="img"` over the pair. A realm-configured logo wins
-            over it: that is someone deliberately overriding the branding, and it
-            arrives as a single image with no wordmark to pair. */}
-        {showCollabLockup ? (
-          <span className="collab-logo collab-logo--masthead" role="img" aria-label="Collab">
-            <img src={resolvedLogo} alt="" className="collab-logo-symbol" />
-            <span className="collab-logo-wordmark" aria-hidden="true">
-              Collab
-            </span>
-          </span>
+        {resolvedLogo ? (
+          <>
+            <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+            {wordmark !== "" && (
+              <span className="font-semibold text-lg">{wordmark}</span>
+            )}
+          </>
         ) : (
-          <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+          <span className="font-semibold text-base">
+            {wordmark || label(t, realmRepresentation?.displayName, realm)}
+          </span>
         )}
       </MenuBarBrand>
 

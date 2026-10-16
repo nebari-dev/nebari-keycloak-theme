@@ -11,6 +11,11 @@
  * locally-owned controls use the Nebari React components directly.
  */
 
+/* Repeat the layer order. A `@layer` block orders itself at first use, so
+   without this statement the `patternfly` layer below would sort after
+   `utilities` in any bundle that does not already carry theme.css's ordering. */
+@layer theme, base, patternfly, components, utilities;
+
 :root,
 .pf-v5-theme-dark {
   --pf-v5-global--FontFamily--sans-serif: var(--font-sans);
@@ -303,6 +308,13 @@ a:not([data-slot]):hover {
  * read at the same visual weight. The two-class selector wins over that file
  * deterministically — both stylesheets are unlayered, so equal specificity would
  * leave it to load order. */
+/* A realm's own welcome mark from Theme customization, set as a quoted CSS
+   string by `applyBrandingDashboardMark`. `content` replaces the image the
+   vendored Dashboard.tsx imports, without owning that file. */
+html[data-branding-dashboard-mark] .keycloak__dashboard_icon {
+  content: var(--branding-dashboard-mark);
+}
+
 .pf-v5-c-empty-state .keycloak__dashboard_icon {
   display: block;
   margin-inline: auto;

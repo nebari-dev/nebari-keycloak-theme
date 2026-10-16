@@ -246,6 +246,21 @@
         margin: 0;
         padding: 0;
     }
+
+    /* Stock shadcn's initializer assigns `border-border` to every element, and
+     * its generated Card, Alert and outline Button rely on that default instead
+     * of repeating a colour utility. Scope the same foundation to the template
+     * login shell so those components render correctly without recolouring the
+     * Nebari theme or either Keycloak console. Explicit component utilities
+     * such as `border-input` remain later in the cascade and still win. */
+    :where(
+        [data-login-theme="template"],
+        [data-login-theme="template"] *,
+        [data-login-theme="template"] *::before,
+        [data-login-theme="template"] *::after
+    ) {
+        border-color: var(--border);
+    }
 }
 
 html,
@@ -734,9 +749,24 @@ a.nebari-button.nebari-button-primary:visited {
     .nebari-login-card { padding: 24px; }
 }
 
-/* ---- Keycloakify default pages ---- */
+/* Helper text that `UserProfileFormFields` renders around an attribute when the
+   realm's User Profile declares one. */
+.nebari-field-hint {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
 
-.kcLabelClass {
+/* ---- Keycloakify default pages ----
+ * Scoped with :where(.nebari-login-wrapper): `kcClsx` always prepends these
+ * logical names, so an unscoped rule here styles every theme that renders
+ * Keycloak's built-in form markup, including the unbranded `template` theme,
+ * whose Tailwind utilities sit in @layer utilities and lose to an unlayered
+ * class rule. :where() adds no specificity, so these stay at (0,1,0) and the
+ * .nebari-* rules that depend on beating them keep doing so. */
+
+:where(.nebari-login-wrapper) .kcLabelClass {
     display: block;
     margin-bottom: 0.375rem;
     font-size: 0.875rem;
@@ -744,7 +774,7 @@ a.nebari-button.nebari-button-primary:visited {
     color: var(--text-secondary);
 }
 
-.kcInputClass {
+:where(.nebari-login-wrapper) .kcInputClass {
     width: 100%;
     padding: 0.625rem 0.875rem;
     font-size: 0.9375rem;
@@ -757,13 +787,13 @@ a.nebari-button.nebari-button-primary:visited {
     font-weight: 500;
 }
 
-.kcInputClass:focus {
+:where(.nebari-login-wrapper) .kcInputClass:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(155, 61, 204, 0.15);
 }
 
-.kcInputErrorMessageClass {
+:where(.nebari-login-wrapper) .kcInputErrorMessageClass {
     display: block;
     margin-top: 0.375rem;
     font-size: 0.8125rem;
@@ -771,7 +801,7 @@ a.nebari-button.nebari-button-primary:visited {
     font-weight: 400;
 }
 
-.kcButtonClass {
+:where(.nebari-login-wrapper) .kcButtonClass {
     width: 100%;
     padding: 0.625rem 1.25rem;
     font-size: 0.9375rem;
@@ -783,16 +813,16 @@ a.nebari-button.nebari-button-primary:visited {
     font-family: inherit;
 }
 
-.kcButtonPrimaryClass {
+:where(.nebari-login-wrapper) .kcButtonPrimaryClass {
     background: var(--accent);
     color: white;
 }
 
-.kcButtonPrimaryClass:hover {
+:where(.nebari-login-wrapper) .kcButtonPrimaryClass:hover {
     background: var(--accent-dark);
 }
 
-.kcFormOptionsClass {
+:where(.nebari-login-wrapper) .kcFormOptionsClass {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -800,13 +830,13 @@ a.nebari-button.nebari-button-primary:visited {
     font-size: 0.875rem;
 }
 
-.kcFormSocialAccountSectionClass hr {
+:where(.nebari-login-wrapper) .kcFormSocialAccountSectionClass hr {
     border: none;
     border-top: 1px solid var(--border-color);
     margin: 1.5rem 0;
 }
 
-.kcFormSocialAccountListClass {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListClass {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -815,7 +845,7 @@ a.nebari-button.nebari-button-primary:visited {
     gap: 0.5rem;
 }
 
-.kcFormSocialAccountListButtonClass {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListButtonClass {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -831,7 +861,7 @@ a.nebari-button.nebari-button-primary:visited {
     transition: var(--transition-fast);
 }
 
-.kcFormSocialAccountListButtonClass:hover {
+:where(.nebari-login-wrapper) .kcFormSocialAccountListButtonClass:hover {
     border-color: var(--accent);
     background: var(--bg-hover);
     text-decoration: none;
@@ -964,8 +994,8 @@ a.nebari-button.nebari-button-primary:visited {
 
 /* Input labels */
 .nebari-label,
-[data-slot="field-label"],
-.kcLabelClass,
+[data-slot="field-label"]:where(:not([data-login-theme="template"] *)),
+:where(.nebari-login-wrapper) .kcLabelClass,
 .nebari-label-wrapper .nebari-label {
     color: var(--color-foreground-default, #262628);
     font-family: var(--Font-Sans, Geist);
@@ -1000,22 +1030,22 @@ a.nebari-button.nebari-button-primary:visited {
 }
 
 /* Login inputs: border-only focus. */
-[data-slot="input"]:focus {
+[data-slot="input"]:focus:where(:not([data-login-theme="template"] *)) {
     border-width: 2px;
     border-color: var(--ring);
     box-shadow: none;
 }
 
 /* Validation uses a 1px destructive border at rest and 2px while focused. */
-[data-slot="input"][aria-invalid="true"],
-[data-slot="input"][data-invalid] {
+[data-slot="input"][aria-invalid="true"]:where(:not([data-login-theme="template"] *)),
+[data-slot="input"][data-invalid]:where(:not([data-login-theme="template"] *)) {
     border-width: 1px;
     border-color: var(--color-foreground-destructive, #d2161c);
     box-shadow: none;
 }
 
-[data-slot="input"][aria-invalid="true"]:focus,
-[data-slot="input"][data-invalid]:focus {
+[data-slot="input"][aria-invalid="true"]:focus:where(:not([data-login-theme="template"] *)),
+[data-slot="input"][data-invalid]:focus:where(:not([data-login-theme="template"] *)) {
     border-width: 2px;
     border-color: var(--color-foreground-destructive, #d2161c);
     box-shadow: none;
@@ -1122,559 +1152,257 @@ a.nebari-button.nebari-button-primary:visited {
     }
 }
 
-/* ==========================================================================
-   COLLAB THEME
-   ========================================================================== */
-
-:root[data-brand="collab"] {
-    color-scheme: dark;
-    --pf-v5-global--Color--100: var(--foreground);
-    --pf-v5-global--Color--200: var(--muted-foreground);
-    --pf-v5-global--Color--dark-100: var(--foreground);
-    --pf-v5-global--Color--dark-200: var(--muted-foreground);
-    --pf-v5-global--Color--light-100: var(--foreground);
-    --pf-v5-global--Color--light-200: var(--muted-foreground);
-    --pf-v5-global--BorderColor--100: var(--border);
-    --pf-v5-global--BorderColor--200: var(--input);
-    --pf-v5-global--BorderColor--300: var(--border);
-    --pf-v5-global--BorderColor--400: var(--border-strong);
-    --pf-v5-global--BorderColor--dark-100: var(--border);
-    --pf-v5-global--BorderColor--light-100: var(--border);
-    --pf-v5-global--icon--Color--dark: var(--foreground);
-    --pf-v5-global--icon--Color--light: var(--muted-foreground);
-    --pf-v5-global--disabled-color--100: var(--muted-foreground);
-    --pf-v5-global--disabled-color--200: var(--border);
-    --pf-v5-global--disabled-color--300: var(--border);
-    --pf-v5-global--success-color--100: #10b981;
-    --pf-v5-global--success-color--200: var(--foreground);
-    --pf-v5-global--warning-color--100: #f59e0b;
-    --pf-v5-global--warning-color--200: var(--foreground);
-    --pf-v5-global--danger-color--100: var(--nebari-red);
-    --pf-v5-global--danger-color--200: var(--destructive-foreground);
-    --pf-v5-global--info-color--100: #507EFF;
-    --pf-v5-global--info-color--200: var(--foreground);
-    --font-sans: "Inter Tight Variable", "Inter Tight", sans-serif;
-    --Font-Sans: var(--font-sans);
-    --background: #022791;
-    --foreground: #ffffff;
-    /* Surfaces are white scrims over the background; `--popover` is opaque. */
-    --card: rgba(255, 255, 255, .08);
-    --card-foreground: #ffffff;
-    --popover: #1540BA;
-    --popover-foreground: #ffffff;
-    --primary: #022791;
-    --primary-foreground: #ffffff;
-    --primary-hover: #1540BA;
-    --secondary: rgba(80, 126, 255, .15);
-    --secondary-foreground: #ffffff;
-    --muted: rgba(255, 255, 255, .08);
-    --muted-foreground: #8FACFF;
-    --muted-foreground-strong: #ffffff;
-    --accent: rgba(80, 126, 255, .18);
-    --accent-foreground: #ffffff;
-    --destructive: rgba(255, 138, 105, .15);
-    --destructive-foreground: #ffad96;
-    --border: rgba(255, 255, 255, .24);
-    --input: rgba(255, 255, 255, .34);
-    --border-strong: rgba(255, 255, 255, .55);
-    --ring: #507EFF;
-    --bg-primary: #022791;
-    --bg-secondary: #1540BA;
-    --bg-elevated: rgba(255, 255, 255, .14);
-    --bg-hover: rgba(80, 126, 255, .18);
-    --text-primary: #ffffff;
-    --text-secondary: #ffffff;
-    --text-muted: #8FACFF;
-    --border-color: rgba(255, 255, 255, .24);
-    --border-subtle: rgba(255, 255, 255, .14);
-    --color-foreground-default: #ffffff;
-    --color-foreground-destructive: #ffad96;
-    --nebari-purple: #8FACFF;
-    --nebari-purple-dark: #507EFF;
-    --nebari-purple-light: rgba(80, 126, 255, .15);
-    --nebari-red: #ff8a69;
-    --login-backdrop: #022791;
-    --login-input-border: rgba(255, 255, 255, .18);
-    --login-placeholder: var(--muted-foreground);
-
-    /* Console masthead and sidebar */
-    --header-background: #1540BA;
-    --header-border: rgba(255, 255, 255, .24);
-    --header-foreground: #ffffff;
-    --header-action-hover: rgba(80, 126, 255, .18);
-    --sign-out-foreground: #ff8a69;
-    --sidebar: #022791;
-    --sidebar-foreground: #ffffff;
-    --sidebar-primary: #315FE3;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: rgba(80, 126, 255, .18);
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: rgba(255, 255, 255, .24);
-    --sidebar-ring: #507EFF;
+/*
+ * Password reveal toggle for `UserProfileFormFields`.
+ *
+ * Both themes have their own React password field with a lucide icon, but
+ * keycloakify's `UserProfileFormFields` renders the toggle itself — a `<button>`
+ * wrapping a bare `<i>` whose class it takes from `kcClsx`. Keycloak's own
+ * themes point that at an icon font, which this build does not ship, so the
+ * glyph is drawn here with a mask instead. Shared by both themes because the
+ * markup is keycloakify's, not either theme's.
+ *
+ * Used by `src/login/userProfileClasses.ts` and its template counterpart, which
+ * is also where the `Register` and `LoginUpdateProfile` forms pick it up.
+ */
+.kc-input-group {
+    position: relative;
 }
 
-/* Dark mode */
-:root[data-brand="collab"][data-theme="dark"] {
-    --background: #000F3A;
-    --login-backdrop: #000F3A;
-    --bg-primary: #000F3A;
-    --sidebar: #000F3A;
-    --card: rgba(255, 255, 255, .14);
-    --popover: #253156;
-    --bg-secondary: #253156;
-    --header-background: #253156;
-    --login-input-border: rgba(255, 255, 255, .3);
-    --login-placeholder: rgba(255, 255, 255, .5);
+.kc-input-group > input {
+    /* Keep the value from running under the toggle. */
+    padding-right: 2.5rem;
 }
 
-/* Account console colours (see src/account/nebari-account.css and src/nebari-brand.css). */
-html[data-brand="collab"][data-kc-theme-type="account"] {
-    --pf-v5-global--BackgroundColor--100: var(--card);
-    --pf-v5-global--BackgroundColor--200: var(--background);
-    --pf-v5-global--BackgroundColor--light-100: var(--card);
-    --account-bg-0d0d14: var(--background);
-    --account-bg-13131a: rgba(255, 255, 255, .12);
-    --account-bg-17171f: var(--card);
-    --account-bg-1a1a2e: rgba(255, 255, 255, .12);
-    --account-bg-1e1e28: rgba(255, 255, 255, .12);
-    --account-bg-5b21b6: var(--primary-hover);
-    --account-bg-6d28d9: var(--primary-hover);
-    --account-bg-7c3aed: var(--primary);
-    --account-bg-7c3aed-a10: rgba(80, 126, 255, .10);
-    --account-bg-7c3aed-a6: rgba(80, 126, 255, .6);
-    --account-bg-7c3aed-a7: rgba(80, 126, 255, .7);
-    --account-bg-7c3aed-a9: rgba(80, 126, 255, .9);
-    --account-bg-a78bfa-a10: rgba(80, 126, 255, .10);
-    --account-bg-a78bfa-a13: rgba(80, 126, 255, .13);
-    --account-bg-dc2626: rgba(255, 138, 105, .25);
-    --account-bg-ef4444: rgba(255, 138, 105, .15);
-    --account-bg-ef4444-a7: rgba(255, 138, 105, .7);
-    --account-bg-ef4444-a9: rgba(255, 138, 105, .9);
-    --account-bg-f0ebff: rgba(255, 255, 255, .12);
-    --account-bg-f4f4f6: var(--background);
-    --account-bg-fafafa: rgba(255, 255, 255, .12);
-    --account-bg-ffffff: var(--card);
-    --account-border-1e1e28: var(--border-subtle);
-    --account-border-26262f: var(--border);
-    --account-border-6d28d9: var(--ring);
-    --account-border-7c3aed: var(--ring);
-    --account-border-7c3aed-a25: rgba(80, 126, 255, .25);
-    --account-border-7c3aed-a40: rgba(80, 126, 255, .40);
-    --account-border-7c3aed-a50: rgba(80, 126, 255, .50);
-    --account-border-7c3aed-a70: rgba(80, 126, 255, .70);
-    --account-border-7c3aed-a85: rgba(80, 126, 255, .85);
-    --account-border-a78bfa: var(--ring);
-    --account-border-a78bfa-a45: rgba(80, 126, 255, .45);
-    --account-border-dc2626: var(--nebari-red);
-    --account-border-e3e3ea: var(--border);
-    --account-border-ef4444: var(--nebari-red);
-    --account-border-ef4444-a25: rgba(255, 138, 105, .25);
-    --account-border-efeff3: var(--border-subtle);
-    --account-fg-111118: var(--foreground);
-    --account-fg-374151: var(--foreground);
-    --account-fg-5b21b6: var(--muted-foreground);
-    --account-fg-6a6a7a: var(--muted-foreground);
-    --account-fg-6d28d9: var(--muted-foreground);
-    --account-fg-7c3aed: var(--muted-foreground);
-    --account-fg-7c3aed-a35: rgba(80, 126, 255, .35);
-    --account-fg-8888a0: var(--muted-foreground);
-    --account-fg-a78bfa: var(--muted-foreground);
-    --account-fg-a78bfa-a35: rgba(80, 126, 255, .35);
-    --account-fg-c8c8d8: var(--foreground);
-    --account-fg-c9cdd3: var(--muted-foreground);
-    --account-fg-dc2626: var(--destructive-foreground);
-    --account-fg-e0e0f0: var(--foreground);
-    --account-fg-ef4444: var(--destructive-foreground);
-    --account-fg-f0f0f8: var(--foreground);
-    --account-fg-ffffff: var(--foreground);
-    --account-pf-5b21b6: var(--muted-foreground);
-    --account-pf-6d28d9: var(--muted-foreground);
-    --account-pf-7c3aed: var(--muted-foreground);
-    --account-pf-7c3aed-a14: rgba(80, 126, 255, .14);
-    --account-pf-9b3dcc: var(--muted-foreground);
-    --account-pf-a78bfa: var(--muted-foreground);
-    --account-pf-c4b5fd: var(--muted-foreground);
-    --account-shadow-7c3aed: var(--ring);
-    --account-shadow-7c3aed-a12: rgba(80, 126, 255, .12);
-    --account-shadow-7c3aed-a30: rgba(80, 126, 255, .30);
-    --account-shadow-a78bfa: var(--ring);
-    --account-shadow-a78bfa-a12: rgba(80, 126, 255, .12);
+.kc-password-toggle {
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    display: flex;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
 }
 
-/* Data tables sit on the section's card surface instead of stacking another
- * translucent layer on it. */
-html[data-brand="collab"] [data-slot="table-container"],
-html[data-brand="collab"] [data-slot="table"] {
-    background-color: transparent;
-}
-
-/* A page section nested in another (tab content) shows the outer section's surface. */
-html[data-brand="collab"] .pf-v5-c-page__main-section .pf-v5-c-page__main-section {
-    background-color: transparent;
-}
-
-/* Checked switches use the selection blue so the knob stays visible. */
-html[data-brand="collab"] [data-slot="switch"][data-checked] {
-    background-color: #507EFF;
-}
-
-html[data-brand="collab"] [data-slot="switch"][data-checked]:hover {
-    background-color: #7095FF;
-}
-
-/* Data list rows sit on the content panel without adding another layer. */
-html[data-brand="collab"][data-kc-theme-type="account"] .pf-v5-c-data-list {
-    --pf-v5-c-data-list__item--BackgroundColor: transparent;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] body,
-html[data-brand="collab"][data-kc-theme-type="login"] button,
-html[data-brand="collab"][data-kc-theme-type="login"] input,
-html[data-brand="collab"][data-kc-theme-type="login"] select,
-html[data-brand="collab"][data-kc-theme-type="login"] textarea {
-    font-family: var(--font-sans);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] body {
-    background: var(--background);
+.kc-password-toggle:hover {
     color: var(--foreground);
 }
 
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper {
-    padding: 32px;
-    background-color: var(--login-backdrop);
-    background-image: none;
+.kc-password-icon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2.062%2012.348a1%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%2019.876%200%201%201%200%200%201%200%20.696%2010.75%2010.75%200%200%201-19.876%200%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2.062%2012.348a1%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%2019.876%200%201%201%200%200%201%200%20.696%2010.75%2010.75%200%200%201-19.876%200%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
 }
 
-/* Flat background: the Nebari glow and grid are turned off. */
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper::before,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper::after {
+.kc-password-icon-hide {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.733%205.076a10.744%2010.744%200%200%201%2011.205%206.575%201%201%200%200%201%200%20.696%2010.747%2010.747%200%200%201-1.444%202.49%22%2F%3E%3Cpath%20d%3D%22M14.084%2014.158a3%203%200%200%201-4.242-4.242%22%2F%3E%3Cpath%20d%3D%22M17.479%2017.499a10.75%2010.75%200%200%201-15.417-5.151%201%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%204.446-5.143%22%2F%3E%3Cpath%20d%3D%22m2%202%2020%2020%22%2F%3E%3C%2Fsvg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.733%205.076a10.744%2010.744%200%200%201%2011.205%206.575%201%201%200%200%201%200%20.696%2010.747%2010.747%200%200%201-1.444%202.49%22%2F%3E%3Cpath%20d%3D%22M14.084%2014.158a3%203%200%200%201-4.242-4.242%22%2F%3E%3Cpath%20d%3D%22M17.479%2017.499a10.75%2010.75%200%200%201-15.417-5.151%201%201%200%200%201%200-.696%2010.75%2010.75%200%200%201%204.446-5.143%22%2F%3E%3Cpath%20d%3D%22m2%202%2020%2020%22%2F%3E%3C%2Fsvg%3E");
+}
+
+/* ========================
+   RUNTIME BRANDING (Theme customization)
+   ========================
+   A realm that publishes branding gets `data-branded` on the login wrapper, and
+   `getBrandingCssVariables` sets the palette there as inline custom properties.
+   The Nebari login rules above use literal colours matched to the Figma file,
+   so tokens alone cannot reach them; this block re-states each of those
+   declarations from the tokens, for branded realms only. An unbranded realm
+   never matches, so it renders exactly as before.
+
+   Every selector starts with `:root .nebari-login-wrapper[data-branded]`
+   (0,3,0), which outranks the `[data-theme="dark"]` variants (0,2,x) by
+   specificity rather than by source order. Error and required-field reds stay
+   as they are: they carry meaning, not brand. */
+
+:root .nebari-login-wrapper[data-branded] {
+    background-color: var(--background);
+    /* A custom background image arrives as an inline style and still wins. */
+    background-image: none;
+    color: var(--foreground);
+}
+
+/* The purple, teal and amber glows are Nebari's, not the realm's. */
+:root .nebari-login-wrapper[data-branded]::before,
+:root .nebari-login-wrapper[data-branded]::after {
     content: none;
 }
 
-/* Translucent card */
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-card {
-    width: min(480px, 100%);
-    padding: 24px;
-    gap: 24px;
-    overflow: visible;
+:root .nebari-login-wrapper[data-branded] .nebari-login-card {
     background: var(--card);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, .12);
-    border-radius: 16px;
-    box-shadow: none;
+    border-color: var(--border);
+    color: var(--card-foreground);
 }
 
-/* Row spacing comes from the card's `gap`. */
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-logo-header,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-header {
-    margin-bottom: 0;
+:root .nebari-login-wrapper[data-branded] .nebari-title,
+:root .nebari-login-wrapper[data-branded] .nebari-subtitle,
+:root .nebari-login-wrapper[data-branded] .nebari-label,
+:root .nebari-login-wrapper[data-branded] [data-slot="field-label"],
+:root .nebari-login-wrapper[data-branded] .kcLabelClass,
+:root .nebari-login-wrapper[data-branded] [data-slot="checkbox"] + *,
+:root .nebari-login-wrapper[data-branded] label {
+    color: var(--foreground);
 }
 
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-section {
-    margin-top: 0;
+:root .nebari-login-wrapper[data-branded] .nebari-forgot-link,
+:root .nebari-login-wrapper[data-branded] .nebari-link,
+:root .nebari-login-wrapper[data-branded] .nebari-info-section,
+:root .nebari-login-wrapper[data-branded] .nebari-required-notice {
+    color: var(--muted-foreground);
 }
 
-/* Logo: symbol and wordmark */
-.collab-logo {
+:root .nebari-login-wrapper[data-branded] .nebari-input,
+:root .nebari-login-wrapper[data-branded] [data-slot="input"],
+:root .nebari-login-wrapper[data-branded] input[type="text"],
+:root .nebari-login-wrapper[data-branded] input[type="email"],
+:root .nebari-login-wrapper[data-branded] input[type="password"],
+:root .nebari-login-wrapper[data-branded] input[type="tel"],
+:root .nebari-login-wrapper[data-branded] select,
+:root .nebari-login-wrapper[data-branded] textarea {
+    background-color: var(--muted);
+    border-color: var(--input);
+    color: var(--foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-input::placeholder,
+:root .nebari-login-wrapper[data-branded] input::placeholder {
+    color: var(--muted-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-input:focus,
+:root .nebari-login-wrapper[data-branded] [data-slot="input"]:focus,
+:root .nebari-login-wrapper[data-branded] input:focus,
+:root .nebari-login-wrapper[data-branded] select:focus,
+:root .nebari-login-wrapper[data-branded] textarea:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 25%, transparent);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-primary,
+:root .nebari-login-wrapper[data-branded] button[type="submit"],
+:root .nebari-login-wrapper[data-branded] input[type="submit"],
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:visited {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-primary:hover,
+:root .nebari-login-wrapper[data-branded] button[type="submit"]:hover,
+:root .nebari-login-wrapper[data-branded] input[type="submit"]:hover,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:hover,
+:root .nebari-login-wrapper[data-branded] a.nebari-button.nebari-button-primary:focus {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: var(--primary-foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-secondary,
+:root .nebari-login-wrapper[data-branded] .nebari-social-button {
+    background: var(--card);
+    border-color: var(--input);
+    color: var(--foreground);
+}
+
+:root .nebari-login-wrapper[data-branded] .nebari-button-secondary:hover,
+:root .nebari-login-wrapper[data-branded] .nebari-social-button:hover {
+    background: var(--muted);
+    border-color: var(--ring);
+    color: var(--foreground);
+}
+
+/* ========================
+   ADVANCED BRANDING (Theme customization, both login themes)
+   ========================
+   Keyed off data attributes and custom properties that the templates set from
+   the validated config: `data-button-shape` is one of three fixed words,
+   `data-button-arrow` and `data-card-glass` are flags, and the custom
+   properties are clamped numbers or allowlisted font stacks. Nothing here
+   reads free text from a realm. */
+
+:root .nebari-login-wrapper[data-branded][data-card-glass] .nebari-login-card,
+:root [data-login-theme="template"][data-card-glass] .branding-card {
+    background: color-mix(in srgb, var(--card) var(--branding-card-opacity, 100%), transparent);
+    -webkit-backdrop-filter: blur(var(--branding-card-blur, 0px));
+    backdrop-filter: blur(var(--branding-card-blur, 0px));
+}
+
+/* A chosen font arrives as `--font-sans` on the login wrapper. Text that only
+   inherits its font from <body> resolved that variable at the root, so the
+   family is restated here, where the override is in scope. */
+:root [data-login-theme="template"],
+:root .nebari-login-wrapper[data-branded] {
+    font-family: var(--font-sans);
+}
+
+/* Logo plus wordmark. */
+.nebari-lockup {
     display: flex;
     align-items: center;
-    gap: 10px;
-}
-
-/* Symbol rotates and scales in once on load. */
-@keyframes collab-logo-intro {
-    from {
-        opacity: 0;
-        transform: rotate(180deg) scale(0);
-    }
-
-    to {
-        opacity: 1;
-        transform: rotate(0deg) scale(1);
-    }
-}
-
-.collab-logo-symbol {
-    display: block;
-    width: 54px;
-    height: 54px;
-    animation: collab-logo-intro .85s cubic-bezier(.16, .84, .32, 1) .06s both;
-}
-
-/* The wordmark doesn't animate. */
-.collab-logo-wordmark {
-    color: var(--foreground);
-    font-family: var(--font-sans);
-    font-size: 32px;
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: -.4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .collab-logo-symbol {
-        animation: none;
-    }
-}
-
-/* Logo in the Admin Console masthead (no animation). */
-.collab-logo--masthead {
-    gap: 8px;
-}
-
-.collab-logo--masthead .collab-logo-symbol {
-    width: 32px;
-    height: 32px;
-    animation: none;
-}
-
-/* Uses the masthead's foreground colour. */
-.collab-logo--masthead .collab-logo-wordmark {
-    font-size: 19px;
-    color: inherit;
-}
-
-/* Admin dashboard hero image: the Collab symbol from `--brand-symbol` (set in main.tsx). */
-html[data-brand="collab"][data-kc-theme-type="admin"] .keycloak__dashboard_icon {
-    content: var(--brand-symbol);
-    width: 72px;
-    max-width: 72px;
-    height: auto;
-}
-
-/* Headings */
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-header .nebari-title {
-    color: var(--foreground);
-    font-family: var(--font-sans);
-    font-size: 21px;
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -.4px;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-subtitle,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label,
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="field-label"],
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-wrapper .nebari-label,
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="checkbox"] {
-    color: var(--foreground);
-    font-family: var(--font-sans);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label,
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="field-label"],
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-wrapper .nebari-label {
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: .2px;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-wrapper {
-    color: var(--destructive-foreground);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper form {
-    gap: 24px;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-input,
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"],
-html[data-brand="collab"][data-kc-theme-type="login"] input[type="text"],
-html[data-brand="collab"][data-kc-theme-type="login"] input[type="email"],
-html[data-brand="collab"][data-kc-theme-type="login"] input[type="password"],
-html[data-brand="collab"][data-kc-theme-type="login"] input[type="tel"],
-html[data-brand="collab"][data-kc-theme-type="login"] select,
-html[data-brand="collab"][data-kc-theme-type="login"] textarea {
-    height: 46px;
-    padding: 11px 16px;
-    border: 1px solid var(--login-input-border);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, .10);
-    color: var(--foreground);
-    font-family: var(--font-sans);
-    font-size: 15px;
-    line-height: 22px;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]::placeholder,
-html[data-brand="collab"][data-kc-theme-type="login"] input::placeholder {
-    color: var(--login-placeholder);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]:hover,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-input:hover {
-    border-color: rgba(255, 255, 255, .34);
-    background: rgba(255, 255, 255, .14);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input"]:focus,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-input:focus {
-    border-width: 1px;
-    border-color: var(--ring);
-    background: rgba(255, 255, 255, .14);
-    box-shadow: 0 0 0 3px rgba(80, 126, 255, .3);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="input-end-adornment"] [data-slot="button"] {
-    color: var(--muted-foreground);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-row .nebari-forgot-link,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-link,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-required-notice {
-    color: var(--muted-foreground);
-    font-family: var(--font-sans);
-}
-
-/* Action links use the primary blue; the forgot-password link stays muted. */
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section .nebari-link {
-    color: var(--muted-foreground);
-    font-weight: 500;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-label-row .nebari-forgot-link:hover,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-link:hover,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-info-section .nebari-link:hover {
-    color: var(--foreground);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] #kc-login,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary,
-html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"],
-html[data-brand="collab"][data-kc-theme-type="login"] input[type="submit"] {
-    min-height: 44px;
-    padding: 11px 30px;
-    border: 1px solid var(--primary);
-    border-radius: 6px;
-    background: var(--primary);
-    color: var(--primary-foreground);
-    font-family: var(--font-sans);
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: .3px;
-    line-height: 22px;
-    box-shadow: none;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] #kc-login:hover,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary:hover,
-html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]:hover,
-html[data-brand="collab"][data-kc-theme-type="login"] input[type="submit"]:hover {
-    border-color: var(--primary-hover);
-    background: var(--primary-hover);
-    color: var(--primary-foreground);
-    text-decoration: none;
-}
-
-/* Arrow after the submit label, shown on hover and focus. */
-html[data-brand="collab"][data-kc-theme-type="login"] #kc-login::after,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary::after,
-html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]::after {
-    /* Arrow icon; `--arrow-w` sets its size. */
-    --arrow-w: 18px;
-
-    content: "";
-    display: block;
-    width: 0;
-    height: var(--arrow-w);
-    margin-left: -8px;
-    overflow: hidden;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") left center / var(--arrow-w) auto no-repeat;
-    opacity: 0;
-    transform: translateX(-6px);
-    transition:
-        width .2s cubic-bezier(.2, .7, .3, 1),
-        margin-left .2s cubic-bezier(.2, .7, .3, 1),
-        opacity .16s ease-out,
-        transform .2s cubic-bezier(.2, .7, .3, 1);
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] #kc-login:hover::after,
-html[data-brand="collab"][data-kc-theme-type="login"] #kc-login:focus-visible::after,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary:hover::after,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary:focus-visible::after,
-html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]:hover::after,
-html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]:focus-visible::after {
-    width: var(--arrow-w);
-    margin-left: 0;
-    opacity: 1;
-    transform: translateX(0);
-}
-
-/* Arrow on keyboard focus; no slide with reduced motion. */
-@media (prefers-reduced-motion: reduce) {
-    html[data-brand="collab"][data-kc-theme-type="login"] #kc-login::after,
-    html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-primary::after,
-    html[data-brand="collab"][data-kc-theme-type="login"] button[type="submit"]::after {
-        transition: none;
-    }
-}
-
-/* Secondary button: outlined pill */
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-secondary,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-button {
-    /* Same height as the primary button. */
-    min-height: 44px;
-    padding: 11px 24px;
-    border: 1px solid rgba(255, 255, 255, .5);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--foreground);
-    font-family: var(--font-sans);
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: .3px;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-button-secondary:hover,
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-button:hover {
-    border-color: var(--foreground);
-    background: rgba(255, 255, 255, .08);
-    color: var(--foreground);
-    text-decoration: none;
-}
-
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-providers {
+    justify-content: center;
     gap: 12px;
 }
 
-html[data-brand="collab"][data-kc-theme-type="login"] .nebari-social-icon {
-    filter: invert(1);
+/* `.nebari-logo` has a fixed width sized for Nebari's wide wordmark logo; beside
+   a text wordmark the mark sizes to its own aspect instead. */
+.nebari-lockup:has(.nebari-wordmark) .nebari-logo {
+    width: auto;
+    height: 32px;
+    /* The base rule centres with auto margins, which in a flex row would take
+       the free space and push the mark away from its name. */
+    margin: 0;
 }
 
-/* Checkbox size (restated on both axes to override `size-4`). */
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="checkbox-control"] {
-    width: 14px;
-    height: 14px;
-    border-color: rgba(255, 255, 255, .58);
+.nebari-wordmark {
+    color: var(--card-foreground, #262628);
+    font-family: var(--Font-Sans, var(--font-sans));
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: -0.01em;
 }
 
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="alert"] {
-    border-radius: 6px;
+:root [data-button-shape="rounded"] :is(.nebari-button, .nebari-button-primary, .nebari-button-secondary, .nebari-social-button, button[type="submit"], input[type="submit"], [data-slot="button"]) {
+    border-radius: 8px;
 }
 
-html[data-brand="collab"][data-kc-theme-type="login"] [data-slot="alert"][data-variant="default"] [data-slot="alert-description"] {
-    color: var(--foreground);
+:root [data-button-shape="pill"] :is(.nebari-button, .nebari-button-primary, .nebari-button-secondary, .nebari-social-button, button[type="submit"], input[type="submit"], [data-slot="button"]) {
+    border-radius: 9999px;
 }
 
-@media (max-width: 480px) {
-    html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-wrapper {
-        padding: 18px;
-    }
+:root [data-button-shape="square"] :is(.nebari-button, .nebari-button-primary, .nebari-button-secondary, .nebari-social-button, button[type="submit"], input[type="submit"], [data-slot="button"]) {
+    border-radius: 0;
+}
 
-    html[data-brand="collab"][data-kc-theme-type="login"] .nebari-login-card {
-        padding: 24px;
-    }
+/* A trailing arrow on the primary action, drawn with a mask so it takes the
+   button's text colour. `input[type="submit"]` cannot carry ::after and keeps
+   its plain label. */
+:root [data-button-arrow] :is(#kc-login, .nebari-button-primary, button[type="submit"])::after {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 0.5em;
+    vertical-align: -0.125em;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22%2F%3E%3Cpath%20d%3D%22m12%205%207%207-7%207%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22%2F%3E%3Cpath%20d%3D%22m12%205%207%207-7%207%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    transition: transform 0.15s ease;
+}
 
-    .collab-logo-symbol {
-        width: 47px;
-        height: 47px;
-    }
+:root [data-button-arrow] :is(#kc-login, .nebari-button-primary, button[type="submit"]):is(:hover, :focus-visible)::after {
+    transform: translateX(3px);
+}
 
-    .collab-logo-wordmark {
-        font-size: 28px;
+@media (prefers-reduced-motion: reduce) {
+    :root [data-button-arrow] :is(#kc-login, .nebari-button-primary, button[type="submit"])::after {
+        transition: none;
     }
 }

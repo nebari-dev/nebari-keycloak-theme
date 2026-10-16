@@ -17,9 +17,6 @@ permissions:
 env:
   REGISTRY: quay.io
   IMAGE_NAME: nebari/nebari-keycloak-theme
-  # TEMPORARY: the Collab theme keeps its existing GHCR image until it is
-  # removed from themes.json. See the collab-image job.
-  COLLAB_IMAGE: ghcr.io/${{ github.repository_owner }}/collab-keycloak-theme
 
 # A newer push supersedes a pull-request run, but a publish is never cancelled
 # midway: a half-pushed image or release is worse than a queued one.
@@ -120,24 +117,12 @@ jobs:
 
       # The Dockerfile copies the JARs from dist_keycloak/, so the image is
       # built from the exact JARs the release ships. Its default THEME_JAR glob
-      # installs every theme left in that directory.
+      # installs every theme in that directory.
       - name: Download theme JARs
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: keycloak-themes-${{ needs.jars.outputs.version }}
           path: dist_keycloak
-
-      # TEMPORARY: Collab is not a Nebari theme and must not ship in the Nebari
-      # image. It keeps its own GHCR image (the collab-image job) until it is
-      # removed from themes.json; delete this step with it.
-      - name: Keep the Collab theme out of the Nebari image
-        run: |
-          rm -f dist_keycloak/collab-keycloak-theme-*.jar
-          if compgen -G "dist_keycloak/collab-*" > /dev/null; then
-            echo "::error::Collab JARs are still in the build context"
-            exit 1
-          fi
-          ls dist_keycloak
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
@@ -194,64 +179,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # TEMPORARY: publishes the Collab theme to its existing GHCR package with the
-  # same tags as before, so Collab deployments are unaffected while Collab moves
-  # to its own repository. Remove this job, COLLAB_IMAGE and the Collab lines in
-  # the release notes when the Collab theme leaves themes.json.
-  collab-image:
-    name: Collab image (temporary, GHCR)
-    needs: jars
-    if: needs.jars.outputs.publish == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Check out source
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-        with:
-          persist-credentials: false
-
-      - name: Download theme JARs
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: keycloak-themes-${{ needs.jars.outputs.version }}
-          path: dist_keycloak
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
-
-      # The `org.opencontainers.image.source` label this sets links the package
-      # to this repository, which is what lets GITHUB_TOKEN push to it.
-      - name: Generate Collab image metadata
-        id: metadata
-        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6
-        with:
-          images: ${{ env.COLLAB_IMAGE }}
-          tags: |
-            type=raw,value=latest
-            type=raw,value=${{ needs.jars.outputs.version }}
-            type=sha,prefix=sha-
-
-      - name: Build and publish Collab image
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
-        with:
-          context: .
-          push: true
-          build-args: |
-            THEME_JAR=collab-keycloak-theme-for-kc-all-other-versions.jar
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
-
   manifest:
     name: Publish multi-arch manifest
     needs: [jars, image]
@@ -303,7 +230,7 @@ jobs:
 
   release:
     name: Cut GitHub release
-    needs: [jars, manifest, collab-image]
+    needs: [jars, manifest]
     if: needs.jars.outputs.publish == 'true' && needs.jars.outputs.release-exists == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -355,9 +282,7 @@ jobs:
             echo "### Or use the prebuilt image"
             echo
             echo '```bash'
-            echo "docker pull $IMAGE:$VERSION             # nebari"
-            # TEMPORARY: until the Collab theme leaves themes.json.
-            echo "docker pull $COLLAB_IMAGE:$VERSION  # collab"
+            echo "docker pull $IMAGE:$VERSION"
             echo '```'
           } > release-notes.md
           cat release-notes.md

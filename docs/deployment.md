@@ -5,30 +5,28 @@ Getting the theme into Keycloak and switching it on are two separate steps. Inst
 
 ## What gets built
 
-`npm run build-keycloak-theme` writes two JARs per brand to `dist_keycloak/`. Use the one that matches your
-brand and your Keycloak:
+`npm run build-keycloak-theme` writes two JARs per theme to `dist_keycloak/`. Use the one that matches your
+theme and your Keycloak:
 
-| File | Brand | Keycloak |
+| File | Theme | Keycloak |
 | --- | --- | --- |
 | `nebari-keycloak-theme-for-kc-all-other-versions.jar` | Nebari | 26 and newer |
 | `nebari-keycloak-theme-for-kc-22-to-25.jar` | Nebari | 22 to 25 |
-| `collab-keycloak-theme-for-kc-all-other-versions.jar` | Collab | 26 and newer |
-| `collab-keycloak-theme-for-kc-22-to-25.jar` | Collab | 22 to 25 |
+| `template-keycloak-theme-for-kc-all-other-versions.jar` | Template | 26 and newer |
+| `template-keycloak-theme-for-kc-22-to-25.jar` | Template | 22 to 25 |
 
-Install one per brand, by name. A glob like `nebari-keycloak-theme-*.jar` matches both Keycloak ranges. To build
-a single brand, run `npm run build-keycloak-theme -- --theme collab`.
+Install one per theme, by name. A glob like `nebari-keycloak-theme-*.jar` matches both Keycloak ranges. To build
+a single theme, run `npm run build-keycloak-theme -- --theme nebari`.
 
-Each release on GitHub attaches all four JARs, so you don't need to build them yourself.
+Each release on GitHub attaches every JAR, so you don't need to build them yourself.
 
 ## Installing
 
 ### The published image
 
 Every push to `main` publishes a complete Keycloak image, `quay.io/nebari/nebari-keycloak-theme`, for
-`linux/amd64` and `linux/arm64`, with the Nebari theme's Keycloak 26 JAR. It is based on
-`quay.io/keycloak/keycloak:26.8.0` and leaves the Collab theme out. Until the Collab theme is removed from this
-repo, Collab keeps its own amd64 image, `ghcr.io/nebari-dev/collab-keycloak-theme`, with the old tag scheme
-(its version tag moves until the version is bumped). The Nebari image's tags:
+`linux/amd64` and `linux/arm64`, with the Keycloak 26 JAR of every theme in [`themes.json`](../themes.json). It
+is based on `quay.io/keycloak/keycloak:26.8.0`. Its tags:
 
 | Tag | Published | Moves? |
 | --- | --- | --- |
@@ -74,8 +72,9 @@ A theme applies per realm. In the Admin Console of the realm you want to change,
 | Admin console theme | `nebari` |
 | Account theme | `nebari` |
 
-For Collab, set all three to `collab`. A realm that still selects `openteams`, Collab's old name, must be
-switched to `collab`.
+A realm that still selects `collab` or `openteams` needs moving to `nebari` before upgrading: that theme is no
+longer shipped here. Its look is available as a Theme customization preset; see
+[Theme customization](theme-customization.md).
 
 Leave **Email theme** alone &mdash; this theme doesn't provide one.
 

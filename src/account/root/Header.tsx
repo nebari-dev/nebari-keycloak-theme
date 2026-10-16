@@ -5,7 +5,9 @@
  * $ npx keycloakify own --path "account/root/Header.tsx" --revert
  */
 
-import { getBrandLogo, isCollabBrand } from "@/lib/branding";
+import { useEffect } from "react";
+import { getConsoleBranding, getConsoleLogo } from "../../branding/consoleLogo";
+import { applyBrandingFavicon } from "../../branding/documentBranding";
 import { ProfileMenu } from "@/components/nebari/ProfileMenu";
 import {
   MenuBarActions,
@@ -101,11 +103,33 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
         ? internalLogoHref
         : logoUrl;
 
-  // Was `isDarkMode ? logo.svg : logo-light.svg` from ../assets. Only the light
-  // asset had ever been replaced with Nebari's, so dark mode rendered the stock
-  // Keycloak logo — and neither knew about any theme but Nebari.
-  const resolvedLogo = getBrandLogo(isDarkMode);
-  const showCollabLockup = isCollabBrand();
+  /* Resolved from the same catalog the login and Admin consoles use, so a theme
+     brands all three or none. A theme that ships no artwork of its own, such
+     as the unbranded `template`, falls back to the realm name as a wordmark,
+     as the Admin Console does, rather than borrowing another theme's logo. */
+  /* See the note in `PageHeader.tsx`: `t` does not know this theme's custom
+     message key, and the value is validated on the way through. */
+  const publishedConfig = (t as unknown as (key: string) => string)(
+    "nebariBrandingConfig",
+  );
+  const themeLogo = getConsoleLogo({
+    themeName: getKcContext().kcContext.themeName,
+    mode: isDarkMode ? "dark" : "light",
+    baseUrl: import.meta.env.BASE_URL,
+    publishedConfig,
+  });
+
+  const resolvedLogo = themeLogo;
+
+  /* Theme customization's wordmark and favicon, from the same validated config. */
+  const { wordmark, favicon } = getConsoleBranding({
+    themeName: getKcContext().kcContext.themeName,
+    publishedConfig,
+  }).advanced;
+
+  useEffect(() => {
+    applyBrandingFavicon(favicon);
+  }, [favicon]);
 
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
@@ -134,18 +158,17 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
       </PageToggleButton>
 
       <MenuBarBrand href={indexHref} aria-label={t("logo")}>
-        {/* Collab publishes no light-on-dark wordmark, so the masthead assembles
-            the lockup — symbol image plus live text — as the Admin Console's
-            `PageHeader.tsx` does. */}
-        {showCollabLockup ? (
-          <span className="collab-logo collab-logo--masthead" role="img" aria-label="Collab">
-            <img src={resolvedLogo} alt="" className="collab-logo-symbol" />
-            <span className="collab-logo-wordmark" aria-hidden="true">
-              Collab
-            </span>
-          </span>
+        {resolvedLogo ? (
+          <>
+            <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
+            {wordmark !== "" && (
+              <span className="font-semibold text-lg">{wordmark}</span>
+            )}
+          </>
         ) : (
-          <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
+          <span className="font-semibold text-base">
+            {wordmark || getKcContext().kcContext.realm.name}
+          </span>
         )}
       </MenuBarBrand>
 

@@ -1,4 +1,4 @@
-import { isValidElement, useEffect } from "react";
+import { isValidElement, useEffect, useLayoutEffect, useState } from "react";
 import { kcSanitize } from "keycloakify/lib/kcSanitize";
 import type { TemplateProps } from "keycloakify/login/TemplateProps";
 import { getKcClsx } from "keycloakify/login/lib/kcClsx";
@@ -7,7 +7,26 @@ import type { KcContext } from "./KcContext";
 import type { I18n } from "./i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { getBrandLogos, isCollabBrand } from "@/lib/branding";
+import {
+    getBrandingImage,
+    getBrandingCssVariables,
+    getBrandingDataAttributes,
+    isBrandingCustomized,
+    type BrandingColorScheme
+} from "../branding/brandingConfig";
+import { applyBrandingFavicon } from "../branding/documentBranding";
+import { loadBrandingFont } from "../branding/fonts";
+import { getChildBrand } from "../themes/childTheme";
+import { getThemeDefinition, parseThemeBrandingConfig } from "../themes/themeCatalog";
+
+/** A realm pinned to one appearance overrides the visitor's preference. */
+function getInitialTheme(colorScheme: BrandingColorScheme): "dark" | "light" {
+    if (colorScheme !== "system") return colorScheme;
+
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+}
 
 export default function Template(props: TemplateProps<KcContext, I18n>) {
     const {
@@ -28,6 +47,27 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
 
     const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
     const { msg, msgStr } = i18n;
+    const themeDefinition = getThemeDefinition(kcContext.themeName);
+    const branding = parseThemeBrandingConfig(
+        themeDefinition,
+        msgStr(themeDefinition.brandingMessageKey)
+    );
+    /* Read once: the stylesheet's light/dark rules key off `data-theme`, so the
+       appearance must not change under the user mid-session. */
+    const [theme] = useState<"dark" | "light">(() =>
+        getInitialTheme(branding.colorScheme)
+    );
+    const paletteMode = theme;
+    /* Gate for the whole branding layer — see `isBrandingCustomized`. */
+    const isBranded = isBrandingCustomized(branding, themeDefinition.defaultBranding);
+    /* A child theme with its own `brand` styles this page through the design
+       tokens, so it needs the token-driven rules too; the literal Figma colours
+       would otherwise ignore its overrides. See `src/themes/childTheme.ts`. */
+    const isTokenDriven = isBranded || getChildBrand(kcContext.properties) !== undefined;
+
+    useLayoutEffect(() => {
+        document.documentElement.dataset.theme = theme;
+    }, [theme]);
 
     useEffect(() => {
         document.title = documentTitle ?? msgStr("loginTitle", kcContext.realm.displayName);
@@ -40,37 +80,74 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
         isValidElement<{ className?: string }>(headerNode) &&
         (headerNode.props.className?.includes("nebari-title") ||
             headerNode.props.className?.includes("nebari-heading-group"));
-    const showCollabLockup = isCollabBrand();
-    // Both variants are rendered and CSS picks one, because the login page has
-    // no JS colour-scheme flag to choose with.
-    const brandLogos = getBrandLogos();
+    const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+    const logo = getBrandingImage(branding.logo, paletteMode);
+    const background = getBrandingImage(branding.backgroundImage, paletteMode);
+    const hasCustomLogo = isBranded && logo !== "";
+    const wordmark = isBranded ? branding.advanced.wordmark : "";
+
+    useEffect(() => {
+        if (!isBranded) return;
+        loadBrandingFont(branding.advanced.font);
+        applyBrandingFavicon(branding.advanced.favicon);
+    }, [isBranded, branding.advanced.font, branding.advanced.favicon]);
 
     return (
-        <main className="nebari-login-wrapper">
-            <Card className="nebari-login-card gap-0 py-0">
+        <main
+            className="nebari-login-wrapper"
+            data-branded={isTokenDriven ? "" : undefined}
+            {...(isBranded ? getBrandingDataAttributes(branding.advanced) : {})}
+            data-has-custom-background={
+                isBranded && background !== "" ? "" : undefined
+            }
+            style={
+                isBranded
+                    ? {
+                          ...getBrandingCssVariables(branding, paletteMode),
+                          ...(background !== ""
+                              ? {
+                                    backgroundImage: `linear-gradient(${branding[paletteMode].pageBackground}d9, ${branding[paletteMode].pageBackground}d9), url(${JSON.stringify(background)})`
+                                }
+                              : {})
+                      }
+                    : undefined
+            }
+        >
+            <Card
+                className="nebari-login-card gap-0 py-0"
+                style={isBranded ? { borderRadius: `${branding.cardRadius}px` } : undefined}
+            >
                 <div className="nebari-logo-header">
-                    {showCollabLockup ? (
-                        /* Collab publishes no light-on-dark wordmark, so the lockup is
-                           assembled here: the full-colour symbol as an image, the name
-                           as text. One `role="img"` over the pair gives it a single
-                           accessible name — otherwise a screen reader announces the
-                           symbol and the word separately, as two things. */
-                        <div className="collab-logo" role="img" aria-label="Collab">
-                            <img src={brandLogos.dark} alt="" className="collab-logo-symbol" />
-                            <span className="collab-logo-wordmark" aria-hidden="true">
-                                Collab
-                            </span>
+                    {/* The default is a light/dark pair swapped by CSS. A branded
+                        realm has one logo for both, so it replaces the pair rather
+                        than being sized by JS — which keeps an unbranded realm
+                        rendering exactly as it did before branding existed. */}
+                    {/* A wordmark is set as text beside the mark, for a logo that
+                        ships without its name; the text is then the accessible
+                        name and the image is decorative. With no logo of its own,
+                        a realm with a wordmark shows the text alone rather than
+                        Nebari's mark. */}
+                    {hasCustomLogo || wordmark !== "" ? (
+                        <div className="nebari-lockup">
+                            {hasCustomLogo && (
+                                <img
+                                    src={logo}
+                                    alt={wordmark !== "" ? "" : `${branding.companyName} logo`}
+                                    className="nebari-logo"
+                                />
+                            )}
+                            {wordmark !== "" && <span className="nebari-wordmark">{wordmark}</span>}
                         </div>
                     ) : (
                         <>
                             <img
-                                src={brandLogos.light}
-                                alt="Nebari"
+                                src={publicAssetUrl("logo/nebari-logo-light.svg")}
+                                alt={branding.companyName}
                                 className="nebari-logo nebari-logo-light"
                             />
                             <img
-                                src={brandLogos.dark}
-                                alt="Nebari"
+                                src={publicAssetUrl("logo/nebari-logo-dark.svg")}
+                                alt={branding.companyName}
                                 className="nebari-logo nebari-logo-dark"
                             />
                         </>

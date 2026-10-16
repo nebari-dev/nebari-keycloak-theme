@@ -22,7 +22,6 @@
     <source media="(prefers-color-scheme: light)" srcset="tests/screenshots/linux/nebari/full-page-light.png">
     <img src="tests/screenshots/linux/nebari/full-page-light.png" alt="The Nebari sign-in page" width="400">
   </picture>
-  <img src="tests/screenshots/linux/collab/full-page-light.png" alt="The Collab sign-in page" width="400">
 </p>
 
 <p align="center">
@@ -32,7 +31,6 @@
   src="https://github.com/nebari-dev/nebari-keycloak-theme/actions/workflows/publish-keycloak-image.yml/badge.svg" alt="Publish"></a>
   <a href="https://github.com/nebari-dev/nebari-keycloak-theme/releases/latest"><img
   src="https://img.shields.io/github/v/release/nebari-dev/nebari-keycloak-theme?logo=github&label=release" alt="Latest release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
   <a href="https://www.keycloak.org"><img src="https://img.shields.io/badge/Keycloak-26-4d4d4d?logo=keycloak&logoColor=white" alt="Keycloak 26"></a>
   <a href="https://www.keycloakify.dev"><img src="https://img.shields.io/badge/Keycloakify-11-6a5acd" alt="Keycloakify 11"></a>
 </p>
@@ -43,6 +41,7 @@
   <a href="docs/architecture.md">Architecture</a> &middot;
   <a href="docs/deployment.md">Deployment</a> &middot;
   <a href="docs/customization.md">Customization</a> &middot;
+  <a href="docs/theme-customization.md">Theme customization</a> &middot;
   <a href="docs/screenshots.md">Screenshots</a> &middot;
   <a href="AGENTS.md">AGENTS.md</a>
 </p>
@@ -53,9 +52,9 @@
 
 ## What is in it
 
-The theme is built with [Keycloakify](https://www.keycloakify.dev/) and ships two brands, `nebari` and
-`collab` (OpenTeams Collab). Each brand is packaged in its own JAR and published as its own image, and each
-JAR contains three Keycloak themes under that brand's name:
+The theme is built with [Keycloakify](https://www.keycloakify.dev/). Each theme in
+[`themes.json`](themes.json) is packaged in its own JAR, and each JAR contains three Keycloak themes under that
+theme's name:
 
 | Theme | What it covers | How it is built |
 | --- | --- | --- |
@@ -69,27 +68,17 @@ where it stops, is in [Architecture](docs/architecture.md).
 
 ## Brands
 
-`nebari` and `collab` share one build and one stylesheet. The brand is the theme Keycloak is rendering:
-`src/main.tsx` stamps `kcContext.themeName` on `<html>` as `data-brand`, and the login page, the Admin Console
-masthead and the Admin dashboard's hero mark read it from there.
+[`themes.json`](themes.json) lists the themes to build, and each one is packaged into its own JAR:
 
-| | Nebari | Collab |
+| Theme | Login pages | For |
 | --- | --- | --- |
-| Theme name | `nebari` | `collab` |
-| JAR, Keycloak 26+ | `nebari-keycloak-theme-for-kc-all-other-versions.jar` | `collab-keycloak-theme-for-kc-all-other-versions.jar` |
-| JAR, Keycloak 22 to 25 | `nebari-keycloak-theme-for-kc-22-to-25.jar` | `collab-keycloak-theme-for-kc-22-to-25.jar` |
-| Image | `quay.io/nebari/nebari-keycloak-theme` (amd64 and arm64) | `ghcr.io/nebari-dev/collab-keycloak-theme` (until Collab is removed) |
+| `nebari` | Nebari design-system components, Nebari logo and palette | Nebari's own deployments |
+| `template` | Stock shadcn/ui components, no logo, neutral palette | A starting point to brand |
 
-Collab takes its look from the openteams.com landing page: a deep-blue ground, Inter Tight, a glass card and
-pill buttons. Those rules are the `[data-brand="collab"]` section of [`src/theme.css`](src/theme.css),
-covering the login pages and both consoles. Strings that
-name the product are keyed by theme in [`src/login/i18n.ts`](src/login/i18n.ts). `collab` was called
-`openteams` before, so a realm that still selects `openteams` must be switched to `collab`.
-
-To add a brand, add its name to [`themes.json`](themes.json), an entry in
-[`src/lib/branding.ts`](src/lib/branding.ts) (the only place a logo path is written down), a theme entry at
-the top of [`tests/visual.spec.ts`](tests/visual.spec.ts), and a `data-brand` rule in `src/theme.css` if the
-mark needs more than an `<img>`.
+Each JAR is named `<theme>-keycloak-theme-for-kc-all-other-versions.jar` (Keycloak 26+) or
+`<theme>-keycloak-theme-for-kc-22-to-25.jar`. The image `quay.io/nebari/nebari-keycloak-theme` (amd64 and
+arm64) carries both. The Admin Console's **Theme customization** page rebrands any theme's login pages per realm without a rebuild &mdash; see [Theme customization](docs/theme-customization.md),
+which also covers adding a theme.
 
 ## Quick start
 
@@ -97,18 +86,16 @@ You need Node.js `^20.19` or `>=22.12` and Docker.
 
 ```bash
 npm install
-npm run build-keycloak-theme           # builds all four JARs into dist_keycloak/
-docker compose up -d --build keycloak  # Keycloak 26 with both themes and a seeded dev realm
+npm run build-keycloak-theme           # builds every theme's JARs into dist_keycloak/
+docker compose up -d --build keycloak  # Keycloak 26 with every theme and a seeded dev realm
 ```
 
-To build one brand only, run `npm run build-keycloak-theme -- --theme collab`; `-- --list` prints the
+To build one theme only, run `npm run build-keycloak-theme -- --theme nebari`; `-- --list` prints the
 available names. The `--` is needed so npm passes the flags on to the script. Building needs Java 17+ and
 Maven, which Keycloakify calls to assemble the JARs.
 
-The seeded realm selects `nebari`. To try Collab, switch the realm's themes to `collab` under
-**Realm settings &rarr; Themes**.
-
-Then sign in on the `nebari` realm:
+The seeded realm selects `nebari`. To try another theme, switch the realm's themes under
+**Realm settings &rarr; Themes**. Then sign in on the `nebari` realm:
 
 | Console | URL | Sign in as |
 | --- | --- | --- |
@@ -116,8 +103,8 @@ Then sign in on the `nebari` realm:
 | Account | http://localhost:8080/realms/nebari/account/ | `demo` / `demo` |
 
 For login-page work you don't need Keycloak at all &mdash; `npm run dev` serves every login page from a mock
-context at http://localhost:5173/?preview=login. Add `&theme=collab` to preview the Collab brand, for example
-http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/quick-start.md) covers both loops and why
+context at http://localhost:5173/?preview=login. Add `&theme=template` to preview another theme, for example
+http://localhost:5173/?preview=login-providers&theme=template. [Quick start](docs/quick-start.md) covers both loops and why
 `master` still shows the stock consoles.
 
 ## Project layout
@@ -130,11 +117,13 @@ http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/
 | `src/components/ui/` | Nebari design-system components from the `@nebari` registry. Upstream-managed &mdash; never edit |
 | `src/components/patternfly/` | Adapters that present PatternFly's API and render Nebari components |
 | `src/components/nebari/` | Compositions owned by this repo, such as the profile menu and password field |
-| `src/lib/branding.ts` | Each brand's logo paths |
-| `src/theme.css` | Tokens, the cascade-layer order, login-page styles, and the Collab `data-brand` rules |
-| `themes.json` | The brands to build; one JAR pair per brand |
-| `scripts/` | The per-brand JAR build, and upgrade guards that catch silent breakage on a Keycloak bump |
-| `tests/` | Playwright screenshot tests and their Linux baselines, one folder per brand |
+| `src/themes/` | The theme catalog: each theme's logo, default palette and editor setting |
+| `src/branding/` | Runtime branding: the published config, its validation, palette derivation, image upload |
+| `custom_themes/` | Branding presets the editor offers for import, shipped inside the JAR |
+| `src/theme.css` | Tokens, the cascade-layer order and login-page styles |
+| `themes.json` | The themes to build; one JAR pair per theme |
+| `scripts/` | The per-theme JAR build, and upgrade guards that catch silent breakage on a Keycloak bump |
+| `tests/` | Playwright screenshot tests and their Linux baselines, one folder per theme |
 | `docs/` | Everything below |
 
 ## Documentation
@@ -147,6 +136,8 @@ http://localhost:5173/?preview=login-providers&theme=collab. [Quick start](docs/
 | [Ownership](docs/ownership.md) | Which Keycloak files this theme forks, why, and what keeps them honest |
 | [Customization](docs/customization.md) | Tokens, logo, translations, login pages and design-system components |
 | [Deployment](docs/deployment.md) | JARs, the published image, and selecting the theme on a realm |
+| [Theme customization](docs/theme-customization.md) | The runtime branding editor, the `template` theme, and adding a theme |
+| [Child themes](docs/child-themes.md) | Extending this theme from another repository: CSS, logos and login wording, without a fork |
 | [Screenshots](docs/screenshots.md) | Every login page in light and dark mode, as `main` renders it |
 | [Releasing](docs/releasing.md) | The publish workflow, versioning and dependency policy |
 | [AGENTS.md](AGENTS.md) | Working agreement for coding agents, including mistakes already made here |
@@ -163,6 +154,7 @@ new record that marks the old one superseded.
 | [0003](docs/adr/0003-pin-the-cascade-layer-order.md) | Pin one cascade-layer order and wrap PatternFly in its own layer |
 | [0004](docs/adr/0004-keep-owned-files-few-and-guarded.md) | Keep owned files few, and guard the ones that stay owned |
 | [0005](docs/adr/0005-run-the-server-ahead-of-the-console-sources.md) | Run the Keycloak server ahead of the vendored console sources |
+| [0006](docs/adr/0006-support-child-themes.md) | Support Keycloak child themes as the extension path beyond runtime branding |
 
 ## License
 

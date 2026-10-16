@@ -1,0 +1,755 @@
+/* Theme customization page chrome.
+ *
+ * The controls are Nebari design-system components, so this file only lays them
+ * out and styles the few things that are not components: the page header,
+ * colour swatches, image crop canvas, and preview panel. Colours come from the
+ * design system's semantic tokens rather than PatternFly's, which is what keeps
+ * the page looking like the rest of the console. */
+
+.branding-loading {
+    display: grid;
+    min-height: 320px;
+    place-items: center;
+}
+
+.branding-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.branding-page-header h1 {
+    margin: 0;
+    color: var(--foreground);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 2rem;
+}
+
+.branding-page-header p,
+.branding-preview-panel__header p {
+    margin: 0.25rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+.branding-page-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* A column with a gap, so the notices at the top are separated from the editor
+   below them without each one carrying its own margin. */
+.branding-page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: var(--background);
+}
+
+/* Two columns on wide screens, with the preview following the editor on narrow
+   ones. `minmax(0, …)` so a long value in a control cannot widen the column. */
+.branding-layout {
+    display: grid;
+    align-items: start;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1200px) {
+    .branding-layout {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+}
+
+.branding-editor-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* `Field` owns the gap between a label and its control; this is the gap between
+   one field and the next. */
+.branding-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.branding-image-control {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.branding-image-control > [data-slot="input-wrapper"] {
+    flex: 1;
+    min-width: 0;
+}
+
+.branding-image-set {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 0.25rem;
+}
+
+.branding-image-set + .branding-image-set {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+/*
+ * Typography on this page, deliberately.
+ *
+ * Every row was label / description / input at 14px, and a group heading was
+ * one weight step from a field label — so nothing told the eye where a group
+ * began and half the text on the page competed at full volume. The sizes below
+ * put three clear levels between a group heading, a field label and a
+ * description, which is what makes the density readable without removing any of
+ * the guidance.
+ *
+ * Scoped to this page rather than changing `Field` in the registry: the same
+ * components are used throughout the console, where the surrounding density is
+ * different.
+ */
+.branding-image-set__header h3 {
+    margin: 0;
+    color: var(--foreground);
+    font-size: 0.9375rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+}
+
+.branding-image-set__header p {
+    margin: 0.1875rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+}
+
+/* Labels carry the row, so they get the weight rather than sharing it with the
+   description underneath. */
+.branding-page-content [data-slot="field-label"] {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+/* The single biggest change: field help was 14px, the same as the label above
+   it. At 12px and fully muted it reads as an aside instead of a second label,
+   which is what removes the wall-of-text feeling. */
+.branding-page-content [data-slot="field-description"] {
+    margin-top: 0.0625rem;
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+}
+
+/*
+ * Make a field look like a field.
+ *
+ * Measured on this page: the input fill was rgb(248,248,248) against a page of
+ * rgb(248,248,248) — pixel-identical — so the only thing separating an input
+ * from the page was a border at 2.53:1, under the 3:1 that WCAG 1.4.11 asks of
+ * a non-text UI component. With a dozen fields stacked, that reads as a wall of
+ * text rather than a form.
+ *
+ * `--border-strong` measures 3.44:1 against this page, and `--card` puts the
+ * fill a step lighter than the surface it sits on, which is the conventional
+ * cue that a rectangle accepts input. Both are existing tokens, so a branded
+ * realm still recolours them.
+ *
+ * This is the contrast standard the template login theme already holds itself
+ * to (see the note in `custom_themes/README.md`); the editor page simply was
+ * not held to it.
+ */
+.branding-page-content input,
+.branding-page-content textarea,
+.branding-page-content select {
+    border-color: var(--border-strong);
+    background-color: var(--card);
+}
+
+/* Tighter inside a field, looser between them: proximity is what groups a
+   label with its own input rather than with the next row's. */
+.branding-page-content [data-slot="field"] {
+    gap: 0.375rem;
+}
+
+.branding-image-set {
+    gap: 1.25rem;
+}
+
+.branding-mode-switch {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.branding-color-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.branding-color-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* The native swatch is the one control with no design-system counterpart, so it
+   is sized and bordered to match the `Input` beside it. */
+.branding-color-field input[type="color"] {
+    width: 2rem;
+    height: var(--nebari-control-height, 2rem);
+    padding: 0;
+    border: 1px solid var(--input);
+    border-radius: 0.375rem;
+    background: none;
+    cursor: pointer;
+    flex: none;
+}
+
+.branding-color-field input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.branding-color-field input[type="color"]::-webkit-color-swatch {
+    border: 0;
+    border-radius: 0.25rem;
+}
+
+.branding-color-field > [data-slot="input-wrapper"] {
+    flex: 1;
+    min-width: 0;
+}
+
+.branding-preview-panel {
+    position: sticky;
+    top: 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--card);
+}
+
+.branding-preview-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.branding-preview-panel__header h2 {
+    margin: 0;
+    color: var(--foreground);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.branding-preview-panel__header > span {
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* The design system's slider track is `--muted`, and in dark mode that resolves
+   to the same value as `--card` — so the empty half of the track disappeared
+   into the card behind it. `--border` is the neighbouring token that still reads
+   against the card. Light mode is left alone, where `--muted` on white already
+   has contrast. Styled here rather than in `slider.tsx`, which is
+   registry-managed. */
+:is([data-theme="dark"], .dark) .branding-page-content [data-slot="slider-track"] {
+    background: var(--border);
+}
+
+/* ------------------------------------------------------------------
+ * Import dialog
+ *
+ * Wider than the design system's default dialog because it carries the theme
+ * list and a full preview side by side — seeing the theme is the point.
+ * ------------------------------------------------------------------ */
+
+.branding-import-dialog {
+    max-width: min(56rem, calc(100vw - 2rem));
+    /* Taller than the design system's default dialog so a whole login card fits
+       beside the list on a normal screen; it still shrinks with the viewport. */
+    max-height: min(calc(100vh - 2rem), 52rem);
+}
+
+/* ------------------------------------------------------------------
+ * Image crop dialog
+ * ------------------------------------------------------------------ */
+
+.branding-crop-dialog {
+    max-width: min(44rem, calc(100vw - 2rem));
+    overflow-y: auto;
+}
+
+.branding-crop-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+/* Width shrinks for portrait source ratios so the frame never exceeds the
+   bounded 20rem editing height. Landscape frames take the available width. */
+.branding-crop-viewport {
+    position: relative;
+    width: min(100%, var(--branding-crop-width));
+    max-width: 100%;
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.5rem;
+    background-color: var(--card);
+    background-image:
+        linear-gradient(45deg, var(--muted) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--muted) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--muted) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--muted) 75%);
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    background-size: 16px 16px;
+    cursor: grab;
+    outline: none;
+    touch-action: none;
+    user-select: none;
+}
+
+.branding-crop-viewport[data-dragging] {
+    cursor: grabbing;
+}
+
+.branding-crop-viewport:focus-visible {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+.branding-crop-viewport > img {
+    position: absolute;
+    max-width: none;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.branding-crop-grid {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgb(255 255 255 / 65%);
+    background-image:
+        linear-gradient(to right, transparent 33.333%, rgb(255 255 255 / 45%) 33.333%, rgb(255 255 255 / 45%) calc(33.333% + 1px), transparent calc(33.333% + 1px), transparent 66.666%, rgb(255 255 255 / 45%) 66.666%, rgb(255 255 255 / 45%) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
+        linear-gradient(to bottom, transparent 33.333%, rgb(255 255 255 / 45%) 33.333%, rgb(255 255 255 / 45%) calc(33.333% + 1px), transparent calc(33.333% + 1px), transparent 66.666%, rgb(255 255 255 / 45%) 66.666%, rgb(255 255 255 / 45%) calc(66.666% + 1px), transparent calc(66.666% + 1px));
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 30%);
+    pointer-events: none;
+}
+
+.branding-crop-move-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 70%);
+    color: white;
+    font-size: 0.75rem;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.branding-crop-move-hint svg {
+    width: 0.875rem;
+    height: 0.875rem;
+}
+
+.branding-crop-instructions {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    text-align: center;
+}
+
+.branding-crop-controls {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.branding-import {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+    .branding-import {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+.branding-import__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.branding-import__options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+.branding-import__option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--card);
+    color: var(--foreground);
+    cursor: pointer;
+    text-align: left;
+}
+
+.branding-import__option:hover {
+    border-color: var(--border-strong);
+    background: var(--accent);
+}
+
+.branding-import__option[aria-checked="true"] {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 1px var(--ring);
+}
+
+.branding-import__option svg {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.125rem;
+    color: var(--muted-foreground);
+}
+
+.branding-import__option span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.branding-import__option strong {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.branding-import__option small {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.branding-import__empty {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+.branding-import__preview {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    min-width: 0;
+}
+
+.branding-import__preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* The dialog is already a bounded box, so the preview is scaled to fit inside it
+   rather than stretching the dialog past the viewport. `zoom` reflows rather
+   than just painting smaller, so the whole login card fits without the wrapper
+   height arithmetic a transform would need. Where `zoom` is unsupported the
+   preview simply renders full size and scrolls, which is why the overflow rule
+   stays. */
+.branding-import__preview .branding-preview {
+    min-height: 0;
+    /* In the zoomed element's own units — 40rem at `zoom: 0.8` is 512 rendered
+       pixels, just past the height of a full login card. */
+    max-height: 40rem;
+    overflow-y: auto;
+    padding: 1.25rem 1rem;
+    zoom: 0.8;
+}
+
+.branding-import__preview .branding-preview__card {
+    width: min(100%, 320px);
+}
+
+.branding-preview {
+    display: grid;
+    min-height: 620px;
+    padding: 2rem 1.25rem;
+    place-items: center;
+    background-color: var(--background);
+    background-position: center;
+    background-size: cover;
+    color: var(--foreground);
+}
+
+.branding-preview__card {
+    position: relative;
+    width: min(100%, 360px);
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+    font-family: "Geist Variable", "Geist", sans-serif;
+}
+
+.branding-preview__logo-wrap {
+    display: grid;
+    min-height: 32px;
+    margin-bottom: 24px;
+    place-items: center;
+}
+
+.branding-preview__logo {
+    display: block;
+    width: 123px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.branding-preview h2 {
+    margin: 0 0 24px;
+    color: var(--foreground);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+.branding-preview label {
+    display: block;
+    margin: 0 0 4px;
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+.branding-preview > .branding-preview__card > input {
+    width: 100%;
+    height: 32px;
+    margin-bottom: 20px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--muted);
+    color: var(--foreground);
+}
+
+.branding-preview button {
+    width: 100%;
+    height: 32px;
+    margin-top: 20px;
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--primary);
+    /* Derived by contrast in `getBrandingCssVariables`, so a light brand colour
+       still gets a readable label — the same rule the login page follows. */
+    color: var(--primary-foreground);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.branding-preview__label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.branding-preview__label-row span {
+    margin-bottom: 4px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+
+.branding-preview label.branding-preview__remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.branding-preview__remember input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--primary);
+}
+
+.branding-preview__providers {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* The "use the login card logos" row, above the console logo inputs it gates. */
+.branding-reuse-toggle {
+    margin-bottom: 4px;
+}
+
+/* The chooser shown when locales carry conflicting themes. Each option is a
+   real preview, because the locale names alone do not tell an admin which
+   configuration they are about to discard. */
+.branding-variant-choice {
+    display: grid;
+    gap: 16px;
+    margin-top: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.branding-variant-choice__option {
+    display: grid;
+    gap: 8px;
+    justify-items: stretch;
+}
+
+/* Shown when the realm's identity providers could not be read, so the absence
+   of provider buttons above is not mistaken for the realm having none. */
+.branding-preview__providers-unknown {
+    margin-top: 12px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-style: italic;
+    text-align: center;
+}
+
+.branding-preview__providers div {
+    display: grid;
+    min-height: 32px;
+    padding: 5px 10px;
+    border: 1px solid var(--input);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--foreground);
+    font-size: 13px;
+    font-weight: 500;
+    place-items: center;
+}
+
+@media (max-width: 767px) {
+    .branding-page-header,
+    .branding-page-actions,
+    .branding-image-control {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .branding-color-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .branding-crop-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .branding-preview-panel {
+        position: static;
+    }
+}
+
+/* The label row carries the "Auto" chip, or the control that hands a pinned
+   colour back to the primary. `min-height` keeps the grid from reflowing as a
+   field switches between the two. */
+.branding-color-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 1.75rem;
+}
+
+.branding-relink {
+    height: auto;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--muted-foreground);
+}
+
+/* ---- Advanced settings in the preview ----
+   The same attributes and properties the login shells read; see the ADVANCED
+   BRANDING block in src/theme.css. */
+.branding-preview__logo-wrap:has(.branding-preview__wordmark) {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Beside a wordmark the mark sizes to its own aspect, as on the login card. */
+.branding-preview__logo-wrap:has(.branding-preview__wordmark) .branding-preview__logo {
+    width: auto;
+    height: 32px;
+    margin: 0;
+}
+
+.branding-preview__wordmark {
+    color: var(--foreground);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: -0.01em;
+}
+
+/* The font property is only set when a realm picks one. */
+.branding-preview .branding-preview__card {
+    font-family: var(--font-sans, "Geist Variable", "Geist", sans-serif);
+}
+
+.branding-preview[data-card-glass] .branding-preview__card {
+    background: color-mix(in srgb, var(--card) var(--branding-card-opacity, 100%), transparent);
+    -webkit-backdrop-filter: blur(var(--branding-card-blur, 0px));
+    backdrop-filter: blur(var(--branding-card-blur, 0px));
+}
+
+.branding-preview[data-button-shape="rounded"] :is(button, .branding-preview__providers > div) {
+    border-radius: 8px;
+}
+
+.branding-preview[data-button-shape="pill"] :is(button, .branding-preview__providers > div) {
+    border-radius: 9999px;
+}
+
+.branding-preview[data-button-shape="square"] :is(button, .branding-preview__providers > div) {
+    border-radius: 0;
+}
+
+.branding-preview[data-button-arrow] .branding-preview__primary::after {
+    content: " \2192";
+}
