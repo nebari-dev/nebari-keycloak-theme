@@ -48,7 +48,11 @@ function resolveReadOnly(
     isReadOnly: boolean | undefined,
     readOnlyVariant: ReadOnlyVariant | undefined
 ): boolean | undefined {
-    return readOnly ?? isReadOnly ?? (readOnlyVariant !== undefined ? true : undefined);
+    // PatternFly v5 resolves this as `!!readOnlyVariant || readOnly` (see
+    // @patternfly/react-core TextInput) — the variant wins. Keep that order, or
+    // an explicit `readOnly={false}` would re-enable a field the Admin Console
+    // marked immutable.
+    return readOnlyVariant !== undefined ? true : (readOnly ?? isReadOnly);
 }
 
 /** The second argument Base UI hands to `onCheckedChange`. */
@@ -89,6 +93,14 @@ function toChangeEvent(
         eventPhase: event.eventPhase,
         isTrusted: event.isTrusted,
         timeStamp: event.timeStamp,
+        // Shape only — none of these four control anything. Base UI reads
+        // `defaultPrevented` *before* it calls `onCheckedChange`, so
+        // `preventDefault()` cannot veto the toggle (`details.cancel()` is the
+        // real veto, and it is not wired through); `stopPropagation()` reaches
+        // the native event, which is above React's root container, so it does
+        // not stop React's synthetic traversal; and `isPropagationStopped` is
+        // hard-coded. No consumer in the vendored tree calls any of them. If one
+        // ever needs to veto a change, thread `details.cancel` instead.
         preventDefault: () => event.preventDefault(),
         stopPropagation: () => event.stopPropagation(),
         isDefaultPrevented: () => event.defaultPrevented,

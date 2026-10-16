@@ -47,11 +47,9 @@ export default function LoginResetPassword(props: PageProps<Extract<KcContext, {
                         type="text"
                     />
                     {hasError && (
-                        <FieldError
-                            aria-live="polite"
-                            dangerouslySetInnerHTML={{ __html: kcSanitize(messagesPerField.get("username")) }}
-                            match={true}
-                        />
+                        <FieldError aria-live="polite" match={true}>
+                            <span dangerouslySetInnerHTML={{ __html: kcSanitize(messagesPerField.get("username")) }} />
+                        </FieldError>
                     )}
                 </Field>
 

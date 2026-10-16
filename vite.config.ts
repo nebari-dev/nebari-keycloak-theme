@@ -84,7 +84,6 @@ function patternflyCssLayer(): Plugin {
     };
 }
 
-// https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
         patternflyCssLayer(),
@@ -99,7 +98,6 @@ export default defineConfig({
                Development exposes every theme so previews can switch between
                them; the packaging script pins one so each JAR ships alone. */
             themeName: packagedThemeName ?? themeNames,
-            themeVersion: "1.0.0",
             kcContextExclusionsFtl: "src/login/kcContextExclusions.ftl",
             /* Resolved by Keycloak from the container environment when the page
                is rendered, so a deployment can flip this in its compose file or

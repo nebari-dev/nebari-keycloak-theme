@@ -37,16 +37,27 @@ const UPSTREAM = new URL(
  */
 const NEBARI_ONLY = new Set([
   // "/software-packs",  // https://github.com/nebari-dev/nebari-keycloak-theme/issues/14
-  /* The Theme customization editor. Rendered conditionally: `routes.tsx` drops
-     the route when the theme or the deployment disabled it, and `LeftNav`
-     renders nothing for a path it cannot find among the routes — so the entry
-     is still a single static `<LeftNav path="/branding">` render site here. */
+  /* The Theme customization editor. `routes.tsx` drops the route when the theme
+     or the deployment disables it, and `LeftNav` renders nothing for a path it
+     cannot find among the routes, so this stays one static render site. */
   "/branding",
 ]);
 
-/** Every `<LeftNav …/>` render site, with its `path` when it is a literal. */
+/**
+ * Every `<LeftNav …/>` render site, with its `path` when it is a literal.
+ *
+ * Comments are stripped first. A commented-out render site otherwise satisfies
+ * both the path set and the site count, so the guard passes while the section
+ * is missing from the console — which is the failure this script exists to
+ * catch, and commenting the entry out is the obvious move when someone hits the
+ * error without a Nebari-styled replacement ready.
+ */
 function navSites(source) {
-  return [...source.matchAll(/<LeftNav\b[\s\S]*?\/>/g)].map((match) => {
+  const code = source
+    .replace(/\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^[ \t]*\/\/.*$/gm, "");
+  return [...code.matchAll(/<LeftNav\b[\s\S]*?\/>/g)].map((match) => {
     const path = match[0].match(/\bpath="([^"]+)"/);
     return { path: path?.[1] };
   });

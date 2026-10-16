@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 type Rgb = [number, number, number];
 
@@ -43,73 +43,115 @@ const previews = [
     "error"
 ] as const;
 
-/* The preview mock reports a theme name that matches nothing in the catalog, so
-   an unpinned preview renders whichever theme is the default. Both themes are
-   pinned explicitly here so a change of default cannot silently repoint a
-   baseline at different markup. */
-
-test.describe("nebari theme", () => {
-    for (const preview of previews) {
-        test(`${preview} page`, async ({ page }) => {
-            await page.goto(`/?preview=${preview}&theme=nebari`);
-            const theme = page.locator(".nebari-login-card");
-            await expect(theme).toBeVisible();
-            await expect(theme).toHaveScreenshot(`${preview}.png`, {
-                animations: "disabled"
-            });
-        });
+/**
+ * Every theme in themes.json, with how to tell its mark apart from the others.
+ * Each theme runs through the same previews and the same assertions, and its
+ * baselines are stored under `tests/screenshots/<platform>/<theme>/`, so adding
+ * a theme is one entry here. See `src/lib/branding.ts`.
+ *
+ * `colorSchemes` lists the schemes each theme is captured in.
+ */
+const themes: {
+    name: string;
+    colorSchemes: readonly ("light" | "dark")[];
+    /** The login card, which the per-page captures crop to. */
+    card: string;
+    assertBrand: (page: Page) => Promise<void>;
+}[] = [
+    {
+        name: "nebari",
+        colorSchemes: ["light", "dark"],
+        card: ".nebari-login-card",
+        assertBrand: async page => {
+            await expect(page.locator(".nebari-logo-light")).toHaveCount(1);
+        }
+    },
+    {
+        // The unbranded starting point: stock shadcn components, no Nebari mark.
+        name: "template",
+        colorSchemes: ["light", "dark"],
+        card: '[data-login-theme="template"] [data-slot="card"]',
+        assertBrand: async page => {
+            await expect(page.locator(".nebari-logo")).toHaveCount(0);
+        }
+    },
+    {
+        name: "collab",
+        colorSchemes: ["light", "dark"],
+        card: ".nebari-login-card",
+        assertBrand: async page => {
+            await expect(page.getByRole("img", { name: "Collab" })).toBeVisible();
+            await expect(page.locator(".nebari-logo")).toHaveCount(0);
+            // The symbol is a raster image; capturing before it decodes would
+            // photograph an empty box and make the baseline flaky.
+            await expect
+                .poll(() =>
+                    page
+                        .locator(".collab-logo-symbol")
+                        .evaluate(
+                            (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
+                        )
+                )
+                .toBe(true);
+        }
     }
+];
 
-    test("dark login page", async ({ page }) => {
-        await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-        await page.goto("/?preview=login&theme=nebari");
-        const theme = page.locator(".nebari-login-card");
-        await expect(theme).toBeVisible();
-        await expect(theme).toHaveScreenshot("login-dark.png", { animations: "disabled" });
-    });
+async function openPreview(page: Page, theme: (typeof themes)[number], preview: string) {
+    await page.goto(`/?preview=${preview}&theme=${theme.name}`);
+    await expect(page.locator("html")).toHaveAttribute("data-brand", theme.name);
+    await expect(page.locator(theme.card).first()).toBeVisible();
+}
 
-    // The captures above crop to the card. These full-page ones include the page
-    // background, so they show what a deployment actually looks like — they are
-    // the images attached to a release. The background glows are animated, but
-    // the reduced-motion rule in theme.css stops them, keeping the capture
-    // stable.
-    for (const colorScheme of ["light", "dark"] as const) {
-        test(`full ${colorScheme} page`, async ({ page }) => {
-            await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
-            await page.goto("/?preview=login&theme=nebari");
-            await expect(page.locator(".nebari-login-card")).toBeVisible();
-            await expect(page).toHaveScreenshot(`full-page-${colorScheme}.png`, {
-                fullPage: true,
-                animations: "disabled"
-            });
-        });
-
-    }
+test("Nebari is the default theme", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-brand", "nebari");
 });
 
-test.describe("template theme", () => {
-    for (const preview of previews) {
-        test(`${preview} page`, async ({ page }) => {
-            await page.goto(`/?preview=${preview}&theme=template`);
-            const card = page.locator('[data-slot="card"]');
-            await expect(card).toBeVisible();
-            await expect(card).toHaveScreenshot(`template-${preview}.png`, {
-                animations: "disabled"
-            });
-        });
-    }
+for (const theme of themes) {
+    test.describe(`${theme.name} theme`, () => {
+        // Light captures are named `<preview>.png` and dark ones `<preview>-dark.png`.
+        for (const colorScheme of theme.colorSchemes) {
+            const dark = colorScheme === "dark";
 
+            for (const preview of previews) {
+                test(dark ? `dark ${preview} page` : `${preview} page`, async ({ page }) => {
+                    if (dark) {
+                        await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+                    }
+                    await openPreview(page, theme, preview);
+                    await theme.assertBrand(page);
+                    await expect(page.locator(theme.card).first()).toHaveScreenshot(
+                        [theme.name, dark ? `${preview}-dark.png` : `${preview}.png`],
+                        { animations: "disabled" }
+                    );
+                });
+            }
+        }
+
+        // The captures above crop to the card. These full-page ones include the
+        // page background, so they show what a deployment actually looks like —
+        // they are the images the README and docs/screenshots.md lead with. The background glows are
+        // animated, but the reduced-motion rule in theme.css stops them, keeping
+        // the capture stable.
+        for (const colorScheme of theme.colorSchemes) {
+            test(`full ${colorScheme} page`, async ({ page }) => {
+                await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+                await openPreview(page, theme, "login");
+                await theme.assertBrand(page);
+                await expect(page).toHaveScreenshot(
+                    [theme.name, `full-page-${colorScheme}.png`],
+                    { fullPage: true, animations: "disabled" }
+                );
+            });
+        }
+    });
+}
+
+/* The template theme ships neutral defaults that a realm is expected to rebrand,
+   so its baseline palette is checked for legibility rather than only pixels. */
+test.describe("template theme defaults", () => {
     for (const colorScheme of ["light", "dark"] as const) {
-        test(`full ${colorScheme} page`, async ({ page }) => {
-            await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
-            await page.goto("/?preview=login&theme=template");
-            await expect(page.locator('[data-slot="card"]')).toBeVisible();
-            await expect(page).toHaveScreenshot(`template-full-page-${colorScheme}.png`, {
-                fullPage: true,
-                animations: "disabled"
-            });
-        });
-
         test(`${colorScheme} default contrast`, async ({ page }) => {
             await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
             await page.goto("/?preview=login&theme=template");

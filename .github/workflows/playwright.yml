@@ -26,6 +26,12 @@ jobs:
           cache: npm
       - run: npm ci
 
+      # The theme owns files `keycloakify sync-extensions` will not refresh, so
+      # upstream changes to them go missing silently. These guards turn that
+      # into a build error. They are not type errors, hence their own step.
+      - name: Theme guards
+        run: npm run check
+
       # Playwright transpiles without type checking, so the visual tests alone
       # would not catch a broken build.
       - name: Type check
@@ -53,6 +59,8 @@ jobs:
       # produces, whether or not they match the baselines.
       - name: Render current screenshots
         if: always()
+        env:
+          PLAYWRIGHT_CAPTURE_CURRENT: "1"
         run: npm run test:screenshots:update
 
       - name: Summarise changed screenshots
@@ -61,13 +69,15 @@ jobs:
           {
             echo "### Theme screenshots"
             echo
-            if git diff --quiet -- tests/screenshots; then
+            if [ ! -d theme-screenshots/linux ]; then
+              echo "Screenshot capture failed; inspect the Playwright logs."
+            elif diff -qr tests/screenshots/linux theme-screenshots/linux > /tmp/screenshot-diff.txt; then
               echo "Rendered output matches the committed baselines."
             else
               echo "Rendered output differs from the committed baselines:"
               echo
               echo '```'
-              git diff --stat -- tests/screenshots
+              cat /tmp/screenshot-diff.txt
               echo '```'
               echo
               echo "Run \`npm run test:screenshots:update\` on Linux and commit the result."
@@ -81,6 +91,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: theme-screenshots
-          path: tests/screenshots
+          path: theme-screenshots
           if-no-files-found: error
           retention-days: 14

@@ -5,8 +5,6 @@
  * $ npx keycloakify own --path "account/root/Header.tsx" --revert
  */
 
-import logoSvgUrl from "../assets/logo.svg"; // white text — dark bg
-import logoLightSvgUrl from "../assets/logo-light.svg"; // black text — light bg
 import { getConsoleLogo } from "../../branding/consoleLogo";
 import { ProfileMenu } from "@/components/nebari/ProfileMenu";
 import {
@@ -92,14 +90,21 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
 
   const logoUrl = env.logoUrl ? env.logoUrl : "/";
   const internalLogoHref = useHref(logoUrl);
-  const indexHref = logoUrl.startsWith("/") ? internalLogoHref : logoUrl;
+  // `Root.tsx` mounts the router without a basename — its top route *is* the
+  // console's path — so `useHref("/")` is the server root, which Keycloak
+  // redirects to the master realm's Admin Console. `/` is Keycloak's default
+  // `logoUrl` and means "home", so send it to this console's own root.
+  const indexHref =
+    logoUrl === "/"
+      ? new URL(environment.baseUrl).pathname
+      : logoUrl.startsWith("/")
+        ? internalLogoHref
+        : logoUrl;
 
   /* Resolved from the same catalog the login and Admin consoles use, so a theme
-     brands all three or none. The bundled assets stay the fallback: this
-     masthead renders a bare <img>, so unlike the Admin Console there is no
-     no-logo path to fall through to without editing shared vendored code. A
-     theme that ships no artwork of its own therefore still shows these here —
-     see the account console note in the README. */
+     brands all three or none. A theme that ships no artwork of its own, such
+     as the unbranded `template`, falls back to the realm name as a wordmark,
+     as the Admin Console does, rather than borrowing another theme's logo. */
   /* See the note in `PageHeader.tsx`: `t` does not know this theme's custom
      message key, and the value is validated on the way through. */
   const themeLogo = getConsoleLogo({
@@ -111,7 +116,14 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
     ),
   });
 
-  const resolvedLogo = themeLogo ?? (isDarkMode ? logoSvgUrl : logoLightSvgUrl);
+  const resolvedLogo = themeLogo;
+
+  /* Goes with the Collab theme; see the same check in the Admin Console's
+     `PageHeader.tsx`. */
+  const showCollabLockup =
+    getKcContext().kcContext.themeName === "collab" &&
+    resolvedLogo !== undefined &&
+    resolvedLogo.endsWith("logo/collab-symbol.png");
 
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
@@ -140,7 +152,20 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
       </PageToggleButton>
 
       <MenuBarBrand href={indexHref} aria-label={t("logo")}>
-        <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
+        {showCollabLockup ? (
+          <span className="collab-logo collab-logo--masthead" role="img" aria-label="Collab">
+            <img src={resolvedLogo} alt="" className="collab-logo-symbol" />
+            <span className="collab-logo-wordmark" aria-hidden="true">
+              Collab
+            </span>
+          </span>
+        ) : resolvedLogo ? (
+          <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
+        ) : (
+          <span className="font-semibold text-base">
+            {getKcContext().kcContext.realm.name}
+          </span>
+        )}
       </MenuBarBrand>
 
       {/* No `MenuBarNav`: this console has no top-level sections, and an empty

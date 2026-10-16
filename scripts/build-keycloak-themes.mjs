@@ -75,14 +75,6 @@ if (unknownThemes.length !== 0) {
 
 const selectedThemes = requestedThemes.length === 0 ? themes : [...new Set(requestedThemes)];
 
-// The exact file names this run produces. A `startsWith(`${theme}-`)` test would
-// be wrong as soon as one theme's name prefixes another's: building only `foo`
-// would treat `foo-bar`'s JARs as superseded and delete them, which is the
-// opposite of what `--theme` promises.
-const namesWrittenByThisBuild = new Set(
-    selectedThemes.flatMap(theme => generatedJars.map(jar => `${theme}-${jar}`))
-);
-
 const stagingDirectory = mkdtempSync(join(tmpdir(), "keycloak-theme-jars-"));
 // Keycloakify writes straight into the output directory and the loop below clears
 // it between themes, so JARs for themes that were not selected have to be held
@@ -205,31 +197,20 @@ try {
         writeFileSync(generatedThemeNamesFile, originalGeneratedThemeNames);
     }
 
-    // A failure can land anywhere, including after Keycloakify has written part
-    // of a JAR into the output directory. Those files are named exactly like a
-    // good build's (`keycloakify build` does not prefix them), so leaving them
-    // would put a truncated artifact where a real one belongs — and the release
-    // step globs `dist_keycloak/*.jar`. Clearing first means the directory ends
-    // up holding either this build's verified output or the previous build's.
-    if (!buildSucceeded) {
-        rmSync(outputDirectory, { recursive: true, force: true });
-    }
-
     mkdirSync(outputDirectory, { recursive: true });
 
     for (const jar of readdirSync(preservedDirectory)) {
         // On success the selected themes have just been written fresh, so their
         // previous JARs are dropped — otherwise one saved under a stale name (a
-        // renamed theme, say) would come back alongside the new one. A full
-        // build supersedes everything for the same reason: it regenerated every
-        // JAR that should exist, so anything left over is stale — a renamed or
-        // removed theme, or an earlier bare `keycloakify build`. Keeping those
-        // would leak them into `gh release create dist_keycloak/*.jar`.
-        // On failure the output directory was just cleared above, so every
-        // preserved JAR goes back and the build leaves nothing worse behind.
+        // renamed theme, say) would come back alongside the new one. On failure
+        // the output directory was cleared without being repopulated, so every
+        // preserved JAR goes back and the build leaves nothing worse behind. A
+        // successful full build drops every preserved JAR, since anything it did
+        // not just write belongs to a theme that no longer exists.
         const supersededByThisBuild =
             buildSucceeded &&
-            (requestedThemes.length === 0 || namesWrittenByThisBuild.has(jar));
+            (requestedThemes.length === 0 ||
+                selectedThemes.some(theme => jar.startsWith(`${theme}-`)));
 
         if (!supersededByThisBuild && !existsSync(join(outputDirectory, jar))) {
             copyFileSync(join(preservedDirectory, jar), join(outputDirectory, jar));
