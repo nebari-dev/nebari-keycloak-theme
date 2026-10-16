@@ -1,5 +1,5 @@
 /*
- * Nebari Account UI — NIC dashboard aesthetic overrides
+ * Nebari Account UI overrides
  * Imported in KcAccountUi.tsx after nebari-brand.css
  */
 
@@ -7,7 +7,7 @@
    PAGE LAYOUT
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Give the page body the NIC bg colour */
+/* Give the page body the Nebari background colour */
 .pf-v5-c-page {
     background: var(--account-bg-f4f4f6, #f4f4f6);
 }
