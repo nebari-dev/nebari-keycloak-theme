@@ -1,8 +1,14 @@
 const ACCEPTED_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const MAX_SOURCE_BYTES = 5 * 1024 * 1024;
-const MAX_STORED_BYTES = { logo: 160_000, background: 420_000 } as const;
+const MAX_STORED_BYTES = { logo: 160_000, background: 420_000, icon: 48_000 } as const;
+const MAX_DIMENSIONS = {
+    logo: { width: 640, height: 240 },
+    background: { width: 1600, height: 1000 },
+    /* A favicon or the Admin welcome mark: square and small. */
+    icon: { width: 256, height: 256 }
+} as const;
 
-export type ImageKind = "logo" | "background";
+export type ImageKind = keyof typeof MAX_STORED_BYTES;
 
 export type ImageDimensions = {
     width: number;
@@ -122,11 +128,11 @@ export async function prepareBrandingImage(
 
     const image = await loadImage(file);
     const source = normalizeCrop(image, crop);
-    const maximum = kind === "logo" ? { width: 640, height: 240 } : { width: 1600, height: 1000 };
+    const maximum = MAX_DIMENSIONS[kind];
     const scale = Math.min(1, maximum.width / source.width, maximum.height / source.height);
     let width = Math.max(1, Math.round(source.width * scale));
     let height = Math.max(1, Math.round(source.height * scale));
-    let quality = kind === "logo" ? 0.9 : 0.82;
+    let quality = kind === "background" ? 0.82 : 0.9;
     let output = "";
 
     for (let attempt = 0; attempt < 6; attempt += 1) {
