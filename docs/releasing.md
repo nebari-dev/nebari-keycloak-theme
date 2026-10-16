@@ -8,13 +8,11 @@ can also be run by hand from the Actions tab.
 1. Builds the themes once with `npm run build-keycloak-theme`. That runs the
    [upgrade guards](development.md#upgrade-guards) and the type check first, so a failure stops the publish.
    The JARs are uploaded as a workflow artifact, so they can be downloaded from every run.
-2. Builds the Nebari image from those JARs, without the Collab JARs, on native `amd64` and `arm64` runners and
-   pushes each by digest to `quay.io/nebari/nebari-keycloak-theme`.
-3. Joins the two into one multi-arch manifest tagged `latest` and `sha-<commit>`, plus `<version>` when step 5
+2. Builds the image from those JARs on native `amd64` and `arm64` runners and pushes each by digest to
+   `quay.io/nebari/nebari-keycloak-theme`.
+3. Joins the two into one multi-arch manifest tagged `latest` and `sha-<commit>`, plus `<version>` when step 4
    is about to cut a release.
-4. **Temporarily,** builds and pushes the Collab image `ghcr.io/nebari-dev/collab-keycloak-theme` as before, so
-   Collab deployments are unaffected. This job goes away when the Collab theme is removed from `themes.json`.
-5. **If no release exists yet for the current version,** cuts a GitHub release `v<version>` with every JAR
+4. **If no release exists yet for the current version,** cuts a GitHub release `v<version>` with every JAR
    attached. The notes list the JARs per theme in `themes.json` and link to [the screenshots](screenshots.md) at
    that commit rather than embedding them. If one exists, it skips this step and logs a notice.
 

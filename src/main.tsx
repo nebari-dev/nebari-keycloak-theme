@@ -1,13 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { getChildBrand, getChildStylesheets, loadChildStylesheets } from "./themes/childTheme";
-import { getThemeDefinition, getThemeLogo, matchThemeName } from "./themes/themeCatalog";
+import { matchThemeName } from "./themes/themeCatalog";
 import type { KcContext } from "./kc.gen";
 import { KcPage } from "./kc.gen";
 import { getKcContextMockForPreview } from "./login/KcContext";
 import "@fontsource-variable/geist";
-// The Collab theme's font. Goes with the Collab theme.
-import "@fontsource-variable/inter-tight";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "./theme.css";
@@ -72,18 +70,6 @@ if (kcContext.themeType === "login") {
        where `resourceUrl` is already usable on its own. */
     const serverBaseUrl = "serverBaseUrl" in kcContext ? kcContext.serverBaseUrl : "";
     loadChildStylesheets(`${serverBaseUrl}${kcContext.resourceUrl}`, getChildStylesheets(themeProperties));
-}
-/* The Admin Console's dashboard renders its hero mark from an asset imported by
-   upstream's vendored `Dashboard.tsx`, which one build cannot swap per theme. The
-   Collab rules in `theme.css` substitute this property instead. Goes with the
-   Collab theme. */
-const brandSymbol = getThemeLogo(
-    getThemeDefinition(kcContext.themeName),
-    "dark",
-    import.meta.env.BASE_URL
-)?.src;
-if (brandSymbol !== undefined) {
-    document.documentElement.style.setProperty("--brand-symbol", `url("${brandSymbol}")`);
 }
 
 createRoot(document.getElementById("root")!).render(

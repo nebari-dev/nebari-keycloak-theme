@@ -104,27 +104,6 @@ const THEME_CATALOG = {
             homepage: "https://www.nebari.dev/",
             logo: "https://github.com/nebari-dev/nebari-design"
         }
-    },
-    /**
-     * OpenTeams Collab. Kept working while its look moves to a Theme
-     * customization preset on the `nebari` theme; it is removed from this repo
-     * once that path is in place. Its styling is the `data-brand="collab"`
-     * section of `src/theme.css`, and the symbol-plus-name lockup is drawn by the
-     * login template and both console mastheads.
-     */
-    collab: {
-        displayName: "Collab",
-        description: "OpenTeams Collab. Deprecated: moving to a Theme customization preset.",
-        brandingMessageKey: "nebariBrandingConfig",
-        defaultBranding: { ...DEFAULT_BRANDING_CONFIG, companyName: "Collab" },
-        componentSet: "nebari",
-        themeCustomization: true,
-        logo: {
-            light: "logo/collab-symbol.png",
-            dark: "logo/collab-symbol.png",
-            width: 40,
-            height: 40
-        }
     }
 } satisfies Record<string, ThemeDefinitionData>;
 

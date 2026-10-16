@@ -121,13 +121,6 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
 
   const resolvedLogo = themeLogo;
 
-  /* Goes with the Collab theme; see the same check in the Admin Console's
-     `PageHeader.tsx`. */
-  const showCollabLockup =
-    getKcContext().kcContext.themeName === "collab" &&
-    resolvedLogo !== undefined &&
-    resolvedLogo.endsWith("logo/collab-symbol.png");
-
   /* Theme customization's wordmark and favicon, from the same validated config. */
   const { wordmark, favicon } = getConsoleBranding({
     themeName: getKcContext().kcContext.themeName,
@@ -165,14 +158,7 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
       </PageToggleButton>
 
       <MenuBarBrand href={indexHref} aria-label={t("logo")}>
-        {showCollabLockup ? (
-          <span className="collab-logo collab-logo--masthead" role="img" aria-label="Collab">
-            <img src={resolvedLogo} alt="" className="collab-logo-symbol" />
-            <span className="collab-logo-wordmark" aria-hidden="true">
-              Collab
-            </span>
-          </span>
-        ) : resolvedLogo ? (
+        {resolvedLogo ? (
           <>
             <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
             {wordmark !== "" && (
