@@ -308,6 +308,13 @@ a:not([data-slot]):hover {
  * read at the same visual weight. The two-class selector wins over that file
  * deterministically — both stylesheets are unlayered, so equal specificity would
  * leave it to load order. */
+/* A realm's own welcome mark from Theme customization, set as a quoted CSS
+   string by `applyBrandingDashboardMark`. `content` replaces the image the
+   vendored Dashboard.tsx imports, without owning that file. */
+html[data-branding-dashboard-mark] .keycloak__dashboard_icon {
+  content: var(--branding-dashboard-mark);
+}
+
 .pf-v5-c-empty-state .keycloak__dashboard_icon {
   display: block;
   margin-inline: auto;

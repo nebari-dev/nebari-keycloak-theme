@@ -5,6 +5,7 @@
  * $ npx keycloakify own --path "admin/PageHeader.tsx" --revert
  */
 
+import { useEffect } from "react";
 import { CircleHelpIcon } from "lucide-react";
 import { ProfileMenu, ProfileMenuItem } from "@/components/nebari/ProfileMenu";
 import { useNebariTheme } from "@/hooks/use-nebari-theme";
@@ -25,7 +26,11 @@ import { useAccess } from "./context/access/Access";
 import { useRealm } from "./context/realm-context/RealmContext";
 import { toDashboard } from "./dashboard/routes/Dashboard";
 import { usePreviewLogo } from "./realm-settings/themes/LogoContext";
-import { getConsoleLogo } from "../branding/consoleLogo";
+import { getConsoleBranding, getConsoleLogo } from "../branding/consoleLogo";
+import {
+  applyBrandingDashboardMark,
+  applyBrandingFavicon,
+} from "../branding/documentBranding";
 import { joinPath } from "./utils/joinPath";
 import useToggle from "./utils/useToggle";
 
@@ -92,6 +97,18 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
     publishedConfig,
   });
 
+  /* Theme customization's wordmark, favicon and welcome-tab mark. All three
+     come out of the same validated config as the logo above. */
+  const { wordmark, favicon, dashboardMark } = getConsoleBranding({
+    themeName: getKcContext().kcContext.themeName,
+    publishedConfig,
+  }).advanced;
+
+  useEffect(() => {
+    applyBrandingFavicon(favicon);
+    applyBrandingDashboardMark(dashboardMark);
+  }, [favicon, dashboardMark]);
+
   const resolvedLogo = customLogo
     ? (customLogo.startsWith("/") ? joinPath(environment["resourceUrl"], customLogo) : customLogo)
     : environment.logo
@@ -135,10 +152,15 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
             </span>
           </span>
         ) : resolvedLogo ? (
-          <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+          <>
+            <img src={resolvedLogo} alt={t("logo")} className="h-8 w-auto" />
+            {wordmark !== "" && (
+              <span className="font-semibold text-lg">{wordmark}</span>
+            )}
+          </>
         ) : (
           <span className="font-semibold text-base">
-            {label(t, realmRepresentation?.displayName, realm)}
+            {wordmark || label(t, realmRepresentation?.displayName, realm)}
           </span>
         )}
       </MenuBarBrand>

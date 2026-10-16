@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 import {
+    DEFAULT_BRANDING_ADVANCED,
+    DEFAULT_BRANDING_CONFIG,
     getBrandingImage,
+    isBrandingCustomized,
     normalizeBrandingConfig,
     TEMPLATE_BRANDING_CONFIG
 } from "../src/branding/brandingConfig";
@@ -121,4 +124,93 @@ test("drops image URLs that are not HTTPS", () => {
     expect(branding.logo).toEqual({ light: "", dark: "" });
     // SVG can carry script, so only raster data URIs are accepted.
     expect(branding.backgroundImage).toEqual({ light: "", dark: LIGHT_LOGO });
+});
+
+test.describe("advanced settings", () => {
+    const defaults = DEFAULT_BRANDING_CONFIG;
+
+    test("default to the theme's own look, so an untouched realm is unbranded", () => {
+        const branding = normalizeBrandingConfig({ ...defaults, advanced: undefined }, defaults);
+
+        expect(branding.advanced).toEqual(DEFAULT_BRANDING_ADVANCED);
+        expect(isBrandingCustomized(branding, defaults)).toBe(false);
+        expect(
+            isBrandingCustomized(
+                { ...defaults, advanced: { ...DEFAULT_BRANDING_ADVANCED, wordmark: "Example" } },
+                defaults
+            )
+        ).toBe(true);
+    });
+
+    test("accept only allowlisted fonts and button shapes", () => {
+        const branding = normalizeBrandingConfig(
+            {
+                ...defaults,
+                advanced: {
+                    font: "https://fonts.example.com/evil.css",
+                    buttonShape: "border-radius: 0; background: url(x)"
+                }
+            },
+            defaults
+        );
+
+        expect(branding.advanced.font).toBe("theme");
+        expect(branding.advanced.buttonShape).toBe("theme");
+    });
+
+    test("clamp numbers and reject anything that is not a number", () => {
+        const clamped = normalizeBrandingConfig(
+            { ...defaults, advanced: { cardOpacity: -50, cardBlur: 9000 } },
+            defaults
+        ).advanced;
+        const rejected = normalizeBrandingConfig(
+            { ...defaults, advanced: { cardOpacity: "50%; color: red", cardBlur: Number.NaN } },
+            defaults
+        ).advanced;
+
+        expect([clamped.cardOpacity, clamped.cardBlur]).toEqual([5, 40]);
+        expect([rejected.cardOpacity, rejected.cardBlur]).toEqual([100, 0]);
+    });
+
+    test("keep text plain, short and free of direction overrides", () => {
+        const advanced = normalizeBrandingConfig(
+            {
+                ...defaults,
+                advanced: {
+                    // U+202E reverses what follows; a wordmark could display as
+                    // something other than what is stored.
+                    wordmark: "\u202eAcme\u0000 and a much, much longer tail, that runs past forty chars",
+                    registerTitle: "<img src=x onerror=alert(1)>"
+                }
+            },
+            defaults
+        ).advanced;
+
+        expect(advanced.wordmark).toBe("Acme and a much, much longer tail, that");
+        expect(advanced.wordmark.length).toBeLessThanOrEqual(40);
+        // Kept as text: it is rendered as a React text node, never as HTML.
+        expect(advanced.registerTitle).toBe("<img src=x onerror=alert(1)>");
+    });
+
+    test("hold icons to HTTPS or raster data URIs of a bounded size", () => {
+        const advanced = normalizeBrandingConfig(
+            {
+                ...defaults,
+                advanced: {
+                    favicon: "http://assets.example.com/favicon.png",
+                    dashboardMark: `data:image/png;base64,${"A".repeat(120_000)}`
+                }
+            },
+            defaults
+        ).advanced;
+
+        expect(advanced.favicon).toBe("");
+        expect(advanced.dashboardMark).toBe("");
+        expect(
+            normalizeBrandingConfig(
+                { ...defaults, advanced: { favicon: "https://assets.example.com/favicon.png" } },
+                defaults
+            ).advanced.favicon
+        ).toBe("https://assets.example.com/favicon.png");
+    });
 });

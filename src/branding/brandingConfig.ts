@@ -19,6 +19,59 @@ export type BrandingPalette = {
 export type BrandingColorScheme = "light" | "dark" | "system";
 export type BrandingLoginMode = "password-and-providers" | "providers-only";
 
+/**
+ * Fonts a realm may choose. Each is bundled and self-hosted, so choosing one
+ * never sends a visitor's browser to a font CDN; `theme` keeps the theme's own
+ * font and `system` uses the operating system's UI font without loading any.
+ */
+export const BRANDING_FONTS = ["theme", "inter-tight", "dm-sans", "system"] as const;
+export type BrandingFont = (typeof BRANDING_FONTS)[number];
+
+export const BRANDING_BUTTON_SHAPES = ["theme", "rounded", "pill", "square"] as const;
+export type BrandingButtonShape = (typeof BRANDING_BUTTON_SHAPES)[number];
+
+/**
+ * Settings beyond palette and artwork, for a brand that needs more than a
+ * recolour. Every field is closed vocabulary: an allowlisted name, a bounded
+ * number, a short plain-text string or a validated image. None of them is CSS,
+ * HTML or a font URL, and none reaches the page as anything but a React text
+ * node, a fixed data attribute or a validated custom property, because the
+ * config is written by realm admins and rendered to unauthenticated visitors.
+ *
+ * The defaults reproduce the theme exactly, so a realm that never opens this
+ * section is unaffected.
+ */
+export type BrandingAdvanced = {
+    font: BrandingFont;
+    /** Card fill opacity in percent, 5 to 100. Below 100 the page shows through. */
+    cardOpacity: number;
+    /** Backdrop blur behind the card in pixels, 0 to 40. */
+    cardBlur: number;
+    buttonShape: BrandingButtonShape;
+    /** A trailing arrow on the primary button. */
+    buttonArrow: boolean;
+    /** Text set beside the logo, for a mark that ships without its name. */
+    wordmark: string;
+    /** Replaces the register page title, which otherwise names the theme. */
+    registerTitle: string;
+    /** The browser-tab icon for the login pages and both consoles. */
+    favicon: string;
+    /** The mark on the Admin Console's welcome tab. */
+    dashboardMark: string;
+};
+
+export const DEFAULT_BRANDING_ADVANCED: BrandingAdvanced = {
+    font: "theme",
+    cardOpacity: 100,
+    cardBlur: 0,
+    buttonShape: "theme",
+    buttonArrow: false,
+    wordmark: "",
+    registerTitle: "",
+    favicon: "",
+    dashboardMark: ""
+};
+
 /** Appearance-specific artwork. An empty variant falls back to the other one. */
 export type BrandingImageSet = {
     light: string;
@@ -51,6 +104,7 @@ export type BrandingConfig = {
     loginMode: BrandingLoginMode;
     light: BrandingPalette;
     dark: BrandingPalette;
+    advanced: BrandingAdvanced;
 };
 
 export const DEFAULT_BRANDING_CONFIG: BrandingConfig = {
@@ -92,7 +146,8 @@ export const DEFAULT_BRANDING_CONFIG: BrandingConfig = {
         text: "#f8f8f8",
         mutedText: "#9d9da6",
         border: "#5a5a61"
-    }
+    },
+    advanced: DEFAULT_BRANDING_ADVANCED
 };
 
 /**
@@ -138,24 +193,47 @@ export const TEMPLATE_BRANDING_CONFIG: BrandingConfig = {
         text: "#fafafa",
         mutedText: "#a1a1a1",
         border: "#737373"
-    }
+    },
+    advanced: DEFAULT_BRANDING_ADVANCED
 };
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 const SAFE_DATA_IMAGE = /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=]+$/i;
 
+/* Control characters, and the bidirectional overrides and isolates that can make
+   rendered text read differently from what is stored (a wordmark that displays
+   as another product's name, say). */
+const UNSAFE_TEXT = /[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g;
+
 function safeText(value: unknown, fallback: string, maxLength: number): string {
     return typeof value === "string"
-        ? value.trim().slice(0, maxLength) || fallback
+        ? value.replace(UNSAFE_TEXT, "").trim().slice(0, maxLength).trimEnd() || fallback
         : fallback;
+}
+
+/** Like `safeText`, but an empty string is a valid, deliberate value. */
+function optionalText(value: unknown, fallback: string, maxLength: number): string {
+    return typeof value === "string"
+        ? value.replace(UNSAFE_TEXT, "").trim().slice(0, maxLength).trimEnd()
+        : fallback;
+}
+
+function boundedInteger(value: unknown, fallback: number, min: number, max: number): number {
+    return typeof value === "number" && Number.isFinite(value)
+        ? Math.min(max, Math.max(min, Math.round(value)))
+        : fallback;
+}
+
+function oneOf<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+    return allowed.includes(value as T) ? (value as T) : fallback;
 }
 
 function safeColor(value: unknown, fallback: string): string {
     return typeof value === "string" && HEX_COLOR.test(value) ? value : fallback;
 }
 
-function safeImage(value: unknown): string {
-    if (typeof value !== "string" || value.length > 900_000) return "";
+function safeImage(value: unknown, maxLength = 900_000): string {
+    if (typeof value !== "string" || value.length > maxLength) return "";
     if (SAFE_DATA_IMAGE.test(value)) return value;
 
     /* HTTPS only. The login page is served to unauthenticated visitors, so a
@@ -219,6 +297,36 @@ function normalizePalette(value: unknown, fallback: BrandingPalette): BrandingPa
     };
 }
 
+/* Icons are small by construction (the editor crops them to 256 px and 48 KB);
+   the bound here is what a hand-edited or imported file is held to. */
+const MAX_ICON_LENGTH = 100_000;
+
+function normalizeAdvanced(value: unknown, fallback: BrandingAdvanced): BrandingAdvanced {
+    const advanced =
+        typeof value === "object" && value !== null && !Array.isArray(value)
+            ? (value as Partial<BrandingAdvanced>)
+            : {};
+
+    return {
+        font: oneOf(advanced.font, BRANDING_FONTS, fallback.font),
+        cardOpacity: boundedInteger(advanced.cardOpacity, fallback.cardOpacity, 5, 100),
+        cardBlur: boundedInteger(advanced.cardBlur, fallback.cardBlur, 0, 40),
+        buttonShape: oneOf(advanced.buttonShape, BRANDING_BUTTON_SHAPES, fallback.buttonShape),
+        buttonArrow:
+            typeof advanced.buttonArrow === "boolean" ? advanced.buttonArrow : fallback.buttonArrow,
+        wordmark: optionalText(advanced.wordmark, fallback.wordmark, 40),
+        registerTitle: optionalText(advanced.registerTitle, fallback.registerTitle, 80),
+        favicon:
+            advanced.favicon === undefined
+                ? fallback.favicon
+                : safeImage(advanced.favicon, MAX_ICON_LENGTH),
+        dashboardMark:
+            advanced.dashboardMark === undefined
+                ? fallback.dashboardMark
+                : safeImage(advanced.dashboardMark, MAX_ICON_LENGTH)
+    };
+}
+
 export function normalizeBrandingConfig(
     value: unknown,
     defaults: BrandingConfig = DEFAULT_BRANDING_CONFIG
@@ -256,7 +364,8 @@ export function normalizeBrandingConfig(
                 ? config.loginMode
                 : defaults.loginMode,
         light: normalizePalette(config.light, defaults.light),
-        dark: normalizePalette(config.dark, defaults.dark)
+        dark: normalizePalette(config.dark, defaults.dark),
+        advanced: normalizeAdvanced(config.advanced, defaults.advanced)
     };
 }
 
@@ -376,6 +485,50 @@ export function getBrandingCssVariables(
         "--text-secondary": palette.text,
         "--text-muted": palette.mutedText,
         "--border-color": palette.border,
-        "--border-subtle": palette.border
+        "--border-subtle": palette.border,
+
+        ...getAdvancedCssVariables(config.advanced)
     } as CSSProperties;
+}
+
+/* CSS font stacks for the allowlisted fonts. The names are fixed here, never
+   taken from the config, so a config can only pick one of these. `theme`
+   leaves the theme's own font in place. */
+const FONT_STACKS: Record<Exclude<BrandingFont, "theme">, string> = {
+    "inter-tight": '"Inter Tight Variable", "Inter Tight", sans-serif',
+    "dm-sans": '"DM Sans", sans-serif',
+    system: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'
+};
+
+function getAdvancedCssVariables(advanced: BrandingAdvanced): Record<string, string> {
+    return {
+        /* Both values are clamped integers by the time they get here. */
+        "--branding-card-opacity": `${advanced.cardOpacity}%`,
+        "--branding-card-blur": `${advanced.cardBlur}px`,
+        ...(advanced.font === "theme"
+            ? {}
+            : {
+                  /* The design system reads the first name, the older login
+                     rules the second. */
+                  "--font-sans": FONT_STACKS[advanced.font],
+                  "--Font-Sans": FONT_STACKS[advanced.font]
+              })
+    };
+}
+
+/**
+ * The data attributes the login stylesheets key the button settings off. Only
+ * non-default values are set, so the theme's own rules apply otherwise.
+ */
+export function getBrandingDataAttributes(
+    advanced: BrandingAdvanced
+): Record<`data-${string}`, string | undefined> {
+    return {
+        "data-button-shape": advanced.buttonShape === "theme" ? undefined : advanced.buttonShape,
+        "data-button-arrow": advanced.buttonArrow ? "" : undefined,
+        /* Even blur(0) changes how a card is composited, so the glass rules only
+           apply when the card is actually translucent or blurred. */
+        "data-card-glass":
+            advanced.cardOpacity < 100 || advanced.cardBlur > 0 ? "" : undefined
+    };
 }

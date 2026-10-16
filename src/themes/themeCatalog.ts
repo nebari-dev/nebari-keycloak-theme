@@ -247,3 +247,13 @@ export function parseThemeBrandingConfig(
 ): BrandingConfig {
     return parseBrandingConfig(value, theme.defaultBranding);
 }
+
+/** The branding a login page should render, read from the realm's messages. */
+export function readPublishedBranding(
+    themeName: string | undefined,
+    msgStr: (key: BrandingMessageKey) => string
+): BrandingConfig {
+    const theme = getThemeDefinition(themeName);
+
+    return parseThemeBrandingConfig(theme, msgStr(theme.brandingMessageKey));
+}

@@ -40,8 +40,13 @@ import { Slider } from "@/components/ui/slider";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import {
+    BRANDING_BUTTON_SHAPES,
+    BRANDING_FONTS,
     serializeBrandingConfig,
+    type BrandingAdvanced,
+    type BrandingButtonShape,
     type BrandingConfig,
+    type BrandingFont,
     type BrandingPalette
 } from "../../branding/brandingConfig";
 import {
@@ -53,7 +58,8 @@ import {
 import { isHexColor, normalizeHexInput } from "../../branding/color";
 import {
     getBrandingImageDimensions,
-    type ImageDimensions
+    type ImageDimensions,
+    type ImageKind
 } from "../../branding/imageUpload";
 import {
     DEFAULT_THEME_NAME,
@@ -275,11 +281,207 @@ type ImageControlProps = {
     id: string;
     label: string;
     help: string;
-    kind: "logo" | "background";
+    kind: ImageKind;
     value: string;
     onChange: (value: string) => void;
     onError: (message: string) => void;
 };
+
+const FONT_LABELS: Record<BrandingFont, string> = {
+    theme: "Theme font",
+    "inter-tight": "Inter Tight",
+    "dm-sans": "DM Sans",
+    system: "System font"
+};
+
+const BUTTON_SHAPE_LABELS: Record<BrandingButtonShape, string> = {
+    theme: "Theme default",
+    rounded: "Rounded",
+    pill: "Pill",
+    square: "Square"
+};
+
+type AdvancedSettingsCardProps = {
+    value: BrandingAdvanced;
+    onChange: <Key extends keyof BrandingAdvanced>(
+        key: Key,
+        value: BrandingAdvanced[Key]
+    ) => void;
+    onImageError: (message: string) => void;
+};
+
+/**
+ * Settings for a brand that needs more than colours and artwork.
+ *
+ * Every control maps to one closed-vocabulary field of `BrandingAdvanced`: a
+ * choice from a fixed list, a bounded slider, a short plain-text box or a
+ * validated image. There is deliberately no free CSS, HTML or font URL box —
+ * this config is written by realm admins and rendered to every visitor of the
+ * login page, so the editor only offers what the validator would accept.
+ */
+function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSettingsCardProps) {
+    const [expanded, setExpanded] = useState(false);
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Advanced settings</CardTitle>
+                <CardDescription>
+                    Typography, card surface, buttons, a wordmark and the browser icon, for a
+                    brand that needs more than colours and a logo.
+                </CardDescription>
+                <Button
+                    aria-controls="branding-advanced-settings"
+                    aria-expanded={expanded}
+                    className="w-fit"
+                    onClick={() => setExpanded(current => !current)}
+                    variant="outline"
+                >
+                    {expanded ? "Hide advanced settings" : "Show advanced settings"}
+                </Button>
+            </CardHeader>
+            {expanded && (
+                <CardContent className="branding-form" id="branding-advanced-settings">
+                    <Field>
+                        <FieldLabel htmlFor="branding-font">Font</FieldLabel>
+                        <Select
+                            onValueChange={next => onChange("font", next as BrandingFont)}
+                            value={value.font}
+                        >
+                            <SelectTrigger aria-label="Login page font" id="branding-font">
+                                <SelectValue>
+                                    {(font: BrandingFont) => FONT_LABELS[font]}
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {BRANDING_FONTS.map(font => (
+                                    <SelectItem key={font} value={font}>
+                                        {FONT_LABELS[font]}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FieldDescription>
+                            Bundled with the theme, so no visitor's browser is sent to a font
+                            service.
+                        </FieldDescription>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel>Card opacity ({value.cardOpacity}%)</FieldLabel>
+                        <Slider
+                            max={100}
+                            min={5}
+                            onValueChange={next =>
+                                onChange("cardOpacity", Array.isArray(next) ? next[0] : next)
+                            }
+                            value={value.cardOpacity}
+                        />
+                    </Field>
+
+                    <Field>
+                        <FieldLabel>Background blur behind the card ({value.cardBlur}px)</FieldLabel>
+                        <Slider
+                            max={40}
+                            min={0}
+                            onValueChange={next =>
+                                onChange("cardBlur", Array.isArray(next) ? next[0] : next)
+                            }
+                            value={value.cardBlur}
+                        />
+                        <FieldDescription>
+                            With opacity below 100%, the page background shows through the card.
+                            Check that text on the card stays readable.
+                        </FieldDescription>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel htmlFor="branding-button-shape">Button shape</FieldLabel>
+                        <Select
+                            onValueChange={next =>
+                                onChange("buttonShape", next as BrandingButtonShape)
+                            }
+                            value={value.buttonShape}
+                        >
+                            <SelectTrigger aria-label="Button shape" id="branding-button-shape">
+                                <SelectValue>
+                                    {(shape: BrandingButtonShape) => BUTTON_SHAPE_LABELS[shape]}
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {BRANDING_BUTTON_SHAPES.map(shape => (
+                                    <SelectItem key={shape} value={shape}>
+                                        {BUTTON_SHAPE_LABELS[shape]}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </Field>
+
+                    <div className="branding-reuse-toggle">
+                        <Checkbox
+                            checked={value.buttonArrow}
+                            id="branding-button-arrow"
+                            onCheckedChange={checked => onChange("buttonArrow", checked === true)}
+                        >
+                            Arrow on the sign-in button
+                        </Checkbox>
+                    </div>
+
+                    <Field>
+                        <FieldLabel htmlFor="branding-wordmark">Wordmark</FieldLabel>
+                        <Input
+                            id="branding-wordmark"
+                            maxLength={40}
+                            onChange={event => onChange("wordmark", event.target.value)}
+                            placeholder="Shown beside the logo"
+                            value={value.wordmark}
+                        />
+                        <FieldDescription>
+                            Plain text set beside the logo on the login card and in the console
+                            headers, for a mark that ships without its name. Up to 40 characters.
+                        </FieldDescription>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel htmlFor="branding-register-title">Register page title</FieldLabel>
+                        <Input
+                            id="branding-register-title"
+                            maxLength={80}
+                            onChange={event => onChange("registerTitle", event.target.value)}
+                            placeholder="Theme default"
+                            value={value.registerTitle}
+                        />
+                        <FieldDescription>
+                            Replaces the title on the sign-up page. Leave empty to keep the
+                            theme's.
+                        </FieldDescription>
+                    </Field>
+
+                    <ImageControl
+                        help="Square PNG, JPEG or WebP, shown in the browser tab on the login pages and both consoles."
+                        id="branding-favicon"
+                        kind="icon"
+                        label="Browser icon"
+                        onChange={next => onChange("favicon", next)}
+                        onError={onImageError}
+                        value={value.favicon}
+                    />
+
+                    <ImageControl
+                        help="Replaces the mark on the Admin Console's welcome tab."
+                        id="branding-dashboard-mark"
+                        kind="icon"
+                        label="Admin welcome mark"
+                        onChange={next => onChange("dashboardMark", next)}
+                        onError={onImageError}
+                        value={value.dashboardMark}
+                    />
+                </CardContent>
+            )}
+        </Card>
+    );
+}
 
 function ImageControl({
     id,
@@ -570,6 +772,13 @@ export default function BrandingSection() {
         value: BrandingConfig[Key]
     ) => {
         setDraft(current => ({ ...current, [key]: value }));
+    };
+
+    const updateAdvanced = <Key extends keyof BrandingAdvanced>(
+        key: Key,
+        value: BrandingAdvanced[Key]
+    ) => {
+        setDraft(current => ({ ...current, advanced: { ...current.advanced, [key]: value } }));
     };
 
     const updateImage = (
@@ -1340,6 +1549,12 @@ export default function BrandingSection() {
                                 </Button>
                             </CardContent>
                         </Card>
+
+                        <AdvancedSettingsCard
+                            onChange={updateAdvanced}
+                            onImageError={setImageError}
+                            value={draft.advanced}
+                        />
                     </div>
 
                     <div className="branding-preview-panel">

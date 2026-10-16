@@ -10,9 +10,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
     getBrandingImage,
     getBrandingCssVariables,
+    getBrandingDataAttributes,
     isBrandingCustomized,
     type BrandingColorScheme
 } from "../branding/brandingConfig";
+import { applyBrandingFavicon } from "../branding/documentBranding";
+import { loadBrandingFont } from "../branding/fonts";
 import { getThemeDefinition, parseThemeBrandingConfig } from "../themes/themeCatalog";
 
 /** A realm pinned to one appearance overrides the visitor's preference. */
@@ -75,11 +78,20 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
     const logo = getBrandingImage(branding.logo, paletteMode);
     const background = getBrandingImage(branding.backgroundImage, paletteMode);
+    const hasCustomLogo = isBranded && logo !== "";
+    const wordmark = isBranded ? branding.advanced.wordmark : "";
+
+    useEffect(() => {
+        if (!isBranded) return;
+        loadBrandingFont(branding.advanced.font);
+        applyBrandingFavicon(branding.advanced.favicon);
+    }, [isBranded, branding.advanced.font, branding.advanced.favicon]);
 
     return (
         <main
             className="nebari-login-wrapper"
             data-branded={isBranded ? "" : undefined}
+            {...(isBranded ? getBrandingDataAttributes(branding.advanced) : {})}
             data-has-custom-background={
                 isBranded && background !== "" ? "" : undefined
             }
@@ -105,12 +117,22 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                         realm has one logo for both, so it replaces the pair rather
                         than being sized by JS — which keeps an unbranded realm
                         rendering exactly as it did before branding existed. */}
-                    {isBranded && logo !== "" ? (
-                        <img
-                            src={logo}
-                            alt={`${branding.companyName} logo`}
-                            className="nebari-logo"
-                        />
+                    {/* A wordmark is set as text beside the mark, for a logo that
+                        ships without its name; the text is then the accessible
+                        name and the image is decorative. With no logo of its own,
+                        a realm with a wordmark shows the text alone rather than
+                        Nebari's mark. */}
+                    {hasCustomLogo || wordmark !== "" ? (
+                        <div className="nebari-lockup">
+                            {hasCustomLogo && (
+                                <img
+                                    src={logo}
+                                    alt={wordmark !== "" ? "" : `${branding.companyName} logo`}
+                                    className="nebari-logo"
+                                />
+                            )}
+                            {wordmark !== "" && <span className="nebari-wordmark">{wordmark}</span>}
+                        </div>
                     ) : themeDefinition.name === "collab" ? (
                         /* Goes with the Collab theme. Collab publishes no
                            light-on-dark wordmark, so the lockup is the symbol as an

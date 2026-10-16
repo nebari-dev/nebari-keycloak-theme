@@ -1318,6 +1318,95 @@ a.nebari-button.nebari-button-primary:visited {
     color: var(--foreground);
 }
 
+/* ========================
+   ADVANCED BRANDING (Theme customization, both login themes)
+   ========================
+   Keyed off data attributes and custom properties that the templates set from
+   the validated config: `data-button-shape` is one of three fixed words,
+   `data-button-arrow` and `data-card-glass` are flags, and the custom
+   properties are clamped numbers or allowlisted font stacks. Nothing here
+   reads free text from a realm. */
+
+:root .nebari-login-wrapper[data-branded][data-card-glass] .nebari-login-card,
+:root [data-login-theme="template"][data-card-glass] .branding-card {
+    background: color-mix(in srgb, var(--card) var(--branding-card-opacity, 100%), transparent);
+    -webkit-backdrop-filter: blur(var(--branding-card-blur, 0px));
+    backdrop-filter: blur(var(--branding-card-blur, 0px));
+}
+
+/* A chosen font arrives as `--font-sans` on the login wrapper. Text that only
+   inherits its font from <body> resolved that variable at the root, so the
+   family is restated here, where the override is in scope. */
+:root [data-login-theme="template"],
+:root .nebari-login-wrapper[data-branded] {
+    font-family: var(--font-sans);
+}
+
+/* Logo plus wordmark. */
+.nebari-lockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* `.nebari-logo` has a fixed width sized for Nebari's wide wordmark logo; beside
+   a text wordmark the mark sizes to its own aspect instead. */
+.nebari-lockup:has(.nebari-wordmark) .nebari-logo {
+    width: auto;
+    height: 32px;
+    /* The base rule centres with auto margins, which in a flex row would take
+       the free space and push the mark away from its name. */
+    margin: 0;
+}
+
+.nebari-wordmark {
+    color: var(--card-foreground, #262628);
+    font-family: var(--Font-Sans, var(--font-sans));
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: -0.01em;
+}
+
+:root [data-button-shape="rounded"] :is(.nebari-button, .nebari-button-primary, .nebari-button-secondary, .nebari-social-button, button[type="submit"], input[type="submit"], [data-slot="button"]) {
+    border-radius: 8px;
+}
+
+:root [data-button-shape="pill"] :is(.nebari-button, .nebari-button-primary, .nebari-button-secondary, .nebari-social-button, button[type="submit"], input[type="submit"], [data-slot="button"]) {
+    border-radius: 9999px;
+}
+
+:root [data-button-shape="square"] :is(.nebari-button, .nebari-button-primary, .nebari-button-secondary, .nebari-social-button, button[type="submit"], input[type="submit"], [data-slot="button"]) {
+    border-radius: 0;
+}
+
+/* A trailing arrow on the primary action, drawn with a mask so it takes the
+   button's text colour. `input[type="submit"]` cannot carry ::after and keeps
+   its plain label. */
+:root [data-button-arrow] :is(#kc-login, .nebari-button-primary, button[type="submit"])::after {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 0.5em;
+    vertical-align: -0.125em;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22%2F%3E%3Cpath%20d%3D%22m12%205%207%207-7%207%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22%2F%3E%3Cpath%20d%3D%22m12%205%207%207-7%207%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    transition: transform 0.15s ease;
+}
+
+:root [data-button-arrow] :is(#kc-login, .nebari-button-primary, button[type="submit"]):is(:hover, :focus-visible)::after {
+    transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root [data-button-arrow] :is(#kc-login, .nebari-button-primary, button[type="submit"])::after {
+        transition: none;
+    }
+}
+
 /* ==========================================================================
    COLLAB THEME
    ========================================================================== */

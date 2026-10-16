@@ -5,7 +5,9 @@
  * $ npx keycloakify own --path "account/root/Header.tsx" --revert
  */
 
-import { getConsoleLogo } from "../../branding/consoleLogo";
+import { useEffect } from "react";
+import { getConsoleBranding, getConsoleLogo } from "../../branding/consoleLogo";
+import { applyBrandingFavicon } from "../../branding/documentBranding";
 import { ProfileMenu } from "@/components/nebari/ProfileMenu";
 import {
   MenuBarActions,
@@ -107,13 +109,14 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
      as the Admin Console does, rather than borrowing another theme's logo. */
   /* See the note in `PageHeader.tsx`: `t` does not know this theme's custom
      message key, and the value is validated on the way through. */
+  const publishedConfig = (t as unknown as (key: string) => string)(
+    "nebariBrandingConfig",
+  );
   const themeLogo = getConsoleLogo({
     themeName: getKcContext().kcContext.themeName,
     mode: isDarkMode ? "dark" : "light",
     baseUrl: import.meta.env.BASE_URL,
-    publishedConfig: (t as unknown as (key: string) => string)(
-      "nebariBrandingConfig",
-    ),
+    publishedConfig,
   });
 
   const resolvedLogo = themeLogo;
@@ -124,6 +127,16 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
     getKcContext().kcContext.themeName === "collab" &&
     resolvedLogo !== undefined &&
     resolvedLogo.endsWith("logo/collab-symbol.png");
+
+  /* Theme customization's wordmark and favicon, from the same validated config. */
+  const { wordmark, favicon } = getConsoleBranding({
+    themeName: getKcContext().kcContext.themeName,
+    publishedConfig,
+  }).advanced;
+
+  useEffect(() => {
+    applyBrandingFavicon(favicon);
+  }, [favicon]);
 
   const token = keycloak.idTokenParsed ?? {};
   const picture = typeof token.picture === "string" ? token.picture : undefined;
@@ -160,10 +173,15 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
             </span>
           </span>
         ) : resolvedLogo ? (
-          <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
+          <>
+            <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
+            {wordmark !== "" && (
+              <span className="font-semibold text-lg">{wordmark}</span>
+            )}
+          </>
         ) : (
           <span className="font-semibold text-base">
-            {getKcContext().kcContext.realm.name}
+            {wordmark || getKcContext().kcContext.realm.name}
           </span>
         )}
       </MenuBarBrand>

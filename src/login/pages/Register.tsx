@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FieldError } from "@/components/ui/field";
 import { kcClassesMap } from "../userProfileClasses";
 import { useRecaptchaSubmitCallback } from "../recaptcha";
+import { readPublishedBranding } from "../../themes/themeCatalog";
 
 type Props = PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n> & {
     UserProfileFormFields: LazyOrNot<
@@ -63,6 +64,10 @@ export default function Register(props: Props) {
     const isInvisibleRecaptcha =
         recaptchaRequired && !recaptchaVisible && recaptchaAction !== undefined;
 
+    /* A realm can replace the title, which otherwise names the theme. Plain
+       text from the validated branding config, rendered as a text node. */
+    const { registerTitle } = readPublishedBranding(kcContext.themeName, i18n.msgStr).advanced;
+
     return (
         <Template
             kcContext={kcContext}
@@ -74,7 +79,7 @@ export default function Register(props: Props) {
             headerNode={
                 messageHeader !== undefined
                     ? advancedMsg(messageHeader)
-                    : msg("registerTitle")
+                    : registerTitle || msg("registerTitle")
             }
             infoNode={
                 <div>

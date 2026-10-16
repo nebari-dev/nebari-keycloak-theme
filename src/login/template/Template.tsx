@@ -10,8 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/ca
 import {
     getBrandingImage,
     getBrandingCssVariables,
+    getBrandingDataAttributes,
     type BrandingColorScheme
 } from "../../branding/brandingConfig";
+import { applyBrandingFavicon } from "../../branding/documentBranding";
+import { loadBrandingFont } from "../../branding/fonts";
 import { getThemeDefinition, parseThemeBrandingConfig } from "../../themes/themeCatalog";
 
 /** A realm pinned to one appearance overrides the visitor's preference. */
@@ -93,6 +96,12 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     } as CSSProperties;
     const logo = getBrandingImage(branding.logo, mode);
     const background = getBrandingImage(branding.backgroundImage, mode);
+    const { wordmark } = branding.advanced;
+
+    useEffect(() => {
+        loadBrandingFont(branding.advanced.font);
+        applyBrandingFavicon(branding.advanced.favicon);
+    }, [branding.advanced.font, branding.advanced.favicon]);
     const backgroundImage =
         background !== ""
             ? `linear-gradient(${branding[mode].pageBackground}d9, ${branding[mode].pageBackground}d9), url(${JSON.stringify(background)})`
@@ -101,6 +110,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     return (
         <main
             data-login-theme="template"
+            {...getBrandingDataAttributes(branding.advanced)}
             className="flex min-h-screen w-full items-center justify-center bg-background bg-cover bg-center p-6 text-foreground"
             style={{
                 ...paletteVariables,
@@ -110,24 +120,32 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
         >
             <div className="w-full max-w-sm">
                 <Card
-                    className="gap-6"
+                    className="branding-card gap-6"
                     style={{ borderRadius: `${branding.cardRadius}px` }}
                 >
                     <CardHeader className="text-center">
                         {/* No default artwork: a template theme ships unbranded
                             on purpose. A logo appears only once a deployment
                             uploads one, so nothing has to be removed first. */}
-                        {logo !== "" && (
-                            <div className="mb-4 flex justify-center">
-                                <img
-                                    src={logo}
-                                    alt={
-                                        branding.companyName !== ""
-                                            ? `${branding.companyName} logo`
-                                            : ""
-                                    }
-                                    className="h-10 w-auto object-contain"
-                                />
+                        {(logo !== "" || wordmark !== "") && (
+                            <div className="mb-4 flex items-center justify-center gap-3">
+                                {logo !== "" && (
+                                    <img
+                                        src={logo}
+                                        alt={
+                                            wordmark === "" && branding.companyName !== ""
+                                                ? `${branding.companyName} logo`
+                                                : ""
+                                        }
+                                        className="h-10 w-auto object-contain"
+                                    />
+                                )}
+                                {/* Plain text beside the mark; see the nebari Template. */}
+                                {wordmark !== "" && (
+                                    <span className="font-semibold text-2xl tracking-tight">
+                                        {wordmark}
+                                    </span>
+                                )}
                             </div>
                         )}
                         <CardTitle>
