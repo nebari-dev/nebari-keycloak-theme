@@ -1,48 +1,61 @@
 name: Publish Keycloak theme
 
+# Pull requests build the JARs and the image for both architectures without
+# pushing anything, so a broken build shows up before merge. Pushes to main
+# publish quay.io/nebari/nebari-keycloak-theme, and cut a GitHub release when
+# the version in package.json has none yet.
 on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  # The Collab theme is published as its own package, so a Collab deployment
-  # pulls an image that carries only the `collab` theme.
-  COLLAB_IMAGE_NAME: ${{ github.repository_owner }}/collab-keycloak-theme
+  REGISTRY: quay.io
+  IMAGE_NAME: nebari/nebari-keycloak-theme
+  # TEMPORARY: the Collab theme keeps its existing GHCR image until it is
+  # removed from themes.json. See the collab-image job.
+  COLLAB_IMAGE: ghcr.io/${{ github.repository_owner }}/collab-keycloak-theme
 
-# Never cancel a publish midway — a half-pushed image or release is worse than
-# a queued one.
+# A newer push supersedes a pull-request run, but a publish is never cancelled
+# midway: a half-pushed image or release is worse than a queued one.
 concurrency:
   group: publish-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  publish:
+  jars:
+    name: Build theme JARs
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      # Only main publishes. A manual run on any other branch builds and stops.
+      publish: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+      release-exists: ${{ steps.release.outputs.exists }}
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 20
           cache: npm
 
       # keycloakify shells out to Maven to assemble the theme JARs. No Maven
-      # cache: setup-java@v6 errors when no pom.xml exists at checkout time,
-      # and this repo only gets one generated during the keycloakify build.
+      # cache: setup-java errors when no pom.xml exists at checkout time, and
+      # this repo only gets one generated during the keycloakify build.
       - name: Set up Java and Maven
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           distribution: temurin
           java-version: "17"
@@ -57,143 +70,307 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
 
-      # The image is republished on every push to main, but a release is cut only
-      # for a version that does not have one yet. Without this, every commit to
-      # main would try to reuse the same tag and fail.
+      # The image is republished on every push to main, but a release, and the
+      # image's version tag with it, is cut only for a version that does not
+      # have one yet. That keeps `:<version>` pointing at one commit for good.
       - name: Check whether the release already exists
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+          if gh release view "$TAG" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::Release ${{ steps.version.outputs.tag }} already exists, so no new release will be cut. Bump \"version\" in package.json to publish one. The container image is still being updated."
+            echo "::notice::Release $TAG already exists, so no new release or version tag will be published. Bump \"version\" in package.json to cut one."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Produces separate Nebari and Collab JARs for each supported Keycloak
-      # version range. Each JAR carries exactly one theme — the build script
-      # verifies that — so each image below can install just its own.
+      # Produces one JAR per theme for each supported Keycloak version range.
+      # Each JAR carries exactly one theme; the build script verifies that.
       - name: Build Keycloak themes
         run: npm run build-keycloak-theme
 
-      # Keep the JARs downloadable on every main-branch run, including commits
-      # that intentionally reuse the current release version.
-      - name: Publish Nebari JAR artifact
-        uses: actions/upload-artifact@v7
+      - name: Upload theme JARs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: nebari-keycloak-theme-${{ steps.version.outputs.version }}
-          path: dist_keycloak/nebari-keycloak-theme-*.jar
+          name: keycloak-themes-${{ steps.version.outputs.version }}
+          path: dist_keycloak/*.jar
           if-no-files-found: error
 
-      - name: Publish Collab JAR artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: collab-keycloak-theme-${{ steps.version.outputs.version }}
-          path: dist_keycloak/collab-keycloak-theme-*.jar
-          if-no-files-found: error
+  image:
+    name: Image (${{ matrix.arch }})
+    needs: jars
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+
+      # The Dockerfile copies the JARs from dist_keycloak/, so the image is
+      # built from the exact JARs the release ships. Its default THEME_JAR glob
+      # installs every theme left in that directory.
+      - name: Download theme JARs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: keycloak-themes-${{ needs.jars.outputs.version }}
+          path: dist_keycloak
+
+      # TEMPORARY: Collab is not a Nebari theme and must not ship in the Nebari
+      # image. It keeps its own GHCR image (the collab-image job) until it is
+      # removed from themes.json; delete this step with it.
+      - name: Keep the Collab theme out of the Nebari image
+        run: |
+          rm -f dist_keycloak/collab-keycloak-theme-*.jar
+          if compgen -G "dist_keycloak/collab-*" > /dev/null; then
+            echo "::error::Collab JARs are still in the build context"
+            exit 1
+          fi
+          ls dist_keycloak
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
+
+      # No continue-on-error: on main a failed login must fail the run, not
+      # quietly skip the publish.
+      - name: Log in to Quay.io
+        if: needs.jars.outputs.publish == 'true'
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
         with:
           registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Generate image labels
+        id: metadata
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+          labels: |
+            org.opencontainers.image.title=nebari-keycloak-theme
+            org.opencontainers.image.description=Keycloak with the Nebari Keycloak themes installed
+
+      # Each architecture is pushed by digest only; the manifest job below
+      # joins them under the real tags. Pull requests build without pushing.
+      - name: Build image
+        id: build
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
+        with:
+          context: .
+          platforms: linux/${{ matrix.arch }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: type=gha,scope=image-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=image-${{ matrix.arch }}
+          provenance: false
+          outputs: ${{ needs.jars.outputs.publish == 'true' && format('type=image,name={0}/{1},push-by-digest=true,name-canonical=true,push=true', env.REGISTRY, env.IMAGE_NAME) || 'type=cacheonly' }}
+
+      - name: Export digest
+        if: needs.jars.outputs.publish == 'true'
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/digests"
+          touch "$RUNNER_TEMP/digests/${DIGEST#sha256:}"
+
+      - name: Upload digest
+        if: needs.jars.outputs.publish == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: digest-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # TEMPORARY: publishes the Collab theme to its existing GHCR package with the
+  # same tags as before, so Collab deployments are unaffected while Collab moves
+  # to its own repository. Remove this job, COLLAB_IMAGE and the Collab lines in
+  # the release notes when the Collab theme leaves themes.json.
+  collab-image:
+    name: Collab image (temporary, GHCR)
+    needs: jars
+    if: needs.jars.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+
+      - name: Download theme JARs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: keycloak-themes-${{ needs.jars.outputs.version }}
+          path: dist_keycloak
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
+        with:
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Generate Nebari image metadata
-        id: metadata
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=raw,value=${{ steps.version.outputs.version }}
-            type=sha,prefix=sha-
-
-      - name: Build and publish Nebari image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          push: true
-          build-args: |
-            KEYCLOAK_VERSION=26.8.0
-            THEME_JAR=nebari-keycloak-theme-for-kc-all-other-versions.jar
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
 
       # The `org.opencontainers.image.source` label this sets links the package
-      # to this repository, which is what lets GITHUB_TOKEN create and push it.
+      # to this repository, which is what lets GITHUB_TOKEN push to it.
       - name: Generate Collab image metadata
-        id: collab-metadata
-        uses: docker/metadata-action@v6
+        id: metadata
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6
         with:
-          images: ${{ env.REGISTRY }}/${{ env.COLLAB_IMAGE_NAME }}
+          images: ${{ env.COLLAB_IMAGE }}
           tags: |
             type=raw,value=latest
-            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=${{ needs.jars.outputs.version }}
             type=sha,prefix=sha-
 
       - name: Build and publish Collab image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
         with:
           context: .
           push: true
           build-args: |
-            KEYCLOAK_VERSION=26.8.0
             THEME_JAR=collab-keycloak-theme-for-kc-all-other-versions.jar
-          tags: ${{ steps.collab-metadata.outputs.tags }}
-          labels: ${{ steps.collab-metadata.outputs.labels }}
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
 
-      # The only release assets are the JARs — that is all a consumer needs. The
+  manifest:
+    name: Publish multi-arch manifest
+    needs: [jars, image]
+    if: needs.jars.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
+
+      - name: Log in to Quay.io
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Download digests
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digest-*
+          merge-multiple: true
+
+      # `latest` and `sha-<commit>` on every publish. The version tag only
+      # alongside a new release, so it never moves once published.
+      - name: Create and push manifest list
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          VERSION: ${{ needs.jars.outputs.version }}
+          NEW_RELEASE: ${{ needs.jars.outputs.release-exists == 'false' }}
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          tags=(--tag "$IMAGE:latest" --tag "$IMAGE:sha-${GITHUB_SHA::7}")
+          if [ "$NEW_RELEASE" = "true" ]; then
+            tags+=(--tag "$IMAGE:$VERSION")
+          fi
+          sources=()
+          for digest in *; do
+            sources+=("$IMAGE@sha256:$digest")
+          done
+          docker buildx imagetools create "${tags[@]}" "${sources[@]}"
+
+      - name: Inspect manifest
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        run: docker buildx imagetools inspect "$IMAGE:sha-${GITHUB_SHA::7}"
+
+  release:
+    name: Cut GitHub release
+    needs: [jars, manifest, collab-image]
+    if: needs.jars.outputs.publish == 'true' && needs.jars.outputs.release-exists == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      # For themes.json, which lists the themes the notes describe.
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+
+      - name: Download theme JARs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: keycloak-themes-${{ needs.jars.outputs.version }}
+          path: dist_keycloak
+
+      # The only release assets are the JARs; that is all a consumer needs. The
       # notes carry no screenshots: docs/screenshots.md shows them, linked here
       # at the release commit.
       - name: Compose release notes
-        if: steps.release.outputs.exists == 'false'
         env:
           SCREENSHOTS: https://github.com/${{ github.repository }}/blob/${{ github.sha }}/docs/screenshots.md
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.jars.outputs.version }}
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          COLLAB_IMAGE: ${{ env.REGISTRY }}/${{ env.COLLAB_IMAGE_NAME }}
         run: |
           {
-            echo "## Nebari and Collab Keycloak themes $VERSION"
+            echo "## Nebari Keycloak themes $VERSION"
             echo
             echo "See [what the theme looks like]($SCREENSHOTS) in this release."
             echo
-            echo "### Install the theme"
+            echo "### Install a theme"
             echo
-            echo "Download the JAR matching your theme and server, drop it into Keycloak's"
+            echo "Download the JAR matching your Keycloak version, drop it into Keycloak's"
             echo "\`providers/\` directory and run \`bin/kc.sh build\`:"
             echo
             echo "| Theme | Keycloak version | Asset |"
             echo "| --- | --- | --- |"
-            echo "| Nebari | 26 and newer | \`nebari-keycloak-theme-for-kc-all-other-versions.jar\` |"
-            echo "| Nebari | 22 to 25 | \`nebari-keycloak-theme-for-kc-22-to-25.jar\` |"
-            echo "| Collab | 26 and newer | \`collab-keycloak-theme-for-kc-all-other-versions.jar\` |"
-            echo "| Collab | 22 to 25 | \`collab-keycloak-theme-for-kc-22-to-25.jar\` |"
+            for theme in $(jq -r '.[]' themes.json); do
+              echo "| \`$theme\` | 26 and newer | \`$theme-keycloak-theme-for-kc-all-other-versions.jar\` |"
+              echo "| \`$theme\` | 22 to 25 | \`$theme-keycloak-theme-for-kc-22-to-25.jar\` |"
+            done
             echo
-            echo "Then select **nebari** or **collab** as the login, account and admin theme for your realm."
+            echo "Then set that theme as the login, account and admin theme under"
+            echo "**Realm settings -> Themes**."
             echo
             echo "### Or use the prebuilt image"
             echo
             echo '```bash'
-            echo "docker pull $IMAGE:$VERSION         # Nebari"
-            echo "docker pull $COLLAB_IMAGE:$VERSION  # Collab"
+            echo "docker pull $IMAGE:$VERSION             # nebari"
+            # TEMPORARY: until the Collab theme leaves themes.json.
+            echo "docker pull $COLLAB_IMAGE:$VERSION  # collab"
             echo '```'
           } > release-notes.md
           cat release-notes.md
 
       - name: Publish release
-        if: steps.release.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.jars.outputs.tag }}
+          VERSION: ${{ needs.jars.outputs.version }}
         run: |
-          gh release create "${{ steps.version.outputs.tag }}" \
-            --title "Nebari and Collab Keycloak themes ${{ steps.version.outputs.version }}" \
+          gh release create "$TAG" \
+            --title "Nebari Keycloak themes $VERSION" \
             --notes-file release-notes.md \
-            --target "${{ github.sha }}" \
+            --target "$GITHUB_SHA" \
             dist_keycloak/*.jar

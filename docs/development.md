@@ -26,8 +26,9 @@ Every pull request runs [`playwright.yml`](../.github/workflows/playwright.yml):
 2. **Type check** &mdash; `npm run typecheck`
 3. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<brand>/`
 
-Pushes to `main` also run the publisher, which builds through `npm run build` and so runs the guards again.
-See [Releasing](releasing.md).
+Pull requests and pushes to `main` also run the publisher. On a pull request it builds the JARs and the image
+for both architectures without pushing, so a packaging failure shows up before merge. See
+[Releasing](releasing.md).
 
 **What CI does not cover:** the Admin and Account consoles have no automated visual or behavioural test. The
 screenshots are login pages only, because the consoles need a live Keycloak session to render. The upgrade
