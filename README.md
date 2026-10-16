@@ -31,7 +31,6 @@
   src="https://github.com/nebari-dev/nebari-keycloak-theme/actions/workflows/publish-keycloak-image.yml/badge.svg" alt="Publish"></a>
   <a href="https://github.com/nebari-dev/nebari-keycloak-theme/releases/latest"><img
   src="https://img.shields.io/github/v/release/nebari-dev/nebari-keycloak-theme?logo=github&label=release" alt="Latest release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
   <a href="https://www.keycloak.org"><img src="https://img.shields.io/badge/Keycloak-26-4d4d4d?logo=keycloak&logoColor=white" alt="Keycloak 26"></a>
   <a href="https://www.keycloakify.dev"><img src="https://img.shields.io/badge/Keycloakify-11-6a5acd" alt="Keycloakify 11"></a>
 </p>
@@ -77,8 +76,8 @@ where it stops, is in [Architecture](docs/architecture.md).
 | `template` | Stock shadcn/ui components, no logo, neutral palette | A starting point to brand |
 
 Each JAR is named `<theme>-keycloak-theme-for-kc-all-other-versions.jar` (Keycloak 26+) or
-`<theme>-keycloak-theme-for-kc-22-to-25.jar`. The Admin Console's **Theme customization** page rebrands any
-theme's login pages per realm without a rebuild &mdash; see [Theme customization](docs/theme-customization.md),
+`<theme>-keycloak-theme-for-kc-22-to-25.jar`. The image `quay.io/nebari/nebari-keycloak-theme` (amd64 and
+arm64) carries both. The Admin Console's **Theme customization** page rebrands any theme's login pages per realm without a rebuild &mdash; see [Theme customization](docs/theme-customization.md),
 which also covers adding a theme.
 
 ## Quick start

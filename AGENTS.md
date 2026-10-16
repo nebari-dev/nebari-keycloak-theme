@@ -6,8 +6,8 @@ Working agreement for coding agents in this repo. Read it before touching code.
 
 A Keycloakify v11 theme for Nebari. [`themes.json`](themes.json) lists the themes it builds, `nebari` and the
 unbranded `template`; each is packaged in its own JAR with three Keycloak themes under its name: the **login**
-pages, the **Account** console and the **Admin** console. The `nebari` image is published as a Keycloak 26 image
-on every push to `main`: `ghcr.io/nebari-dev/nebari-keycloak-theme`.
+pages, the **Account** console and the **Admin** console. Every push to `main` publishes both in the multi-arch
+image `quay.io/nebari/nebari-keycloak-theme`.
 
 - The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
 - `src/main.tsx` stamps the theme name on `<html>` as `data-brand` and the theme type as `data-kc-theme-type`.
