@@ -41,5 +41,24 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         url: "http://127.0.0.1:4173"
     },
-    projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }]
+    projects: [
+        {
+            // Every spec except the accessibility suites: screenshots, branding,
+            // child themes and the doc gallery.
+            name: "chromium",
+            // A RegExp, because glob patterns match the absolute path, and a
+            // checkout inside a directory named "a11y" would ignore everything.
+            testIgnore: /[\\/]tests[\\/]a11y[\\/]/,
+            use: { ...devices["Desktop Chrome"] }
+        },
+        {
+            // WCAG 2.2 AA scans and keyboard checks of every login page.
+            // helpers.spec.ts proves the checks can still fail, so it runs with
+            // them. The console suites need a real Keycloak and live in
+            // playwright.consoles.config.ts.
+            name: "a11y-login",
+            testMatch: ["a11y/login.a11y.spec.ts", "a11y/helpers.spec.ts"],
+            use: { ...devices["Desktop Chrome"] }
+        }
+    ]
 });

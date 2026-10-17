@@ -152,4 +152,6 @@ update the early script too.
 - **React 18 versus the registry.** Registry components take `ref` as a plain prop, the React 19 convention.
   Where a DOM node is needed &mdash; menu triggers, tooltips &mdash; the theme renders one through the `render`
   prop, and the PatternFly tooltip is still used for that reason.
-- **The consoles have no automated tests.** See [Development](development.md#what-ci-checks).
+- **The consoles are only tested for accessibility.** CI scans the main Admin and Account screens against a
+  real Keycloak, but nothing checks that a console screen still works. See
+  [Development](development.md#what-ci-checks).

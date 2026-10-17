@@ -5,6 +5,7 @@ import {
     exampleBrand as brand,
     exampleWithBackground as withBackground
 } from "./fixtures/branding/example";
+import { loginCards } from "./previews";
 
 /**
  * The images in docs/theme-customization.md. Each one renders the example
@@ -14,12 +15,7 @@ import {
  * baselines themselves, so it always shows what `main` renders, and a change
  * that alters one fails here until it is rebaselined.
  */
-const cards = {
-    nebari: ".nebari-login-card",
-    template: '[data-login-theme="template"] [data-slot="card"]'
-} as const;
-
-type Theme = keyof typeof cards;
+type Theme = "nebari" | "template";
 
 /**
  * The config embeds its images, which makes the URL longer than the dev
@@ -33,7 +29,7 @@ async function open(page: Page, theme: Theme, preview: string, branding: Brandin
         async route => route.fulfill({ response: await route.fetch({ url: short }) })
     );
     await page.goto(`${short}&branding=${encodeURIComponent(JSON.stringify(branding))}`);
-    await expect(page.locator(cards[theme]).first()).toBeVisible();
+    await expect(page.locator(loginCards[theme]).first()).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
 }
 
@@ -85,7 +81,7 @@ test.describe("theme customization docs", () => {
 
     test("providers-only login mode", async ({ page }) => {
         await open(page, "nebari", "login-providers", { ...brand, loginMode: "providers-only" });
-        await expect(page.locator(cards.nebari)).toHaveScreenshot(shot("providers-only"), {
+        await expect(page.locator(loginCards.nebari)).toHaveScreenshot(shot("providers-only"), {
             animations: "disabled"
         });
     });

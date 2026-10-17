@@ -37,10 +37,12 @@ Node `^20.19` or `>=22.12`.
 npm install                          # also re-syncs the vendored console sources
 npm run dev                          # login pages at :5173, e.g. /?preview=login
 npm run check                        # upgrade guards
-npm run typecheck                    # tsc --noEmit
+npm run typecheck                    # tsc --noEmit, on src/ and on tests/ + Playwright configs
 npm run lint                         # Biome lint + format check, also run in CI
 npm run format                       # Biome formatter, writes in place
 npm run test:screenshots             # compare login pages against Linux baselines, per brand
+npm run test:a11y                    # login-page accessibility (axe + keyboard), every theme and scheme
+npm run test:a11y:consoles           # Admin + Account accessibility; needs the compose Keycloak running
 npm run build-keycloak-theme         # guards + tsc + vite build + one JAR pair per brand in dist_keycloak/
 docker compose up -d --build keycloak   # consoles, on the nebari realm
 ```
@@ -68,10 +70,14 @@ docker compose up -d --build keycloak   # consoles, on the nebari realm
 - **The dev server can't show the consoles.** They need a real Keycloak. Rebuild the JAR *and* the image &mdash;
   `docker compose up -d --build keycloak` &mdash; and sign in on the `nebari` realm, not `master`. Forgetting
   `--build` makes it look like nothing changed.
-- **Nothing tests the consoles automatically.** CI covers login-page pixels, the type check, lint and the guards.
-  For a console change, check it in the compose loop and say in the pull request that you did.
-- **A green type check covers `src/` only.** The owned console files are type-checked, but nothing under
-  `tests/` or the Playwright config is: Playwright transpiles without checking types.
+- **CI only checks the consoles for accessibility.** It runs login-page pixels and accessibility, console
+  accessibility against a real Keycloak, the type check, lint and the guards. Nothing checks that a console screen
+  still works: for a console change, check it in the compose loop and say in the pull request that you did.
+- **Don't add to `tests/a11y/known-violations.ts` to make a test pass.** Fix the problem, or file the issue first
+  and link it from the entry.
+- **The type check covers `src/`, `tests/` and the Playwright configs**, through `tsconfig.json` and
+  `tsconfig.tests.json`. Playwright itself transpiles specs without checking types, so a spec only gets checked
+  if `tsconfig.tests.json` includes it.
 - **A rebaselined screenshot is a claim that the new rendering is right.** Look at the diff before committing it.
   Regenerate baselines on Linux, or in the Playwright container documented in
   [`docs/development.md`](docs/development.md#regenerate-baselines-on-linux).
