@@ -203,6 +203,7 @@ const SAFE_DATA_IMAGE = /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=]+$/i;
 /* Control characters, and the bidirectional overrides and isolates that can make
    rendered text read differently from what is stored (a wordmark that displays
    as another product's name, say). */
+// biome-ignore lint/suspicious/noControlCharactersInRegex: matching control characters is the point; they are stripped
 const UNSAFE_TEXT = /[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g;
 
 function safeText(value: unknown, fallback: string, maxLength: number): string {
@@ -252,10 +253,7 @@ function safeImage(value: unknown, maxLength = 900_000): string {
  * exact rendering after the version 2 migration. Version 2 may leave either
  * variant empty; `getBrandingImage` supplies the runtime fallback.
  */
-function normalizeImageSet(
-    value: unknown,
-    fallback: BrandingImageSet
-): BrandingImageSet {
+function normalizeImageSet(value: unknown, fallback: BrandingImageSet): BrandingImageSet {
     if (typeof value === "string") {
         const image = safeImage(value);
 
@@ -275,15 +273,12 @@ function normalizeImageSet(
 }
 
 /** Resolve an appearance-specific image, falling back to its sibling variant. */
-export function getBrandingImage(
-    images: BrandingImageSet,
-    mode: "light" | "dark"
-): string {
+export function getBrandingImage(images: BrandingImageSet, mode: "light" | "dark"): string {
     return images[mode] || images[mode === "light" ? "dark" : "light"];
 }
 
 function normalizePalette(value: unknown, fallback: BrandingPalette): BrandingPalette {
-    const palette = typeof value === "object" && value !== null ? value as Partial<BrandingPalette> : {};
+    const palette = typeof value === "object" && value !== null ? (value as Partial<BrandingPalette>) : {};
 
     return {
         primary: safeColor(palette.primary, fallback.primary),
@@ -312,14 +307,11 @@ function normalizeAdvanced(value: unknown, fallback: BrandingAdvanced): Branding
         cardOpacity: boundedInteger(advanced.cardOpacity, fallback.cardOpacity, 5, 100),
         cardBlur: boundedInteger(advanced.cardBlur, fallback.cardBlur, 0, 40),
         buttonShape: oneOf(advanced.buttonShape, BRANDING_BUTTON_SHAPES, fallback.buttonShape),
-        buttonArrow:
-            typeof advanced.buttonArrow === "boolean" ? advanced.buttonArrow : fallback.buttonArrow,
+        buttonArrow: typeof advanced.buttonArrow === "boolean" ? advanced.buttonArrow : fallback.buttonArrow,
         wordmark: optionalText(advanced.wordmark, fallback.wordmark, 40),
         registerTitle: optionalText(advanced.registerTitle, fallback.registerTitle, 80),
         favicon:
-            advanced.favicon === undefined
-                ? fallback.favicon
-                : safeImage(advanced.favicon, MAX_ICON_LENGTH),
+            advanced.favicon === undefined ? fallback.favicon : safeImage(advanced.favicon, MAX_ICON_LENGTH),
         dashboardMark:
             advanced.dashboardMark === undefined
                 ? fallback.dashboardMark
@@ -331,7 +323,7 @@ export function normalizeBrandingConfig(
     value: unknown,
     defaults: BrandingConfig = DEFAULT_BRANDING_CONFIG
 ): BrandingConfig {
-    const config = typeof value === "object" && value !== null ? value as Partial<BrandingConfig> : {};
+    const config = typeof value === "object" && value !== null ? (value as Partial<BrandingConfig>) : {};
 
     return {
         /* Normalization is also the v1 → v2 migration boundary. Published
@@ -344,23 +336,17 @@ export function normalizeBrandingConfig(
             typeof config.useLoginLogoInConsole === "boolean"
                 ? config.useLoginLogoInConsole
                 : defaults.useLoginLogoInConsole,
-        backgroundImage: normalizeImageSet(
-            config.backgroundImage,
-            defaults.backgroundImage
-        ),
+        backgroundImage: normalizeImageSet(config.backgroundImage, defaults.backgroundImage),
         cardRadius:
             typeof config.cardRadius === "number" && Number.isFinite(config.cardRadius)
                 ? Math.min(32, Math.max(0, Math.round(config.cardRadius)))
                 : defaults.cardRadius,
         colorScheme:
-            config.colorScheme === "light" ||
-            config.colorScheme === "dark" ||
-            config.colorScheme === "system"
+            config.colorScheme === "light" || config.colorScheme === "dark" || config.colorScheme === "system"
                 ? config.colorScheme
                 : defaults.colorScheme,
         loginMode:
-            config.loginMode === "password-and-providers" ||
-            config.loginMode === "providers-only"
+            config.loginMode === "password-and-providers" || config.loginMode === "providers-only"
                 ? config.loginMode
                 : defaults.loginMode,
         light: normalizePalette(config.light, defaults.light),
@@ -424,20 +410,14 @@ function decodeBase64Utf8(value: string): string {
  * every login page. Both sides go through `normalizeBrandingConfig` so the
  * comparison does not depend on key order or on how the config was built.
  */
-export function isBrandingCustomized(
-    config: BrandingConfig,
-    defaults: BrandingConfig
-): boolean {
+export function isBrandingCustomized(config: BrandingConfig, defaults: BrandingConfig): boolean {
     return (
         JSON.stringify(normalizeBrandingConfig(config, defaults)) !==
         JSON.stringify(normalizeBrandingConfig(defaults, defaults))
     );
 }
 
-export function getBrandingCssVariables(
-    config: BrandingConfig,
-    mode: "light" | "dark"
-): CSSProperties {
+export function getBrandingCssVariables(config: BrandingConfig, mode: "light" | "dark"): CSSProperties {
     const palette = config[mode];
 
     return {
@@ -528,7 +508,6 @@ export function getBrandingDataAttributes(
         "data-button-arrow": advanced.buttonArrow ? "" : undefined,
         /* Even blur(0) changes how a card is composited, so the glass rules only
            apply when the card is actually translucent or blurred. */
-        "data-card-glass":
-            advanced.cardOpacity < 100 || advanced.cardBlur > 0 ? "" : undefined
+        "data-card-glass": advanced.cardOpacity < 100 || advanced.cardBlur > 0 ? "" : undefined
     };
 }

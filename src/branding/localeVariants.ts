@@ -19,10 +19,7 @@
  * the same value is written under every locale the realm supports, plus `en` as
  * the fallback Keycloak resolves when a visitor's locale has no entry.
  */
-export function publishLocales(
-    locale: string,
-    supportedLocales: string[] | undefined
-): string[] {
+export function publishLocales(locale: string, supportedLocales: string[] | undefined): string[] {
     return [...new Set(["en", locale, ...(supportedLocales ?? [])])];
 }
 
@@ -130,13 +127,8 @@ export type CanonicalSelection =
  * values disagree there is no safe guess: the caller has to ask, because either
  * answer discards a theme somebody published.
  */
-export function selectCanonicalVariant(
-    read: LocaleRead,
-    locales: string[]
-): CanonicalSelection {
-    const populated = read.variants.filter(
-        variant => variant.value !== undefined && variant.value !== ""
-    );
+export function selectCanonicalVariant(read: LocaleRead, locales: string[]): CanonicalSelection {
+    const populated = read.variants.filter(variant => variant.value !== undefined && variant.value !== "");
 
     if (populated.length === 0) {
         /* "Found nothing" and "could not look" are not the same answer. Only

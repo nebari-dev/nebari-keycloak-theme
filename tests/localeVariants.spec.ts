@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-    publishLocales,
-    readLocaleVariants,
-    selectCanonicalVariant
-} from "../src/branding/localeVariants";
+import { publishLocales, readLocaleVariants, selectCanonicalVariant } from "../src/branding/localeVariants";
 
 const THEME_A = "base64:aaa";
 const THEME_B = "base64:bbb";
@@ -24,10 +20,11 @@ test("writes en, the default locale and every supported locale, without repeats"
 });
 
 test("groups locales by stored value, most-carried first", async () => {
-    const read = await readLocaleVariants(
-        reader({ en: THEME_A, de: THEME_A, fr: THEME_B }),
-        ["en", "de", "fr"]
-    );
+    const read = await readLocaleVariants(reader({ en: THEME_A, de: THEME_A, fr: THEME_B }), [
+        "en",
+        "de",
+        "fr"
+    ]);
 
     expect(read).toEqual({
         variants: [
@@ -45,10 +42,7 @@ test("groups locales by stored value, most-carried first", async () => {
  * unbranded realm.
  */
 test("keeps an unreadable locale out of the variants", async () => {
-    const read = await readLocaleVariants(reader({ en: THEME_A }, ["de"]), [
-        "en",
-        "de"
-    ]);
+    const read = await readLocaleVariants(reader({ en: THEME_A }, ["de"]), ["en", "de"]);
 
     expect(read).toEqual({
         variants: [{ value: THEME_A, locales: ["en"] }],
@@ -83,10 +77,7 @@ test("all reads failing is unknown, never unbranded", async () => {
 
 test("empty locales plus one unreadable is unknown, not unbranded", async () => {
     const locales = ["en", "de", "fr"];
-    const read = await readLocaleVariants(
-        reader({ en: undefined, de: "" }, ["fr"]),
-        locales
-    );
+    const read = await readLocaleVariants(reader({ en: undefined, de: "" }, ["fr"]), locales);
 
     expect(selectCanonicalVariant(read, locales).kind).toBe("unreadable");
 });
@@ -142,10 +133,7 @@ test("an empty string counts as unpublished, not as a theme", async () => {
 
 test("two disagreeing published themes are a conflict, never a guess", async () => {
     const locales = ["en", "de", "fr"];
-    const read = await readLocaleVariants(
-        reader({ en: THEME_A, de: THEME_A, fr: THEME_B }),
-        locales
-    );
+    const read = await readLocaleVariants(reader({ en: THEME_A, de: THEME_A, fr: THEME_B }), locales);
     const selection = selectCanonicalVariant(read, locales);
 
     expect(selection.kind).toBe("conflict");
@@ -154,10 +142,7 @@ test("two disagreeing published themes are a conflict, never a guess", async () 
 
     /* Both are offered, most-carried first, so the admin can see what each is
        before discarding one. */
-    expect(selection.variants.map(variant => variant.locales)).toEqual([
-        ["en", "de"],
-        ["fr"]
-    ]);
+    expect(selection.variants.map(variant => variant.locales)).toEqual([["en", "de"], ["fr"]]);
     expect(selection.unreadable).toEqual([]);
 });
 
@@ -168,20 +153,14 @@ test("two disagreeing published themes are a conflict, never a guess", async () 
  */
 test("a conflict carries the locales that could not be read", async () => {
     const locales = ["en", "de", "fr"];
-    const read = await readLocaleVariants(
-        reader({ en: THEME_A, de: THEME_B }, ["fr"]),
-        locales
-    );
+    const read = await readLocaleVariants(reader({ en: THEME_A, de: THEME_B }, ["fr"]), locales);
     const selection = selectCanonicalVariant(read, locales);
 
     expect(selection.kind).toBe("conflict");
 
     if (selection.kind !== "conflict") return;
 
-    expect(selection.variants.map(variant => variant.value)).toEqual([
-        THEME_A,
-        THEME_B
-    ]);
+    expect(selection.variants.map(variant => variant.value)).toEqual([THEME_A, THEME_B]);
     expect(selection.unreadable).toEqual(["fr"]);
 });
 

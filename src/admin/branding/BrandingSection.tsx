@@ -13,13 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -29,13 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -56,11 +44,7 @@ import {
     type DerivedPaletteKey
 } from "../../branding/derivePalette";
 import { isHexColor, normalizeHexInput } from "../../branding/color";
-import {
-    getBrandingImageDimensions,
-    type ImageDimensions,
-    type ImageKind
-} from "../../branding/imageUpload";
+import { getBrandingImageDimensions, type ImageDimensions, type ImageKind } from "../../branding/imageUpload";
 import {
     DEFAULT_THEME_NAME,
     cloneThemeDefaults,
@@ -76,10 +60,7 @@ import {
     selectCanonicalVariant,
     type LocaleVariant
 } from "../../branding/localeVariants";
-import {
-    getLoginProviders,
-    type LoginProvider
-} from "../../branding/loginProviders";
+import { getLoginProviders, type LoginProvider } from "../../branding/loginProviders";
 import { useAdminClient } from "../admin-client";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { BrandingPreview } from "./BrandingPreview";
@@ -176,9 +157,7 @@ async function readLoginIdentityProviders(
     adminClient: ReturnType<typeof useAdminClient>["adminClient"],
     realm: string
 ): Promise<LoginProvider[] | undefined> {
-    const providers = await adminClient.identityProviders
-        .find({ realm })
-        .catch(() => undefined);
+    const providers = await adminClient.identityProviders.find({ realm }).catch(() => undefined);
 
     return providers === undefined ? undefined : getLoginProviders(providers);
 }
@@ -229,9 +208,8 @@ type SaveFilePicker = (options: {
  * after a cancelled dialog.
  */
 async function saveThemeFile(fileName: string, text: string): Promise<boolean> {
-    const showSaveFilePicker = (
-        window as unknown as { showSaveFilePicker?: SaveFilePicker }
-    ).showSaveFilePicker;
+    const showSaveFilePicker = (window as unknown as { showSaveFilePicker?: SaveFilePicker })
+        .showSaveFilePicker;
 
     if (typeof showSaveFilePicker === "function") {
         try {
@@ -303,10 +281,7 @@ const BUTTON_SHAPE_LABELS: Record<BrandingButtonShape, string> = {
 
 type AdvancedSettingsCardProps = {
     value: BrandingAdvanced;
-    onChange: <Key extends keyof BrandingAdvanced>(
-        key: Key,
-        value: BrandingAdvanced[Key]
-    ) => void;
+    onChange: <Key extends keyof BrandingAdvanced>(key: Key, value: BrandingAdvanced[Key]) => void;
     onImageError: (message: string) => void;
 };
 
@@ -327,8 +302,8 @@ function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSetting
             <CardHeader>
                 <CardTitle>Advanced settings</CardTitle>
                 <CardDescription>
-                    Typography, card surface, buttons, a wordmark and the browser icon, for a
-                    brand that needs more than colours and a logo.
+                    Typography, card surface, buttons, a wordmark and the browser icon, for a brand that needs
+                    more than colours and a logo.
                 </CardDescription>
                 <Button
                     aria-controls="branding-advanced-settings"
@@ -349,9 +324,7 @@ function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSetting
                             value={value.font}
                         >
                             <SelectTrigger aria-label="Login page font" id="branding-font">
-                                <SelectValue>
-                                    {(font: BrandingFont) => FONT_LABELS[font]}
-                                </SelectValue>
+                                <SelectValue>{(font: BrandingFont) => FONT_LABELS[font]}</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 {BRANDING_FONTS.map(font => (
@@ -362,8 +335,7 @@ function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSetting
                             </SelectContent>
                         </Select>
                         <FieldDescription>
-                            Bundled with the theme, so no visitor's browser is sent to a font
-                            service.
+                            Bundled with the theme, so no visitor's browser is sent to a font service.
                         </FieldDescription>
                     </Field>
 
@@ -384,23 +356,19 @@ function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSetting
                         <Slider
                             max={40}
                             min={0}
-                            onValueChange={next =>
-                                onChange("cardBlur", Array.isArray(next) ? next[0] : next)
-                            }
+                            onValueChange={next => onChange("cardBlur", Array.isArray(next) ? next[0] : next)}
                             value={value.cardBlur}
                         />
                         <FieldDescription>
-                            With opacity below 100%, the page background shows through the card.
-                            Check that text on the card stays readable.
+                            With opacity below 100%, the page background shows through the card. Check that
+                            text on the card stays readable.
                         </FieldDescription>
                     </Field>
 
                     <Field>
                         <FieldLabel htmlFor="branding-button-shape">Button shape</FieldLabel>
                         <Select
-                            onValueChange={next =>
-                                onChange("buttonShape", next as BrandingButtonShape)
-                            }
+                            onValueChange={next => onChange("buttonShape", next as BrandingButtonShape)}
                             value={value.buttonShape}
                         >
                             <SelectTrigger aria-label="Button shape" id="branding-button-shape">
@@ -438,8 +406,8 @@ function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSetting
                             value={value.wordmark}
                         />
                         <FieldDescription>
-                            Plain text set beside the logo on the login card and in the console
-                            headers, for a mark that ships without its name. Up to 40 characters.
+                            Plain text set beside the logo on the login card and in the console headers, for a
+                            mark that ships without its name. Up to 40 characters.
                         </FieldDescription>
                     </Field>
 
@@ -453,8 +421,7 @@ function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSetting
                             value={value.registerTitle}
                         />
                         <FieldDescription>
-                            Replaces the title on the sign-up page. Leave empty to keep the
-                            theme's.
+                            Replaces the title on the sign-up page. Leave empty to keep the theme's.
                         </FieldDescription>
                     </Field>
 
@@ -510,11 +477,7 @@ function ImageControl({
                 dimensions: await getBrandingImageDimensions(file)
             });
         } catch (error) {
-            onError(
-                error instanceof Error
-                    ? error.message
-                    : "The image could not be processed."
-            );
+            onError(error instanceof Error ? error.message : "The image could not be processed.");
         }
     };
 
@@ -535,11 +498,7 @@ function ImageControl({
                     {/* A label wrapping a hidden file input, rather than a Button
                         with a click handler: it keeps the native picker's keyboard
                         and screen-reader behaviour without a ref. */}
-                    <Button
-                        disabled={disabled}
-                        render={<label htmlFor={`${id}-file`} />}
-                        variant="outline"
-                    >
+                    <Button disabled={disabled} render={<label htmlFor={`${id}-file`} />} variant="outline">
                         <UploadIcon aria-hidden />
                         Upload
                     </Button>
@@ -581,22 +540,15 @@ export default function BrandingSection() {
     const themeDefinition = useMemo(
         () =>
             getThemeDefinition(
-                getConfiguredThemeName(
-                    realmRepresentation?.loginTheme,
-                    realmRepresentation?.adminTheme
-                )
+                getConfiguredThemeName(realmRepresentation?.loginTheme, realmRepresentation?.adminTheme)
             ),
         [realmRepresentation?.loginTheme, realmRepresentation?.adminTheme]
     );
 
     const locale = realmRepresentation?.defaultLocale || "en";
 
-    const [draft, setDraft] = useState<BrandingConfig>(() =>
-        cloneThemeDefaults(themeDefinition)
-    );
-    const [published, setPublished] = useState<BrandingConfig>(() =>
-        cloneThemeDefaults(themeDefinition)
-    );
+    const [draft, setDraft] = useState<BrandingConfig>(() => cloneThemeDefaults(themeDefinition));
+    const [published, setPublished] = useState<BrandingConfig>(() => cloneThemeDefaults(themeDefinition));
     const [previewMode, setPreviewMode] = useState<"light" | "dark">("light");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -634,10 +586,7 @@ export default function BrandingSection() {
     /** `undefined` until read, and after a failed read — see `BrandingPreview`. */
     const [identityProviders, setIdentityProviders] = useState<LoginProvider[]>();
 
-    const isDirty = useMemo(
-        () => JSON.stringify(draft) !== JSON.stringify(published),
-        [draft, published]
-    );
+    const isDirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(published), [draft, published]);
 
     /**
      * Publishing is also the repair for locale drift, so it cannot be gated on
@@ -648,6 +597,7 @@ export default function BrandingSection() {
      */
     const canPublish = isDirty || staleLocales.length !== 0;
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: reloadCount is the trigger; the retry button bumps it to load again
     useEffect(() => {
         let active = true;
 
@@ -663,10 +613,7 @@ export default function BrandingSection() {
             setUnreadableLocales([]);
             setCanonicalLocales([]);
             try {
-                const locales = publishLocales(
-                    locale,
-                    realmRepresentation?.supportedLocales
-                );
+                const locales = publishLocales(locale, realmRepresentation?.supportedLocales);
 
                 /* Every locale is read before anything is decided. Reading only
                    the default locale would make a realm whose default has just
@@ -731,22 +678,14 @@ export default function BrandingSection() {
                     setDraft(config);
                     setPublished(config);
                     setPreviewMode(config.colorScheme === "dark" ? "dark" : "light");
-                    setStaleLocales(
-                        selection.kind === "canonical" ? selection.stale : []
-                    );
-                    setUnreadableLocales(
-                        selection.kind === "canonical" ? selection.unreadable : []
-                    );
-                    setCanonicalLocales(
-                        selection.kind === "canonical" ? selection.variant.locales : []
-                    );
+                    setStaleLocales(selection.kind === "canonical" ? selection.stale : []);
+                    setUnreadableLocales(selection.kind === "canonical" ? selection.unreadable : []);
+                    setCanonicalLocales(selection.kind === "canonical" ? selection.variant.locales : []);
                     setIdentityProviders(providers);
                 }
             } catch (error) {
                 if (active) {
-                    setLoadError(
-                        error instanceof Error ? error.message : "Unknown error"
-                    );
+                    setLoadError(error instanceof Error ? error.message : "Unknown error");
                     addError("Unable to load theme customization", error);
                 }
             } finally {
@@ -767,17 +706,11 @@ export default function BrandingSection() {
         reloadCount
     ]);
 
-    const update = <Key extends keyof BrandingConfig>(
-        key: Key,
-        value: BrandingConfig[Key]
-    ) => {
+    const update = <Key extends keyof BrandingConfig>(key: Key, value: BrandingConfig[Key]) => {
         setDraft(current => ({ ...current, [key]: value }));
     };
 
-    const updateAdvanced = <Key extends keyof BrandingAdvanced>(
-        key: Key,
-        value: BrandingAdvanced[Key]
-    ) => {
+    const updateAdvanced = <Key extends keyof BrandingAdvanced>(key: Key, value: BrandingAdvanced[Key]) => {
         setDraft(current => ({ ...current, advanced: { ...current.advanced, [key]: value } }));
     };
 
@@ -804,13 +737,7 @@ export default function BrandingSection() {
     const updatePalette = (key: PaletteKey, value: string) => {
         setDraft(current =>
             key === "primary"
-                ? applyBrandPrimary(
-                      current,
-                      value,
-                      previewMode,
-                      undefined,
-                      themeDefinition.defaultBranding
-                  )
+                ? applyBrandPrimary(current, value, previewMode, undefined, themeDefinition.defaultBranding)
                 : {
                       ...current,
                       [previewMode]: { ...current[previewMode], [key]: value }
@@ -969,10 +896,9 @@ export default function BrandingSection() {
                     <AlertTitle>This realm has more than one published theme</AlertTitle>
                     <AlertDescription>
                         <p>
-                            The theme is stored once per locale, and these locales
-                            disagree — so visitors currently see different branding
-                            depending on their language. Choose the one to keep;
-                            publishing then writes it to every locale.
+                            The theme is stored once per locale, and these locales disagree — so visitors
+                            currently see different branding depending on their language. Choose the one to
+                            keep; publishing then writes it to every locale.
                         </p>
                         {unreadableLocales.length !== 0 && (
                             <p>
@@ -981,16 +907,12 @@ export default function BrandingSection() {
                                     ? "it is not shown below and may hold a third theme"
                                     : "they are not shown below and may hold further themes"}
                                 . Whichever option you keep will be published over{" "}
-                                {unreadableLocales.length === 1 ? "it" : "them"} as
-                                well.
+                                {unreadableLocales.length === 1 ? "it" : "them"} as well.
                             </p>
                         )}
                         <div className="branding-variant-choice">
                             {variantChoice.map(variant => {
-                                const config = parseThemeBrandingConfig(
-                                    themeDefinition,
-                                    variant.value
-                                );
+                                const config = parseThemeBrandingConfig(themeDefinition, variant.value);
 
                                 return (
                                     <div
@@ -1000,11 +922,7 @@ export default function BrandingSection() {
                                         <BrandingPreview
                                             branding={config}
                                             identityProviders={identityProviders}
-                                            mode={
-                                                config.colorScheme === "dark"
-                                                    ? "dark"
-                                                    : "light"
-                                            }
+                                            mode={config.colorScheme === "dark" ? "dark" : "light"}
                                             themeName={themeDefinition.name}
                                         />
                                         <Button
@@ -1012,19 +930,14 @@ export default function BrandingSection() {
                                                 setDraft(config);
                                                 setPublished(config);
                                                 setPreviewMode(
-                                                    config.colorScheme === "dark"
-                                                        ? "dark"
-                                                        : "light"
+                                                    config.colorScheme === "dark" ? "dark" : "light"
                                                 );
                                                 setStaleLocales(
                                                     publishLocales(
                                                         locale,
                                                         realmRepresentation?.supportedLocales
                                                     ).filter(
-                                                        candidate =>
-                                                            !variant.locales.includes(
-                                                                candidate
-                                                            )
+                                                        candidate => !variant.locales.includes(candidate)
                                                     )
                                                 );
                                                 /* The editor's drift warning
@@ -1066,13 +979,10 @@ export default function BrandingSection() {
                     <AlertDescription>
                         <p>{loadError}</p>
                         <p>
-                            The editor stays closed until the published theme can be
-                            read, so that nothing overwrites it by accident.
+                            The editor stays closed until the published theme can be read, so that nothing
+                            overwrites it by accident.
                         </p>
-                        <Button
-                            onClick={() => setReloadCount(count => count + 1)}
-                            variant="outline"
-                        >
+                        <Button onClick={() => setReloadCount(count => count + 1)} variant="outline">
                             Try again
                         </Button>
                     </AlertDescription>
@@ -1087,8 +997,8 @@ export default function BrandingSection() {
                 <div>
                     <h1>Theme customization</h1>
                     <p>
-                        Configure the <strong>{themeDefinition.displayName}</strong> login
-                        experience for the <strong>{realm}</strong> realm.
+                        Configure the <strong>{themeDefinition.displayName}</strong> login experience for the{" "}
+                        <strong>{realm}</strong> realm.
                     </p>
                 </div>
                 <div className="branding-page-actions">
@@ -1099,14 +1009,8 @@ export default function BrandingSection() {
                     >
                         Discard changes
                     </Button>
-                    <Button
-                        disabled={!canPublish || saving}
-                        loading={saving}
-                        onClick={publish}
-                    >
-                        {isDirty || staleLocales.length === 0
-                            ? "Publish theme"
-                            : "Publish to all locales"}
+                    <Button disabled={!canPublish || saving} loading={saving} onClick={publish}>
+                        {isDirty || staleLocales.length === 0 ? "Publish theme" : "Publish to all locales"}
                     </Button>
                     <DropdownMenu>
                         {/* Same override as `ProfileMenu`: the registry's trigger
@@ -1120,9 +1024,7 @@ export default function BrandingSection() {
                             variant's background while the menu is open. */}
                         <DropdownMenuTrigger
                             aria-label="Theme options"
-                            className={cn(
-                                buttonVariants({ size: "icon", variant: "outline" })
-                            )}
+                            className={cn(buttonVariants({ size: "icon", variant: "outline" }))}
                             render={<button type="button" />}
                             variant="outline"
                         >
@@ -1158,25 +1060,18 @@ export default function BrandingSection() {
                                     message say "de does not have the theme that
                                     de has". */}
                                 The theme in this editor is the one published for{" "}
-                                {canonicalLocales.join(", ") || "this realm"}.{" "}
-                                {staleLocales.join(", ")}{" "}
-                                {staleLocales.length === 1 ? "does" : "do"} not have
-                                it, so a visitor in{" "}
-                                {staleLocales.length === 1
-                                    ? "that language"
-                                    : "those languages"}{" "}
-                                sees something different. This happens when a locale
-                                is added to the realm after the last publish, or when
-                                a publish only partly succeeded. Publishing again
+                                {canonicalLocales.join(", ") || "this realm"}. {staleLocales.join(", ")}{" "}
+                                {staleLocales.length === 1 ? "does" : "do"} not have it, so a visitor in{" "}
+                                {staleLocales.length === 1 ? "that language" : "those languages"} sees
+                                something different. This happens when a locale is added to the realm after
+                                the last publish, or when a publish only partly succeeded. Publishing again
                                 writes every locale.
                             </p>
                             {unreadableLocales.length !== 0 && (
                                 <p>
-                                    {unreadableLocales.join(", ")} could not be read
-                                    at all rather than being empty, so{" "}
-                                    {unreadableLocales.length === 1 ? "it" : "they"}{" "}
-                                    may hold a different theme. Publishing replaces
-                                    whatever is there.
+                                    {unreadableLocales.join(", ")} could not be read at all rather than being
+                                    empty, so {unreadableLocales.length === 1 ? "it" : "they"} may hold a
+                                    different theme. Publishing replaces whatever is there.
                                 </p>
                             )}
                         </AlertDescription>
@@ -1187,9 +1082,8 @@ export default function BrandingSection() {
                     <InfoIcon aria-hidden />
                     <AlertTitle>Experimental image storage</AlertTitle>
                     <AlertDescription>
-                        Uploaded images are compressed and stored with the realm
-                        configuration for this experiment. Replace this with object
-                        storage before using the feature in production.
+                        Uploaded images are compressed and stored with the realm configuration for this
+                        experiment. Replace this with object storage before using the feature in production.
                     </AlertDescription>
                 </Alert>
 
@@ -1214,34 +1108,25 @@ export default function BrandingSection() {
                             </CardHeader>
                             <CardContent className="branding-form">
                                 <Field>
-                                    <FieldLabel htmlFor="branding-company-name">
-                                        Company name
-                                    </FieldLabel>
+                                    <FieldLabel htmlFor="branding-company-name">Company name</FieldLabel>
                                     <Input
                                         id="branding-company-name"
                                         maxLength={80}
-                                        onChange={event =>
-                                            update("companyName", event.target.value)
-                                        }
+                                        onChange={event => update("companyName", event.target.value)}
                                         value={draft.companyName}
                                     />
                                 </Field>
                                 <div className="branding-image-set">
                                     <div className="branding-image-set__header">
                                         <h3>Login card logos</h3>
-                                        <p>
-                                            One per appearance, so a wordmark stays
-                                            visible on either card.
-                                        </p>
+                                        <p>One per appearance, so a wordmark stays visible on either card.</p>
                                     </div>
                                     <ImageControl
                                         id="branding-logo-light"
                                         kind="logo"
                                         label="Light appearance logo"
                                         help="Needs enough dark contrast to read on a light card."
-                                        onChange={value =>
-                                            updateImage("logo", "light", value)
-                                        }
+                                        onChange={value => updateImage("logo", "light", value)}
                                         onError={setImageError}
                                         value={draft.logo.light}
                                     />
@@ -1250,9 +1135,7 @@ export default function BrandingSection() {
                                         kind="logo"
                                         label="Dark appearance logo"
                                         help="Leave empty to reuse the light logo."
-                                        onChange={value =>
-                                            updateImage("logo", "dark", value)
-                                        }
+                                        onChange={value => updateImage("logo", "dark", value)}
                                         onError={setImageError}
                                         value={draft.logo.dark}
                                     />
@@ -1262,9 +1145,8 @@ export default function BrandingSection() {
                                     <div className="branding-image-set__header">
                                         <h3>Console header logos</h3>
                                         <p>
-                                            Shown in the Admin and Account console
-                                            mastheads — a shorter, wider slot than the
-                                            login card.
+                                            Shown in the Admin and Account console mastheads — a shorter,
+                                            wider slot than the login card.
                                         </p>
                                     </div>
                                     <div className="branding-reuse-toggle">
@@ -1272,10 +1154,7 @@ export default function BrandingSection() {
                                             checked={draft.useLoginLogoInConsole}
                                             id="branding-reuse-login-logo"
                                             onCheckedChange={checked =>
-                                                update(
-                                                    "useLoginLogoInConsole",
-                                                    checked === true
-                                                )
+                                                update("useLoginLogoInConsole", checked === true)
                                             }
                                         >
                                             Use the login card logos
@@ -1287,9 +1166,7 @@ export default function BrandingSection() {
                                         kind="logo"
                                         label="Light console logo"
                                         help="Short and wide reads best here."
-                                        onChange={value =>
-                                            updateImage("consoleLogo", "light", value)
-                                        }
+                                        onChange={value => updateImage("consoleLogo", "light", value)}
                                         onError={setImageError}
                                         value={draft.consoleLogo.light}
                                     />
@@ -1299,9 +1176,7 @@ export default function BrandingSection() {
                                         kind="logo"
                                         label="Dark console logo"
                                         help="Leave empty to reuse the light console logo."
-                                        onChange={value =>
-                                            updateImage("consoleLogo", "dark", value)
-                                        }
+                                        onChange={value => updateImage("consoleLogo", "dark", value)}
                                         onError={setImageError}
                                         value={draft.consoleLogo.dark}
                                     />
@@ -1311,8 +1186,8 @@ export default function BrandingSection() {
                                     <div className="branding-image-set__header">
                                         <h3>Background images</h3>
                                         <p>
-                                            Optional full-page artwork can also change
-                                            with the visitor's appearance.
+                                            Optional full-page artwork can also change with the visitor's
+                                            appearance.
                                         </p>
                                     </div>
                                     <ImageControl
@@ -1320,9 +1195,7 @@ export default function BrandingSection() {
                                         kind="background"
                                         label="Light appearance background"
                                         help="Shown behind the login card in light mode."
-                                        onChange={value =>
-                                            updateImage("backgroundImage", "light", value)
-                                        }
+                                        onChange={value => updateImage("backgroundImage", "light", value)}
                                         onError={setImageError}
                                         value={draft.backgroundImage.light}
                                     />
@@ -1331,9 +1204,7 @@ export default function BrandingSection() {
                                         kind="background"
                                         label="Dark appearance background"
                                         help="Shown in dark mode. Leave empty to reuse the light appearance background."
-                                        onChange={value =>
-                                            updateImage("backgroundImage", "dark", value)
-                                        }
+                                        onChange={value => updateImage("backgroundImage", "dark", value)}
                                         onError={setImageError}
                                         value={draft.backgroundImage.dark}
                                     />
@@ -1345,25 +1216,18 @@ export default function BrandingSection() {
                             <CardHeader>
                                 <CardTitle>Color palette</CardTitle>
                                 <CardDescription>
-                                    The primary action color drives the rest: colors
-                                    marked <em>Auto</em> follow it, in both appearances.
-                                    Edit one to pin it, and the button label switches
-                                    between black and white on its own.
+                                    The primary action color drives the rest: colors marked <em>Auto</em>{" "}
+                                    follow it, in both appearances. Edit one to pin it, and the button label
+                                    switches between black and white on its own.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div
-                                    aria-label="Palette mode"
-                                    className="branding-mode-switch"
-                                    role="group"
-                                >
+                                <div aria-label="Palette mode" className="branding-mode-switch" role="group">
                                     {(["light", "dark"] as const).map(mode => (
                                         <Button
                                             key={mode}
                                             onClick={() => setPreviewMode(mode)}
-                                            variant={
-                                                previewMode === mode ? "default" : "outline"
-                                            }
+                                            variant={previewMode === mode ? "default" : "outline"}
                                         >
                                             {mode === "light" ? "Light" : "Dark"} palette
                                         </Button>
@@ -1373,16 +1237,12 @@ export default function BrandingSection() {
                                     {PALETTE_FIELDS.map(field => (
                                         <Field key={field.key}>
                                             <div className="branding-color-label">
-                                                <FieldLabel
-                                                    htmlFor={`branding-color-${field.key}`}
-                                                >
+                                                <FieldLabel htmlFor={`branding-color-${field.key}`}>
                                                     {field.label}
                                                 </FieldLabel>
                                                 {field.key !== "primary" &&
                                                     (linkedKeys.has(field.key) ? (
-                                                        <Badge variant="secondary">
-                                                            Auto
-                                                        </Badge>
+                                                        <Badge variant="secondary">Auto</Badge>
                                                     ) : (
                                                         <Button
                                                             className="branding-relink"
@@ -1404,10 +1264,7 @@ export default function BrandingSection() {
                                                 <input
                                                     aria-label={`${field.label} color picker`}
                                                     onChange={event =>
-                                                        updatePalette(
-                                                            field.key,
-                                                            event.target.value
-                                                        )
+                                                        updatePalette(field.key, event.target.value)
                                                     }
                                                     type="color"
                                                     value={draft[previewMode][field.key]}
@@ -1415,9 +1272,7 @@ export default function BrandingSection() {
                                                 <HexColorInput
                                                     id={`branding-color-${field.key}`}
                                                     label={`${field.label} hex value`}
-                                                    onCommit={next =>
-                                                        updatePalette(field.key, next)
-                                                    }
+                                                    onCommit={next => updatePalette(field.key, next)}
                                                     value={draft[previewMode][field.key]}
                                                 />
                                             </div>
@@ -1431,8 +1286,7 @@ export default function BrandingSection() {
                             <CardHeader>
                                 <CardTitle>Layout</CardTitle>
                                 <CardDescription>
-                                    How the login card is shaped and which sign-in methods
-                                    it offers.
+                                    How the login card is shaped and which sign-in methods it offers.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="branding-form">
@@ -1442,17 +1296,12 @@ export default function BrandingSection() {
                                         label to the real range input through context,
                                         so leaving it off is what gives the control an
                                         accessible name. */}
-                                    <FieldLabel>
-                                        Card corner radius ({draft.cardRadius}px)
-                                    </FieldLabel>
+                                    <FieldLabel>Card corner radius ({draft.cardRadius}px)</FieldLabel>
                                     <Slider
                                         max={32}
                                         min={0}
                                         onValueChange={value =>
-                                            update(
-                                                "cardRadius",
-                                                Array.isArray(value) ? value[0] : value
-                                            )
+                                            update("cardRadius", Array.isArray(value) ? value[0] : value)
                                         }
                                         value={draft.cardRadius}
                                     />
@@ -1464,10 +1313,7 @@ export default function BrandingSection() {
                                     </FieldLabel>
                                     <Select
                                         onValueChange={value =>
-                                            update(
-                                                "colorScheme",
-                                                value as BrandingConfig["colorScheme"]
-                                            )
+                                            update("colorScheme", value as BrandingConfig["colorScheme"])
                                         }
                                         value={draft.colorScheme}
                                     >
@@ -1498,15 +1344,10 @@ export default function BrandingSection() {
                                 </Field>
 
                                 <Field>
-                                    <FieldLabel htmlFor="branding-login-mode">
-                                        Login method
-                                    </FieldLabel>
+                                    <FieldLabel htmlFor="branding-login-mode">Login method</FieldLabel>
                                     <Select
                                         onValueChange={value =>
-                                            update(
-                                                "loginMode",
-                                                value as BrandingConfig["loginMode"]
-                                            )
+                                            update("loginMode", value as BrandingConfig["loginMode"])
                                         }
                                         value={draft.loginMode}
                                     >
@@ -1533,16 +1374,14 @@ export default function BrandingSection() {
                                         </SelectContent>
                                     </Select>
                                     <FieldDescription>
-                                        The password form remains available as a safe
-                                        fallback when no identity providers are configured.
+                                        The password form remains available as a safe fallback when no
+                                        identity providers are configured.
                                     </FieldDescription>
                                 </Field>
 
                                 <Button
                                     className="self-start"
-                                    onClick={() =>
-                                        setDraft(cloneThemeDefaults(themeDefinition))
-                                    }
+                                    onClick={() => setDraft(cloneThemeDefaults(themeDefinition))}
                                     variant="link"
                                 >
                                     Restore {themeDefinition.displayName} defaults

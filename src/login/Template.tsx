@@ -23,9 +23,7 @@ import { getThemeDefinition, parseThemeBrandingConfig } from "../themes/themeCat
 function getInitialTheme(colorScheme: BrandingColorScheme): "dark" | "light" {
     if (colorScheme !== "system") return colorScheme;
 
-    return window.matchMedia?.("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export default function Template(props: TemplateProps<KcContext, I18n>) {
@@ -48,15 +46,10 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
     const { msg, msgStr } = i18n;
     const themeDefinition = getThemeDefinition(kcContext.themeName);
-    const branding = parseThemeBrandingConfig(
-        themeDefinition,
-        msgStr(themeDefinition.brandingMessageKey)
-    );
+    const branding = parseThemeBrandingConfig(themeDefinition, msgStr(themeDefinition.brandingMessageKey));
     /* Read once: the stylesheet's light/dark rules key off `data-theme`, so the
        appearance must not change under the user mid-session. */
-    const [theme] = useState<"dark" | "light">(() =>
-        getInitialTheme(branding.colorScheme)
-    );
+    const [theme] = useState<"dark" | "light">(() => getInitialTheme(branding.colorScheme));
     const paletteMode = theme;
     /* Gate for the whole branding layer — see `isBrandingCustomized`. */
     const isBranded = isBrandingCustomized(branding, themeDefinition.defaultBranding);
@@ -97,9 +90,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
             className="nebari-login-wrapper"
             data-branded={isTokenDriven ? "" : undefined}
             {...(isBranded ? getBrandingDataAttributes(branding.advanced) : {})}
-            data-has-custom-background={
-                isBranded && background !== "" ? "" : undefined
-            }
+            data-has-custom-background={isBranded && background !== "" ? "" : undefined}
             style={
                 isBranded
                     ? {
@@ -156,9 +147,15 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
 
                 <CardHeader className="nebari-header px-0">
                     {headerNode !== undefined ? (
-                        headerHasOwnTitleMarkup ? headerNode : <h1 className="nebari-title">{headerNode}</h1>
+                        headerHasOwnTitleMarkup ? (
+                            headerNode
+                        ) : (
+                            <h1 className="nebari-title">{headerNode}</h1>
+                        )
                     ) : (
-                        <h1 className="nebari-title">{msg("loginTitleHtml", kcContext.realm.displayNameHtml)}</h1>
+                        <h1 className="nebari-title">
+                            {msg("loginTitleHtml", kcContext.realm.displayNameHtml)}
+                        </h1>
                     )}
                 </CardHeader>
 
@@ -187,13 +184,9 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                     </div>
                 )}
 
-                {socialProvidersNode && (
-                    <div className="nebari-social-section">{socialProvidersNode}</div>
-                )}
+                {socialProvidersNode && <div className="nebari-social-section">{socialProvidersNode}</div>}
 
-                {displayInfo && infoNode && (
-                    <div className="nebari-info-section">{infoNode}</div>
-                )}
+                {displayInfo && infoNode && <div className="nebari-info-section">{infoNode}</div>}
             </Card>
         </main>
     );

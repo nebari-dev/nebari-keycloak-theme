@@ -114,6 +114,7 @@ export type ThemeDefinition = ThemeDefinitionData & { name: CustomThemeName };
 /* `hasOwnProperty` rather than `in`: the name reaching this comes from the
    realm's theme setting, and `"toString" in THEME_CATALOG` is true. */
 function isCustomThemeName(value: string): value is CustomThemeName {
+    // biome-ignore lint/suspicious/noPrototypeBuiltins: Object.hasOwn is ES2022, and this targets ES2020
     return Object.prototype.hasOwnProperty.call(THEME_CATALOG, value);
 }
 
@@ -130,9 +131,7 @@ function isCustomThemeName(value: string): value is CustomThemeName {
  */
 export const CUSTOM_THEME_NAMES: readonly CustomThemeName[] = (() => {
     const uncatalogued = themeNames.filter(name => !isCustomThemeName(name));
-    const unpackaged = Object.keys(THEME_CATALOG).filter(
-        name => !themeNames.includes(name)
-    );
+    const unpackaged = Object.keys(THEME_CATALOG).filter(name => !themeNames.includes(name));
 
     if (uncatalogued.length !== 0 || unpackaged.length !== 0) {
         throw new Error(
@@ -171,14 +170,10 @@ const THEME_DEFINITIONS = Object.fromEntries(
  * The catalogued name for what Keycloak reported, or `undefined` when it names
  * no theme of ours — a stock Keycloak theme, or one from another JAR.
  */
-export function matchThemeName(
-    themeName: string | undefined
-): CustomThemeName | undefined {
+export function matchThemeName(themeName: string | undefined): CustomThemeName | undefined {
     const normalized = themeName?.replace(/_retrocompat$/, "");
 
-    return normalized !== undefined && isCustomThemeName(normalized)
-        ? normalized
-        : undefined;
+    return normalized !== undefined && isCustomThemeName(normalized) ? normalized : undefined;
 }
 
 export function resolveThemeName(themeName: string | undefined): CustomThemeName {
@@ -203,10 +198,7 @@ export function getThemeLogo(
     const source = theme.logo[mode];
 
     return {
-        src:
-            source.startsWith("data:") || /^https?:\/\//.test(source)
-                ? source
-                : `${baseUrl}${source}`,
+        src: source.startsWith("data:") || /^https?:\/\//.test(source) ? source : `${baseUrl}${source}`,
         style: {
             width: `${theme.logo.width}px`,
             height: `${theme.logo.height}px`,
@@ -220,10 +212,7 @@ export function cloneThemeDefaults(theme: ThemeDefinition): BrandingConfig {
     return structuredClone(theme.defaultBranding);
 }
 
-export function parseThemeBrandingConfig(
-    theme: ThemeDefinition,
-    value: string | undefined
-): BrandingConfig {
+export function parseThemeBrandingConfig(theme: ThemeDefinition, value: string | undefined): BrandingConfig {
     return parseBrandingConfig(value, theme.defaultBranding);
 }
 

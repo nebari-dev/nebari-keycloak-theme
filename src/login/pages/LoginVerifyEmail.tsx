@@ -4,7 +4,9 @@ import type { I18n } from "../i18n";
 import { MailIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function LoginVerifyEmail(props: PageProps<Extract<KcContext, { pageId: "login-verify-email.ftl" }>, I18n>) {
+export default function LoginVerifyEmail(
+    props: PageProps<Extract<KcContext, { pageId: "login-verify-email.ftl" }>, I18n>
+) {
     const { kcContext, i18n, Template } = props;
     const { url, user } = kcContext;
     const { msg, msgStr } = i18n;
@@ -29,9 +31,7 @@ export default function LoginVerifyEmail(props: PageProps<Extract<KcContext, { p
         >
             <Alert>
                 <MailIcon aria-hidden />
-                <AlertDescription>
-                    {msg("emailVerifyInstruction1", user?.email ?? "")}
-                </AlertDescription>
+                <AlertDescription>{msg("emailVerifyInstruction1", user?.email ?? "")}</AlertDescription>
             </Alert>
         </Template>
     );

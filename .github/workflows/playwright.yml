@@ -40,6 +40,11 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      # The CI form of `npm run lint`: lint and format, failing on warnings,
+      # without writing anything.
+      - name: Lint and format check
+        run: npx biome ci --error-on-warnings .
+
       - run: npx playwright install --with-deps chromium
 
       # Gate: compares against the committed baselines in tests/screenshots.

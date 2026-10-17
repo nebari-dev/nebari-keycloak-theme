@@ -5,9 +5,7 @@ import type { I18n } from "../../i18n";
 import { Alert, AlertDescription } from "@/components/shadcn/alert";
 import { Button } from "@/components/shadcn/button";
 
-export default function Error(
-    props: PageProps<Extract<KcContext, { pageId: "error.ftl" }>, I18n>
-) {
+export default function ErrorPage(props: PageProps<Extract<KcContext, { pageId: "error.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
     const { msg } = i18n;
     const { message, client, skipLink } = kcContext;

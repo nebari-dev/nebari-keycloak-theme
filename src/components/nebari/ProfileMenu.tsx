@@ -181,9 +181,7 @@ export function ProfileMenu({
                         )}
                     </div>
 
-                    {canChangeTheme && (
-                        <ThemePicker setThemeMode={setThemeMode} themeMode={themeMode} />
-                    )}
+                    {canChangeTheme && <ThemePicker setThemeMode={setThemeMode} themeMode={themeMode} />}
 
                     {children}
 
@@ -206,4 +204,5 @@ export function ProfileMenu({
     );
 }
 
+// biome-ignore lint/style/useComponentExportOnlyModules: DropdownMenuItem is a component
 export { DropdownMenuItem as ProfileMenuItem };

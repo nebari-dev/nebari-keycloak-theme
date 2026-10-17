@@ -1,8 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-    correctedFirst,
-    lastPageStart
-} from "../src/shared/keycloak-ui-shared/controls/table/pagination";
+import { correctedFirst, lastPageStart } from "../src/shared/keycloak-ui-shared/controls/table/pagination";
 
 test("last page starts on a page boundary", () => {
     // 25 rows at 10 per page: pages start at 0, 10, 20.

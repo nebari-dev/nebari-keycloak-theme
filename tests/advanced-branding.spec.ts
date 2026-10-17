@@ -11,7 +11,8 @@ import {
  * reads what the browser computed, not what the config says, because the
  * settings only matter if the stylesheets and templates actually apply them.
  */
-const PIXEL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+const PIXEL =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
 const advanced = {
     ...DEFAULT_BRANDING_ADVANCED,
@@ -60,7 +61,9 @@ for (const [theme, defaults, card] of [
             expect(arrow).toBe('""');
 
             await expect(page.locator(card)).toHaveCSS("backdrop-filter", "blur(12px)");
-            const fill = await page.locator(card).evaluate(element => getComputedStyle(element).backgroundColor);
+            const fill = await page
+                .locator(card)
+                .evaluate(element => getComputedStyle(element).backgroundColor);
             // 40% of the card colour: an alpha channel below 1.
             expect(fill).toMatch(/(rgba|color)\(.*\b0?\.4\b/);
 

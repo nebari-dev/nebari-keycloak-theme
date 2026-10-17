@@ -7,14 +7,8 @@ import type { I18n } from "../../i18n";
 import { Button } from "@/components/shadcn/button";
 import { kcClassesMap } from "../userProfileClasses";
 
-
-type Props = PageProps<
-    Extract<KcContext, { pageId: "login-update-profile.ftl" }>,
-    I18n
-> & {
-    UserProfileFormFields: LazyOrNot<
-        (props: UserProfileFormFieldsProps) => React.ReactElement
-    >;
+type Props = PageProps<Extract<KcContext, { pageId: "login-update-profile.ftl" }>, I18n> & {
+    UserProfileFormFields: LazyOrNot<(props: UserProfileFormFieldsProps) => React.ReactElement>;
     doMakeUserConfirmPassword: boolean;
 };
 

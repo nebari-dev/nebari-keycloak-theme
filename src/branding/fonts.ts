@@ -28,5 +28,8 @@ export function loadBrandingFont(font: BrandingFont): void {
 
     /* A failed load leaves the fallback in the font stack, which is a legible
        page; it is not worth surfacing to a visitor. */
-    loaded.set(font, load().catch(() => undefined));
+    loaded.set(
+        font,
+        load().catch(() => undefined)
+    );
 }

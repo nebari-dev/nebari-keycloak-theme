@@ -58,11 +58,7 @@ async function captureAround(page: Page, path: string, elements: Locator[], padd
 
 test("theme customization page", async ({ page }) => {
     mkdirSync(outDir, { recursive: true });
-    await adminRequest(
-        page,
-        "PUT",
-        `base64:${Buffer.from(JSON.stringify(config)).toString("base64")}`
-    );
+    await adminRequest(page, "PUT", `base64:${Buffer.from(JSON.stringify(config)).toString("base64")}`);
 
     try {
         await page.goto(`/admin/${realm}/console/#/${realm}/branding`);
@@ -106,7 +102,10 @@ test("theme customization page", async ({ page }) => {
         const backgrounds = page
             .locator(".branding-image-set")
             .filter({ has: page.getByRole("heading", { name: "Background images" }) });
-        await backgrounds.locator('input[type="file"]').first().setInputFiles(fileURLToPath(exampleBackgroundFile));
+        await backgrounds
+            .locator('input[type="file"]')
+            .first()
+            .setInputFiles(fileURLToPath(exampleBackgroundFile));
         const cropDialog = page.getByRole("dialog");
         await expect(cropDialog).toBeVisible();
         await cropDialog.screenshot({ path: out("crop-dialog") });

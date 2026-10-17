@@ -1,9 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { parseThemeExport, serializeThemeExport } from "../src/themes/themePresets";
-import {
-    DEFAULT_BRANDING_CONFIG,
-    TEMPLATE_BRANDING_CONFIG
-} from "../src/branding/brandingConfig";
+import { DEFAULT_BRANDING_CONFIG, TEMPLATE_BRANDING_CONFIG } from "../src/branding/brandingConfig";
 import type { ThemeDefinition } from "../src/themes/themeCatalog";
 
 /*
@@ -38,18 +35,12 @@ test("rejects files that would silently import as theme defaults", () => {
 });
 
 test("rejects an envelope with no format version, and a newer one", () => {
-    expect(() =>
-        parseThemeExport(
-            JSON.stringify({ config: DEFAULT_BRANDING_CONFIG }),
-            theme
-        )
-    ).toThrow(/not a Nebari theme export/);
+    expect(() => parseThemeExport(JSON.stringify({ config: DEFAULT_BRANDING_CONFIG }), theme)).toThrow(
+        /not a Nebari theme export/
+    );
 
     expect(() =>
-        parseThemeExport(
-            JSON.stringify({ nebariThemeExport: 99, config: DEFAULT_BRANDING_CONFIG }),
-            theme
-        )
+        parseThemeExport(JSON.stringify({ nebariThemeExport: 99, config: DEFAULT_BRANDING_CONFIG }), theme)
     ).toThrow(/newer version/);
 });
 

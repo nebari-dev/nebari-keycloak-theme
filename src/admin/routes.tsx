@@ -41,6 +41,7 @@ export type AppRouteObjectHandle = {
 
 export interface AppRouteObject extends NonIndexRouteObject {
   path: string;
+  // biome-ignore lint/suspicious/noExplicitAny: upstream's type, kept as vendored
   breadcrumb?: (t: TFunction) => string | ComponentType<any>;
   handle: AppRouteObjectHandle;
 }

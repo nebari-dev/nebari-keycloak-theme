@@ -3,7 +3,10 @@ import { expect, test, type Page } from "@playwright/test";
 type Rgb = [number, number, number];
 
 function parseRgb(value: string): Rgb {
-    const channels = value.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+    const channels = value
+        .match(/[\d.]+/g)
+        ?.slice(0, 3)
+        .map(Number);
 
     if (channels?.length !== 3) throw new Error(`Expected an rgb() colour, got ${value}`);
 
@@ -14,9 +17,7 @@ function relativeLuminance(value: string): number {
     const [red, green, blue] = parseRgb(value).map(channel => {
         const normalized = channel / 255;
 
-        return normalized <= 0.04045
-            ? normalized / 12.92
-            : ((normalized + 0.055) / 1.055) ** 2.4;
+        return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
     });
 
     return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
@@ -119,10 +120,10 @@ for (const theme of themes) {
                 await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
                 await openPreview(page, theme, "login");
                 await theme.assertBrand(page);
-                await expect(page).toHaveScreenshot(
-                    [theme.name, `full-page-${colorScheme}.png`],
-                    { fullPage: true, animations: "disabled" }
-                );
+                await expect(page).toHaveScreenshot([theme.name, `full-page-${colorScheme}.png`], {
+                    fullPage: true,
+                    animations: "disabled"
+                });
             });
         }
     });

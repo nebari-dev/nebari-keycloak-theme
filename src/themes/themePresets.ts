@@ -1,7 +1,4 @@
-import {
-    normalizeBrandingConfig,
-    type BrandingConfig
-} from "../branding/brandingConfig";
+import { normalizeBrandingConfig, type BrandingConfig } from "../branding/brandingConfig";
 import type { ThemeDefinition } from "./themeCatalog";
 
 /**
@@ -133,9 +130,7 @@ export function parseThemeExport(text: string, theme: ThemeDefinition): ThemePre
                 ? candidate.name.trim().slice(0, 80)
                 : "Imported theme",
         description:
-            typeof candidate.description === "string"
-                ? candidate.description.trim().slice(0, 200)
-                : "",
+            typeof candidate.description === "string" ? candidate.description.trim().slice(0, 200) : "",
         config: normalizeBrandingConfig(rawConfig, theme.defaultBranding),
         source: "upload"
     };
@@ -143,7 +138,10 @@ export function parseThemeExport(text: string, theme: ThemeDefinition): ThemePre
 
 /** `nebari-theme-<realm>-<date>.json`, safe for any filesystem. */
 export function themeExportFileName(realm: string, exportedAt: string): string {
-    const slug = realm.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const slug = realm
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
 
     return `nebari-theme-${slug || "realm"}-${exportedAt.slice(0, 10)}.json`;
 }

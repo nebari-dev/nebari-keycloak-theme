@@ -133,8 +133,7 @@ export function toOklch(hex: string): Oklch {
  * the hue and the lightness the palette was reasoning about.
  */
 export function fromOklch({ L, C, h }: Oklch): string {
-    const at = (chroma: number) =>
-        oklabToRgb([L, Math.cos(h) * chroma, Math.sin(h) * chroma]);
+    const at = (chroma: number) => oklabToRgb([L, Math.cos(h) * chroma, Math.sin(h) * chroma]);
 
     if (isDisplayable(at(C))) return rgbToHex(at(C));
 
@@ -164,9 +163,7 @@ function luminance(hex: string): number {
 
 /** WCAG 2.x contrast ratio, 1 (identical) to 21 (black on white). */
 export function contrastRatio(left: string, right: string): number {
-    const [lighter, darker] = [luminance(left), luminance(right)].sort(
-        (first, second) => second - first
-    );
+    const [lighter, darker] = [luminance(left), luminance(right)].sort((first, second) => second - first);
 
     return (lighter + 0.05) / (darker + 0.05);
 }
@@ -182,7 +179,5 @@ export function contrastRatio(left: string, right: string): number {
 export function readableOn(color: string): string {
     if (!isHexColor(color)) return "#ffffff";
 
-    return contrastRatio("#000000", color) >= contrastRatio("#ffffff", color)
-        ? "#000000"
-        : "#ffffff";
+    return contrastRatio("#000000", color) >= contrastRatio("#ffffff", color) ? "#000000" : "#ffffff";
 }

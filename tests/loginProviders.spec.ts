@@ -9,39 +9,37 @@ import { getLoginProviders } from "../src/branding/loginProviders";
  */
 const RECORDED = [
     {
-        "alias": "idp-disabled",
-        "displayName": "Disabled IdP",
-        "enabled": false,
-        "hideOnLogin": false,
-        "linkOnly": false
+        alias: "idp-disabled",
+        displayName: "Disabled IdP",
+        enabled: false,
+        hideOnLogin: false,
+        linkOnly: false
     },
     {
-        "alias": "idp-hidden",
-        "displayName": "Hidden IdP",
-        "enabled": true,
-        "hideOnLogin": true,
-        "linkOnly": false
+        alias: "idp-hidden",
+        displayName: "Hidden IdP",
+        enabled: true,
+        hideOnLogin: true,
+        linkOnly: false
     },
     {
-        "alias": "idp-linkonly",
-        "displayName": "Link Only IdP",
-        "enabled": true,
-        "hideOnLogin": false,
-        "linkOnly": true
+        alias: "idp-linkonly",
+        displayName: "Link Only IdP",
+        enabled: true,
+        hideOnLogin: false,
+        linkOnly: true
     },
     {
-        "alias": "idp-normal",
-        "displayName": "Normal IdP",
-        "enabled": true,
-        "hideOnLogin": false,
-        "linkOnly": false
+        alias: "idp-normal",
+        displayName: "Normal IdP",
+        enabled: true,
+        hideOnLogin: false,
+        linkOnly: false
     }
 ];
 
 test("keeps only the providers the login page actually offers", () => {
-    expect(getLoginProviders(RECORDED)).toEqual([
-        { id: "idp-normal", label: "Normal IdP" }
-    ]);
+    expect(getLoginProviders(RECORDED)).toEqual([{ id: "idp-normal", label: "Normal IdP" }]);
 });
 
 test("excludes organization-scoped and legacy-hidden providers", () => {
@@ -66,9 +64,7 @@ test("falls back to the alias when a provider has no display name", () => {
 });
 
 test("a provider with no flags set at all is treated as offered", () => {
-    expect(getLoginProviders([{ alias: "bare" }])).toEqual([
-        { id: "bare", label: "bare" }
-    ]);
+    expect(getLoginProviders([{ alias: "bare" }])).toEqual([{ id: "bare", label: "bare" }]);
 });
 
 /**
@@ -81,10 +77,7 @@ test("gives providers sharing a display name distinct ids", () => {
         { alias: "sso-us", displayName: "Corporate SSO", enabled: true }
     ]);
 
-    expect(providers.map(provider => provider.label)).toEqual([
-        "Corporate SSO",
-        "Corporate SSO"
-    ]);
+    expect(providers.map(provider => provider.label)).toEqual(["Corporate SSO", "Corporate SSO"]);
     expect(new Set(providers.map(provider => provider.id)).size).toBe(2);
 });
 
@@ -95,10 +88,6 @@ test("falls back past a missing alias to something still unique", () => {
         { enabled: true }
     ]);
 
-    expect(providers.map(provider => provider.id)).toEqual([
-        "abc",
-        "provider-1",
-        "provider-2"
-    ]);
+    expect(providers.map(provider => provider.id)).toEqual(["abc", "provider-1", "provider-2"]);
     expect(new Set(providers.map(provider => provider.id)).size).toBe(3);
 });

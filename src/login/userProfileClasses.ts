@@ -21,5 +21,5 @@ export const kcClassesMap = {
     kcButtonPrimaryClass: "nebari-button-primary nebari-button-full",
     kcButtonDefaultClass: "nebari-button nebari-button-secondary",
     kcButtonLargeClass: "",
-    kcButtonBlockClass: "",
+    kcButtonBlockClass: ""
 } as const;

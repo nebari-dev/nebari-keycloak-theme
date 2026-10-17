@@ -57,8 +57,8 @@ new versions.
 Dependabot runs monthly for npm, GitHub Actions and the Keycloak base image in the Dockerfile, configured in
 [`.github/dependabot.yml`](../.github/dependabot.yml). The policy:
 
-- **Minor and patch updates** arrive grouped in one pull request. `@typescript-eslint/*` gets its own group,
-  because the parser and plugin peer-depend on each other and a lone bump of either fails `npm ci`.
+- **Minor and patch updates** arrive grouped in one pull request. `@biomejs/biome` gets its own, because a new
+  Biome version can change formatter output and the pull request has to run `npm run format` too.
 - **Major updates are never proposed.** Nearly every dependency sits under a peer pin from the Keycloakify,
   PatternFly and Vite stack, so a major bump fails `npm ci` with `ERESOLVE`. Take them by hand.
 - **Some packages are held further:**
@@ -69,7 +69,6 @@ Dependabot runs monthly for npm, GitHub Actions and the Keycloak base image in t
 | `react`, `react-dom` and their types | The Keycloakify and PatternFly console packages require React 18 |
 | `react-hook-form` | `@keycloakify/keycloak-ui-shared` pins it to exactly `7.70.0`, so even a minor bump fails `npm ci` |
 | `oidc-spa` (minors) | `@keycloakify/keycloak-ui-shared` pins it to `~10.0.x` |
-| `eslint-plugin-react-refresh` (minors) | Still `0.x`, and `0.5` needs ESLint 9; this repo is on ESLint 8 |
 
 Open Dependabot security alerts are tracked in
 [the repository's security tab](https://github.com/nebari-dev/nebari-keycloak-theme/security/dependabot).

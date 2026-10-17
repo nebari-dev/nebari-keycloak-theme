@@ -1,11 +1,4 @@
-import {
-    contrastRatio,
-    fromOklch,
-    isHexColor,
-    readableOn,
-    toOklch,
-    type Oklch
-} from "./color";
+import { contrastRatio, fromOklch, isHexColor, readableOn, toOklch, type Oklch } from "./color";
 import type { BrandingConfig, BrandingPalette } from "./brandingConfig";
 
 /**
@@ -98,12 +91,7 @@ export type DeriveOptions = {
  * Returns the last tone tried when nothing clears the target, so a caller always
  * gets its best effort rather than `null` for an impossible request.
  */
-function stepUntilContrast(
-    base: string,
-    tone: Omit<Oklch, "L">,
-    direction: 1 | -1,
-    target: number
-): string {
+function stepUntilContrast(base: string, tone: Omit<Oklch, "L">, direction: 1 | -1, target: number): string {
     const start = toOklch(base).L;
     let last = base;
 
@@ -129,12 +117,7 @@ function stepUntilContrast(
  * of regression nobody notices until a brand colour lands near the black/white
  * crossover.
  */
-function labelBandEdge(
-    label: string,
-    tone: Omit<Oklch, "L">,
-    start: number,
-    direction: 1 | -1
-): number {
+function labelBandEdge(label: string, tone: Omit<Oklch, "L">, start: number, direction: 1 | -1): number {
     let edge = start;
 
     for (let step = 1; step <= 100; step++) {
@@ -217,9 +200,7 @@ export function derivePalette(
         pageBackground,
         cardBackground,
         inputBackground,
-        text: softText
-            ? surface(lightness.text, SURFACE_CHROMA.text)
-            : readableOn(cardBackground),
+        text: softText ? surface(lightness.text, SURFACE_CHROMA.text) : readableOn(cardBackground),
         mutedText: stepUntilContrast(cardBackground, inkTone, inkDirection, TEXT_CONTRAST),
         border: stepUntilContrast(cardBackground, inkTone, inkDirection, BORDER_CONTRAST)
     };
@@ -249,12 +230,7 @@ export function companionPrimary(primary: string, target: "light" | "dark"): str
 
     if (contrastRatio(shifted, card) >= COMPONENT_CONTRAST) return shifted;
 
-    return stepUntilContrast(
-        card,
-        { C: toOklch(shifted).C, h },
-        towardsDark ? 1 : -1,
-        COMPONENT_CONTRAST
-    );
+    return stepUntilContrast(card, { C: toOklch(shifted).C, h }, towardsDark ? 1 : -1, COMPONENT_CONTRAST);
 }
 
 /**
@@ -297,9 +273,7 @@ export function getLinkedKeys(
     options?: DeriveOptions,
     defaults?: BrandingPalette
 ): DerivedPaletteKey[] {
-    return DERIVED_PALETTE_KEYS.filter(key =>
-        isDerivedFromPrimary(palette, key, mode, options, defaults)
-    );
+    return DERIVED_PALETTE_KEYS.filter(key => isDerivedFromPrimary(palette, key, mode, options, defaults));
 }
 
 /**
@@ -344,13 +318,7 @@ export function applyBrandPrimary(
     const otherMode = editedMode === "light" ? "dark" : "light";
     const next: BrandingConfig = {
         ...config,
-        [editedMode]: applyPrimary(
-            config[editedMode],
-            primary,
-            editedMode,
-            options,
-            defaults?.[editedMode]
-        )
+        [editedMode]: applyPrimary(config[editedMode], primary, editedMode, options, defaults?.[editedMode])
     };
 
     if (!isHexColor(primary)) return next;
@@ -359,8 +327,7 @@ export function applyBrandPrimary(
     const followsEditedMode =
         isHexColor(config[editedMode].primary) &&
         otherPrimary === companionPrimary(config[editedMode].primary, otherMode);
-    const isDefault =
-        defaults !== undefined && otherPrimary === defaults[otherMode].primary.toLowerCase();
+    const isDefault = defaults !== undefined && otherPrimary === defaults[otherMode].primary.toLowerCase();
 
     if (!followsEditedMode && !isDefault) return next;
 

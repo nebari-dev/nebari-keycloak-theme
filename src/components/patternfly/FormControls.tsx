@@ -76,9 +76,7 @@ type CheckedChangeEventDetails = {
  * runs. Consumers read the two interchangeably, so both are pinned to that input
  * here; verified in a browser to give `currentTarget.name` and `target.checked`.
  */
-function toChangeEvent(
-    details: CheckedChangeEventDetails
-): ChangeEvent<HTMLInputElement> {
+function toChangeEvent(details: CheckedChangeEventDetails): ChangeEvent<HTMLInputElement> {
     const { event } = details;
     const target = event.target as HTMLInputElement;
 
@@ -152,10 +150,7 @@ function assignRef<T>(ref: ForwardedRef<T> | undefined, value: T | null) {
  * resolved from a wrapper that is `display: contents`, so it participates in no
  * layout of its own.
  */
-function useResolvedControl<T extends HTMLElement>(
-    selector: string,
-    forwarded: ForwardedRef<T> | undefined
-) {
+function useResolvedControl<T extends HTMLElement>(selector: string, forwarded: ForwardedRef<T> | undefined) {
     const host = useRef<HTMLSpanElement | null>(null);
 
     useLayoutEffect(() => {
@@ -269,10 +264,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
     },
     ref
 ) {
-    const host = useResolvedControl<HTMLTextAreaElement>(
-        '[data-slot="textarea"]',
-        innerRef ?? ref
-    );
+    const host = useResolvedControl<HTMLTextAreaElement>('[data-slot="textarea"]', innerRef ?? ref);
 
     return (
         <span ref={host} style={{ display: "contents" }}>

@@ -8,13 +8,14 @@ updates:
       time: "08:00"
       timezone: "US/Eastern"
     groups:
-      # The parser and plugin peer-depend on each other, so a lone major bump
-      # of either fails npm ci. Listed before patch-and-minor so it wins the
+      # Biome is pinned exactly because a new version can change formatter
+      # output. It gets its own pull request, which also has to run
+      # `npm run format`. Listed before patch-and-minor so it wins the
       # first-match group assignment.
-      typescript-eslint:
+      biome:
         applies-to: version-updates
         patterns:
-          - "@typescript-eslint/*"
+          - "@biomejs/biome"
       # Group all patch and minor updates into a single PR
       patch-and-minor:
         applies-to: version-updates
@@ -41,10 +42,6 @@ updates:
       - dependency-name: "react-hook-form"
       # @keycloakify/keycloak-ui-shared pins oidc-spa to ~10.0.x.
       - dependency-name: "oidc-spa"
-        update-types: ["version-update:semver-minor"]
-      # Still 0.x, so 0.4 -> 0.5 counts as a minor bump, but 0.5 requires
-      # eslint 9+ and this repo is on eslint 8. Moves with the eslint major.
-      - dependency-name: "eslint-plugin-react-refresh"
         update-types: ["version-update:semver-minor"]
 
   - package-ecosystem: "github-actions"

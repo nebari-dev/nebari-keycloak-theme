@@ -1,11 +1,5 @@
 import { AlertCircleIcon, FileJsonIcon, UploadIcon } from "lucide-react";
-import {
-    useMemo,
-    useRef,
-    useState,
-    type ChangeEvent,
-    type KeyboardEvent
-} from "react";
+import { useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,10 +12,7 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import type { BrandingConfig } from "../../branding/brandingConfig";
-import {
-    parseThemeExport,
-    type ThemePreset
-} from "../../themes/themePresets";
+import { parseThemeExport, type ThemePreset } from "../../themes/themePresets";
 import { getBundledPresets } from "../../themes/bundledPresets";
 import type { ThemeDefinition } from "../../themes/themeCatalog";
 import { BrandingPreview } from "./BrandingPreview";
@@ -65,9 +56,7 @@ export function ImportThemeDialog({
     }, [theme]);
 
     const [uploaded, setUploaded] = useState<ThemePreset | undefined>();
-    const [selectedId, setSelectedId] = useState<string | undefined>(
-        () => bundled[0]?.id
-    );
+    const [selectedId, setSelectedId] = useState<string | undefined>(() => bundled[0]?.id);
     const [fileError, setFileError] = useState("");
     const [previewMode, setPreviewMode] = useState<"light" | "dark">("light");
     const fileInput = useRef<HTMLInputElement>(null);
@@ -99,9 +88,8 @@ export function ImportThemeDialog({
         event.preventDefault();
 
         const nextIndex = (index + step + choices.length) % choices.length;
-        const options = event.currentTarget.parentElement?.querySelectorAll<
-            HTMLButtonElement
-        >('[role="radio"]');
+        const options =
+            event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
 
         select(choices[nextIndex]);
         /* The newly checked radio is the only tab stop, so focus follows it. */
@@ -124,9 +112,7 @@ export function ImportThemeDialog({
             setUploaded(named);
             select(named);
         } catch (error) {
-            setFileError(
-                error instanceof Error ? error.message : "That file could not be read."
-            );
+            setFileError(error instanceof Error ? error.message : "That file could not be read.");
         }
     };
 
@@ -137,8 +123,8 @@ export function ImportThemeDialog({
                     <DialogHeader>
                         <DialogTitle>Import theme</DialogTitle>
                         <DialogDescription>
-                            Choose a theme to load into the editor. Nothing is published
-                            until you press Publish theme.
+                            Choose a theme to load into the editor. Nothing is published until you press
+                            Publish theme.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -165,17 +151,14 @@ export function ImportThemeDialog({
                                         <FileJsonIcon aria-hidden />
                                         <span>
                                             <strong>{preset.name}</strong>
-                                            {preset.description !== "" && (
-                                                <small>{preset.description}</small>
-                                            )}
+                                            {preset.description !== "" && <small>{preset.description}</small>}
                                         </span>
                                     </button>
                                 ))}
 
                                 {choices.length === 0 && (
                                     <p className="branding-import__empty">
-                                        No themes are bundled with this build. Choose a
-                                        file to import one.
+                                        No themes are bundled with this build. Choose a file to import one.
                                     </p>
                                 )}
                             </div>
@@ -212,9 +195,7 @@ export function ImportThemeDialog({
                                 <span>Preview</span>
                                 <Button
                                     onClick={() =>
-                                        setPreviewMode(mode =>
-                                            mode === "light" ? "dark" : "light"
-                                        )
+                                        setPreviewMode(mode => (mode === "light" ? "dark" : "light"))
                                     }
                                     size="sm"
                                     variant="outline"
@@ -230,18 +211,13 @@ export function ImportThemeDialog({
                                     themeName={theme.name}
                                 />
                             ) : (
-                                <p className="branding-import__empty">
-                                    Select a theme to preview it.
-                                </p>
+                                <p className="branding-import__empty">Select a theme to preview it.</p>
                             )}
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button
-                            onClick={() => onOpenChange(false)}
-                            variant="outline"
-                        >
+                        <Button onClick={() => onOpenChange(false)} variant="outline">
                             Cancel
                         </Button>
                         <Button

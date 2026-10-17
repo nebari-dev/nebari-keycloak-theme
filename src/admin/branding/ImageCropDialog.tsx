@@ -20,13 +20,7 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import {
     calculateSourceCrop,
@@ -110,8 +104,9 @@ export function ImageCropDialog({
         setError("");
 
         return () => URL.revokeObjectURL(url);
-    }, [file]);
+    }, [file, initialAspect]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: the viewport changes shape with the aspect choice, so re-measure then
     useLayoutEffect(() => {
         if (!viewportElement) return;
 
@@ -133,8 +128,7 @@ export function ImageCropDialog({
             : kind === "logo"
               ? ASPECT_VALUES.wordmark
               : ASPECT_VALUES.landscape;
-    const aspect =
-        aspectChoice === "original" ? originalAspect : ASPECT_VALUES[aspectChoice];
+    const aspect = aspectChoice === "original" ? originalAspect : ASPECT_VALUES[aspectChoice];
     const aspectOptions: AspectChoice[] =
         kind === "icon"
             ? ["square"]
@@ -174,10 +168,9 @@ export function ImageCropDialog({
         y: Math.max(-(geometry?.maxY ?? 0), Math.min(geometry?.maxY ?? 0, next.y))
     });
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: geometry's bounds are the only values that affect clamping; clampPosition is new every render
     useEffect(() => {
         setPosition(current => clampPosition(current));
-        // Geometry's bounds are the only values that affect clamping.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [geometry?.maxX, geometry?.maxY]);
 
     const selectedCrop = (): ImageCrop | undefined => {
@@ -204,11 +197,7 @@ export function ImageCropDialog({
         try {
             onComplete(await prepareBrandingImage(file, kind, selectedCrop()));
         } catch (cause) {
-            setError(
-                cause instanceof Error
-                    ? cause.message
-                    : "The image could not be processed."
-            );
+            setError(cause instanceof Error ? cause.message : "The image could not be processed.");
         } finally {
             setProcessing(false);
         }
@@ -282,8 +271,8 @@ export function ImageCropDialog({
                 <DialogHeader>
                     <DialogTitle>Crop and resize {label.toLowerCase()}</DialogTitle>
                     <DialogDescription>
-                        Pick a frame, zoom, then drag the image into position. The upload
-                        is resized and optimized only after you apply the crop.
+                        Pick a frame, zoom, then drag the image into position. The upload is resized and
+                        optimized only after you apply the crop.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -341,8 +330,8 @@ export function ImageCropDialog({
                     </div>
 
                     <p id="branding-crop-instructions" className="branding-crop-instructions">
-                        The crop frame is keyboard accessible. Use the arrow keys to move
-                        the image; hold Shift for larger steps.
+                        The crop frame is keyboard accessible. Use the arrow keys to move the image; hold
+                        Shift for larger steps.
                     </p>
                     <p id="branding-crop-size" className="sr-only" aria-live="polite">
                         {cropDescription}
@@ -359,13 +348,8 @@ export function ImageCropDialog({
                                 }}
                                 value={aspectChoice}
                             >
-                                <SelectTrigger
-                                    aria-label="Crop frame aspect ratio"
-                                    id="branding-crop-aspect"
-                                >
-                                    <SelectValue>
-                                        {(value: AspectChoice) => ASPECT_LABELS[value]}
-                                    </SelectValue>
+                                <SelectTrigger aria-label="Crop frame aspect ratio" id="branding-crop-aspect">
+                                    <SelectValue>{(value: AspectChoice) => ASPECT_LABELS[value]}</SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
                                     {aspectOptions.map(option => (
@@ -385,9 +369,7 @@ export function ImageCropDialog({
                                 max={300}
                                 min={100}
                                 onValueChange={value =>
-                                    setZoom(
-                                        (Array.isArray(value) ? value[0] : value) / 100
-                                    )
+                                    setZoom((Array.isArray(value) ? value[0] : value) / 100)
                                 }
                                 step={5}
                                 value={Math.round(zoom * 100)}

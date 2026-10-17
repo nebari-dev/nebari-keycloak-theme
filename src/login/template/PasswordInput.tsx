@@ -18,12 +18,7 @@ type PasswordInputProps = Omit<ComponentProps<typeof Input>, "type"> & {
  * end of the form rather than beside the field it belongs to. It stays
  * reachable by pointer and by screen-reader navigation.
  */
-export function PasswordInput({
-    className,
-    showLabel,
-    hideLabel,
-    ...props
-}: PasswordInputProps) {
+export function PasswordInput({ className, showLabel, hideLabel, ...props }: PasswordInputProps) {
     const [isRevealed, setIsRevealed] = useState(false);
 
     return (

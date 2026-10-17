@@ -32,10 +32,7 @@ export function getConsoleLogo(params: {
     /* Absent or unparseable falls back to the theme's defaults, whose logos are
        empty for every theme — so this is `""` unless a realm published one. */
     const config = parseThemeBrandingConfig(theme, publishedConfig);
-    const published = getBrandingImage(
-        config.useLoginLogoInConsole ? config.logo : config.consoleLogo,
-        mode
-    );
+    const published = getBrandingImage(config.useLoginLogoInConsole ? config.logo : config.consoleLogo, mode);
 
     return published || getThemeLogo(theme, mode, baseUrl)?.src;
 }

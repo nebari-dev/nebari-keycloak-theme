@@ -26,9 +26,7 @@ export type LoginProvider = {
  * `hideOnLogin` and one `linkOnly` provider serves exactly the normal one in
  * `kcContext.social.providers`, which is what this reproduces.
  */
-export function getLoginProviders(
-    providers: IdentityProviderRepresentation[]
-): LoginProvider[] {
+export function getLoginProviders(providers: IdentityProviderRepresentation[]): LoginProvider[] {
     return providers
         .filter(
             provider =>

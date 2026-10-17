@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
-export default function LoginUpdatePassword(props: PageProps<Extract<KcContext, { pageId: "login-update-password.ftl" }>, I18n>) {
+export default function LoginUpdatePassword(
+    props: PageProps<Extract<KcContext, { pageId: "login-update-password.ftl" }>, I18n>
+) {
     const { kcContext, i18n, Template } = props;
     const { url, messagesPerField, isAppInitiatedAction } = kcContext;
     const { msg, msgStr } = i18n;

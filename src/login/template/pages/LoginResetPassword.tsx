@@ -32,9 +32,7 @@ export default function LoginResetPassword(
             displayMessage={!hasError}
             headerNode={msg("emailForgotTitle")}
             infoNode={
-                realm.duplicateEmailsAllowed
-                    ? msg("emailInstructionUsername")
-                    : msg("emailInstruction")
+                realm.duplicateEmailsAllowed ? msg("emailInstructionUsername") : msg("emailInstruction")
             }
         >
             <form
@@ -56,14 +54,14 @@ export default function LoginResetPassword(
                     />
                     {hasError && (
                         <FieldError aria-live="polite">
-                                {/* shadcn's FieldError renders only `children` or
+                            {/* shadcn's FieldError renders only `children` or
                                     `errors`; markup has to come in as a child. */}
-                                <span
-                                    dangerouslySetInnerHTML={{
-                                        __html: kcSanitize(messagesPerField.get("username"))
-                                    }}
-                                />
-                            </FieldError>
+                            <span
+                                dangerouslySetInnerHTML={{
+                                    __html: kcSanitize(messagesPerField.get("username"))
+                                }}
+                            />
+                        </FieldError>
                     )}
                 </Field>
 

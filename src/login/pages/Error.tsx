@@ -6,9 +6,7 @@ import type { I18n } from "../i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-export default function Error(
-    props: PageProps<Extract<KcContext, { pageId: "error.ftl" }>, I18n>
-) {
+export default function ErrorPage(props: PageProps<Extract<KcContext, { pageId: "error.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
     const { msg } = i18n;

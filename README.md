@@ -122,6 +122,7 @@ http://localhost:5173/?preview=login-providers&theme=template. [Quick start](doc
 | `custom_themes/` | Branding presets the editor offers for import, shipped inside the JAR |
 | `src/theme.css` | Tokens, the cascade-layer order and login-page styles |
 | `themes.json` | The themes to build; one JAR pair per theme |
+| `biome.json` | Lint and format rules, and the files each one skips &mdash; see [Development](docs/development.md#lint-and-format) |
 | `scripts/` | The per-theme JAR build, and upgrade guards that catch silent breakage on a Keycloak bump |
 | `tests/` | Playwright screenshot tests and their Linux baselines, one folder per theme |
 | `docs/` | Everything below |

@@ -67,10 +67,7 @@ async function read(url, hint) {
   try {
     return await readFile(url, "utf8");
   } catch (cause) {
-    throw new Error(
-      `Cannot read ${fileURLToPath(url)}. ${hint}`,
-      { cause },
-    );
+    throw new Error(`Cannot read ${fileURLToPath(url)}. ${hint}`, { cause });
   }
 }
 
