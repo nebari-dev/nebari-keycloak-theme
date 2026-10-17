@@ -44,7 +44,8 @@ Keycloak context, so you get hot reload without a Keycloak server:
 | `error` | Error page |
 
 These are defined in `getKcContextMockForPreview` in [`src/login/KcContext.ts`](../src/login/KcContext.ts).
-The same previews are what the [screenshot tests](development.md#screenshot-tests) capture.
+The same previews are what the [screenshot](development.md#screenshot-tests) and
+[accessibility](development.md#accessibility-tests) tests check.
 
 ## The compose loop (consoles)
 

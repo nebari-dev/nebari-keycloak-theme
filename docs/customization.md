@@ -80,8 +80,12 @@ style one:
 2. Add a `case` for its `.ftl` page id in [`src/login/KcPage.tsx`](../src/login/KcPage.tsx).
 3. Add a preview for it in `getKcContextMockForPreview` in
    [`src/login/KcContext.ts`](../src/login/KcContext.ts).
-4. Add the preview name to [`tests/visual.spec.ts`](../tests/visual.spec.ts), then generate its baseline on
-   Linux &mdash; see [Development](development.md#regenerate-baselines-on-linux).
+4. Add the preview name to `previews`, and the page to `loginPages`, in
+   [`tests/previews.ts`](../tests/previews.ts). The screenshot and accessibility suites both read that file,
+   and the accessibility suite fails if a page in `src/login/pages/` or `src/login/template/pages/` is missing
+   from `loginPages`.
+5. Generate its screenshot baseline on Linux &mdash; see
+   [Development](development.md#regenerate-baselines-on-linux).
 
 ## Design-system components
 
