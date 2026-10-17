@@ -1,6 +1,7 @@
 import { createGetKcContextMock } from "keycloakify/login/KcContext";
 import type { KcContext as KcContextBase } from "keycloakify/login/KcContext";
 
+// biome-ignore lint/complexity/noBannedTypes: an empty extension leaves KcContextBase unchanged
 export type KcContextExtension = {};
 
 export type KcContext = KcContextBase & KcContextExtension;

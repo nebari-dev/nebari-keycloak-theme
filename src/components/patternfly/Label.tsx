@@ -24,7 +24,7 @@ const COLOR_MAP = {
     grey: { variant: "secondary" }
 } as const satisfies Record<string, { variant: NebariVariant; className?: string }>;
 
-type PatternFlyLabelProps = {
+export type PatternFlyLabelProps = {
     /** Defaults to `grey`, matching PatternFly. */
     color?: keyof typeof COLOR_MAP;
     /** PatternFly's `outline` swaps the fill for a border. */
@@ -83,5 +83,3 @@ export function Label({
         </NebariBadge>
     );
 }
-
-export type { PatternFlyLabelProps };

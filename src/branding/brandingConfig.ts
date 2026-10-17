@@ -203,6 +203,7 @@ const SAFE_DATA_IMAGE = /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=]+$/i;
 /* Control characters, and the bidirectional overrides and isolates that can make
    rendered text read differently from what is stored (a wordmark that displays
    as another product's name, say). */
+// biome-ignore lint/suspicious/noControlCharactersInRegex: matching control characters is the point; they are stripped
 const UNSAFE_TEXT = /[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g;
 
 function safeText(value: unknown, fallback: string, maxLength: number): string {

@@ -114,6 +114,7 @@ export type ThemeDefinition = ThemeDefinitionData & { name: CustomThemeName };
 /* `hasOwnProperty` rather than `in`: the name reaching this comes from the
    realm's theme setting, and `"toString" in THEME_CATALOG` is true. */
 function isCustomThemeName(value: string): value is CustomThemeName {
+    // biome-ignore lint/suspicious/noPrototypeBuiltins: Object.hasOwn is ES2022, and this targets ES2020
     return Object.prototype.hasOwnProperty.call(THEME_CATALOG, value);
 }
 

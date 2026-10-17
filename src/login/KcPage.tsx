@@ -58,7 +58,7 @@ export default function KcPage(props: { kcContext: KcContext }) {
         Login,
         Register,
         Info,
-        Error,
+        Error: ErrorPage,
         LoginResetPassword,
         LoginUpdatePassword,
         LoginVerifyEmail,
@@ -97,7 +97,7 @@ export default function KcPage(props: { kcContext: KcContext }) {
                         );
                     case "error.ftl":
                         return (
-                            <Error
+                            <ErrorPage
                                 {...{ kcContext, i18n, Template }}
                                 classes={undefined}
                                 doUseDefaultCss={false}

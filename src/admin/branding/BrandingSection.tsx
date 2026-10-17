@@ -597,6 +597,7 @@ export default function BrandingSection() {
      */
     const canPublish = isDirty || staleLocales.length !== 0;
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: reloadCount is the trigger; the retry button bumps it to load again
     useEffect(() => {
         let active = true;
 

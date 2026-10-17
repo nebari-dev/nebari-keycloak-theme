@@ -204,4 +204,5 @@ export function ProfileMenu({
     );
 }
 
+// biome-ignore lint/style/useComponentExportOnlyModules: DropdownMenuItem is a component
 export { DropdownMenuItem as ProfileMenuItem };

@@ -104,8 +104,9 @@ export function ImageCropDialog({
         setError("");
 
         return () => URL.revokeObjectURL(url);
-    }, [file]);
+    }, [file, initialAspect]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: the viewport changes shape with the aspect choice, so re-measure then
     useLayoutEffect(() => {
         if (!viewportElement) return;
 
@@ -167,10 +168,9 @@ export function ImageCropDialog({
         y: Math.max(-(geometry?.maxY ?? 0), Math.min(geometry?.maxY ?? 0, next.y))
     });
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: geometry's bounds are the only values that affect clamping; clampPosition is new every render
     useEffect(() => {
         setPosition(current => clampPosition(current));
-        // Geometry's bounds are the only values that affect clamping.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [geometry?.maxX, geometry?.maxY]);
 
     const selectedCrop = (): ImageCrop | undefined => {
