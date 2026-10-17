@@ -38,6 +38,8 @@ npm install                          # also re-syncs the vendored console source
 npm run dev                          # login pages at :5173, e.g. /?preview=login
 npm run check                        # upgrade guards
 npm run typecheck                    # tsc --noEmit
+npm run lint                         # Biome lint + format check, also run in CI
+npm run format                       # Biome formatter, writes in place
 npm run test:screenshots             # compare login pages against Linux baselines, per brand
 npm run build-keycloak-theme         # guards + tsc + vite build + one JAR pair per brand in dist_keycloak/
 docker compose up -d --build keycloak   # consoles, on the nebari realm
@@ -66,8 +68,8 @@ docker compose up -d --build keycloak   # consoles, on the nebari realm
 - **The dev server can't show the consoles.** They need a real Keycloak. Rebuild the JAR *and* the image &mdash;
   `docker compose up -d --build keycloak` &mdash; and sign in on the `nebari` realm, not `master`. Forgetting
   `--build` makes it look like nothing changed.
-- **Nothing tests the consoles automatically.** CI covers login-page pixels, the type check and the guards. For a
-  console change, check it in the compose loop and say in the pull request that you did.
+- **Nothing tests the consoles automatically.** CI covers login-page pixels, the type check, lint and the guards.
+  For a console change, check it in the compose loop and say in the pull request that you did.
 - **A green type check covers `src/` only.** The owned console files are type-checked, but nothing under
   `tests/` or the Playwright config is: Playwright transpiles without checking types.
 - **A rebaselined screenshot is a claim that the new rendering is right.** Look at the diff before committing it.

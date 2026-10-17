@@ -14,10 +14,39 @@ Setting up is covered in [Quick start](quick-start.md). This page is the referen
 | `npm run test:screenshots` | Compares the login pages against the committed baselines |
 | `npm run test:screenshots:update` | Accepts the current rendering as the new baselines |
 | `npm run docs:console-images` | Recaptures the Admin Console images in [Theme customization](theme-customization.md) from the compose loop |
-| `npm run lint` | ESLint with `--max-warnings 0` |
+| `npm run lint` | Biome lint and format check, failing on warnings |
+| `npm run format` | Biome formatter, writing changes in place |
 
-`npm run lint` is not part of CI and currently reports problems in generated, gitignored console files that
-this repo doesn't author. Run it on the files you touched rather than treating the whole-repo result as a gate.
+CI runs the same check as `biome ci --error-on-warnings .`. See [Lint and format](#lint-and-format).
+
+## Lint and format
+
+[Biome](https://biomejs.dev/) lints and formats the tracked JavaScript and TypeScript, configured in
+[`biome.json`](../biome.json). It skips gitignored files, so the vendored console sources are never checked, and
+it skips the generated `src/kc.gen.tsx`.
+
+The rules are listed one by one in `biome.json` rather than taken from Biome's `recommended` preset. They cover
+general correctness, TypeScript, the rules of hooks (`useHookAtTopLevel`, `useExhaustiveDependencies`) and
+Fast Refresh boundaries (`useComponentExportOnlyModules`). `noExplicitAny`, `useExhaustiveDependencies` and
+`useComponentExportOnlyModules` are warnings, and `npm run lint` fails on warnings too.
+
+The formatter writes 4-space indents, double quotes, no trailing commas and 110-column lines. It leaves some files
+in their own style:
+
+| Files | Formatter | Linter | Why |
+| --- | --- | --- | --- |
+| `src/components/ui/`, `src/components/shadcn/`, `src/lib/utils.ts`, `src/hooks/theme-provider.tsx`, `src/hooks/use-theme-preference.ts` | Off | Off | Registry files. `shadcn add` overwrites them |
+| `src/account/`, `src/admin/` (except `src/admin/branding/`), `src/shared/`, `public/keycloak-theme/` | Off | On | Owned files keep upstream's formatting so they still diff cleanly against the originals |
+| `scripts/check-*.mjs` | 2-space, trailing commas | On | Formatted in the style they were written in |
+
+The Theme customization editor in `src/admin/branding/` is written in this repo rather than vendored, so it is
+formatted like the rest of `src/`.
+
+A `// biome-ignore <rule>: <reason>` comment suppresses one diagnostic. Biome reports a suppression that no longer
+matches anything.
+
+`@biomejs/biome` is pinned exactly, because a Biome release can change formatter output. Dependabot proposes it in
+its own pull request, apart from the other minor and patch updates; run `npm run format` on that branch.
 
 ## What CI checks
 
@@ -25,7 +54,8 @@ Every pull request runs [`playwright.yml`](../.github/workflows/playwright.yml):
 
 1. **Theme guards** &mdash; `npm run check`
 2. **Type check** &mdash; `npm run typecheck`
-3. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<brand>/`
+3. **Lint and format check** &mdash; `biome ci --error-on-warnings .`, the CI form of `npm run lint`
+4. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<brand>/`
 
 Pull requests and pushes to `main` also run the publisher. On a pull request it builds the JARs and the image
 for both architectures without pushing, so a packaging failure shows up before merge. See
