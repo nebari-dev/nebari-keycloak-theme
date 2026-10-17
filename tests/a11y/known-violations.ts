@@ -34,8 +34,10 @@ export type KnownViolation = {
     issue: string;
 };
 
-/** Filed as follow-ups to #6; replace with the issue links once they exist. */
-const PENDING_ISSUE = "to be filed (follow-up to #6)";
+const ISSUES = "https://github.com/nebari-dev/nebari-keycloak-theme/issues";
+const CONTRAST_ISSUE = `${ISSUES}/68`;
+const KEYBOARD_ISSUE = `${ISSUES}/69`;
+const NAMES_ISSUE = `${ISSUES}/70`;
 
 export const knownViolations: readonly KnownViolation[] = [
     {
@@ -49,7 +51,7 @@ export const knownViolations: readonly KnownViolation[] = [
             "The sign-in form keeps Keycloak's positive tabindex values (2–5), so Tab order is set by " +
             "hand instead of by the DOM. Removing them moves 'Forgot password?' between the username " +
             "and password fields, which is a UX decision, not a mechanical fix.",
-        issue: PENDING_ISSUE
+        issue: KEYBOARD_ISSUE
     },
     {
         id: "login-password-toggle-unreachable",
@@ -64,7 +66,7 @@ export const knownViolations: readonly KnownViolation[] = [
             "src/login/template/PasswordInput.tsx), so keyboard and switch users cannot reveal what they typed. " +
             "It is kept out of the Tab order because the positive tabindexes above would otherwise sort it after " +
             "the submit button; it is fixed with them.",
-        issue: PENDING_ISSUE
+        issue: KEYBOARD_ISSUE
     },
 
     // The console skin, which every theme shares.
@@ -74,7 +76,7 @@ export const knownViolations: readonly KnownViolation[] = [
         surfaces: ["admin"],
         colors: [{ foreground: "#2b9af3", background: "#353538" }],
         reason: "PatternFly's info-alert title colour on the dark alert background is 4.08:1.",
-        issue: PENDING_ISSUE
+        issue: CONTRAST_ISSUE
     },
     {
         id: "account-current-nav-item-contrast",
@@ -82,7 +84,7 @@ export const knownViolations: readonly KnownViolation[] = [
         surfaces: ["account"],
         colors: [{ foreground: "#7c3aed", background: "#e8e1f5" }],
         reason: "The current Account nav item is 4.48:1 in the light scheme.",
-        issue: PENDING_ISSUE
+        issue: CONTRAST_ISSUE
     },
 
     // Vendored console markup: fixing these here would mean owning upstream files.
@@ -95,7 +97,7 @@ export const knownViolations: readonly KnownViolation[] = [
         reason:
             "The user list's toolbar kebab is an icon-only MenuToggle with no aria-label " +
             "(upstream components/users/UserDataTableToolbarItems.tsx), so screen readers announce an unnamed button.",
-        issue: PENDING_ISSUE
+        issue: NAMES_ISSUE
     },
     {
         id: "admin-action-menu-state",
@@ -106,7 +108,7 @@ export const knownViolations: readonly KnownViolation[] = [
             "The page-header Action menu's toggle keeps aria-expanded=false while its menu is open, because " +
             "upstream components/view-header/ViewHeader.tsx doesn't pass isExpanded to MenuToggle. The menu " +
             "itself works by keyboard; only the announced state is wrong.",
-        issue: PENDING_ISSUE
+        issue: NAMES_ISSUE
     },
     {
         id: "admin-multi-line-input-buttons-unreachable",
@@ -118,7 +120,7 @@ export const knownViolations: readonly KnownViolation[] = [
             "buttons, so on client settings a keyboard user can enter one redirect URI or web origin but can never " +
             "add a second or remove one. This blocks the task outright (WCAG 2.1.1). Its aria-label 'Add' also hides " +
             "the visible text 'Add valid redirect URIs' from speech-input users (2.5.3).",
-        issue: PENDING_ISSUE
+        issue: KEYBOARD_ISSUE
     },
     {
         id: "account-groups-row-checkbox-unnamed",
@@ -129,7 +131,7 @@ export const knownViolations: readonly KnownViolation[] = [
         reason:
             "Each row on the Account Groups page has a disabled 'direct membership' checkbox with no label " +
             "(upstream groups/Groups.tsx).",
-        issue: PENDING_ISSUE
+        issue: NAMES_ISSUE
     }
 ];
 
