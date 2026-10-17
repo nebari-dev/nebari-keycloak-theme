@@ -256,7 +256,8 @@
     padding: 0.125rem 0.5rem;
     border-radius: 999px;
     background: var(--muted);
-    color: var(--muted-foreground);
+    /* --muted-foreground on --muted is 4.22:1, below WCAG AA for this size. */
+    color: var(--foreground);
     font-size: 0.75rem;
     font-weight: 500;
 }
