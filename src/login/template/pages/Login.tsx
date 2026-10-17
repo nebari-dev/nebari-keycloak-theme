@@ -25,7 +25,8 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
         auth,
         messagesPerField,
         enableWebAuthnConditionalUI,
-        authenticators
+        authenticators,
+        registrationDisabled
     } = kcContext;
     const { msg, msgStr } = i18n;
 
@@ -60,6 +61,18 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
             classes={classes}
             displayMessage={!hasLoginError}
             headerNode={msg("loginAccountTitle")}
+            displayInfo={realm.password && realm.registrationAllowed && !registrationDisabled}
+            infoNode={
+                <div id="kc-registration">
+                    {msg("noAccount")}{" "}
+                    <a
+                        className="text-foreground font-medium underline-offset-4 hover:underline"
+                        href={url.registrationUrl}
+                    >
+                        {msg("doRegister")}
+                    </a>
+                </div>
+            }
             socialProvidersNode={
                 hasSocialProviders && (
                     <div className="flex flex-col gap-3">
