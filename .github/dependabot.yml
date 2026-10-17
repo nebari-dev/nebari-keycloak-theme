@@ -16,6 +16,14 @@ updates:
         applies-to: version-updates
         patterns:
           - "@biomejs/biome"
+      # axe is pinned exactly because a new release adds rules, which can fail
+      # the accessibility suites without a code change. Its own pull request
+      # shows what the new rules find. Listed before patch-and-minor.
+      axe:
+        applies-to: version-updates
+        patterns:
+          - "axe-core"
+          - "@axe-core/playwright"
       # Group all patch and minor updates into a single PR
       patch-and-minor:
         applies-to: version-updates

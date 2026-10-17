@@ -38,7 +38,12 @@ coverage/
 playwright-report/
 test-results/
 test-results-capture/
-test-results-console/
+test-results-consoles/
+test-results-a11y/
+playwright-report-a11y/
+playwright-report-consoles/
+# Signed-in console sessions saved by the accessibility setup
+.playwright/
 theme-screenshots/
 
 # Temporary

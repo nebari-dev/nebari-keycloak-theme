@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { loginCards, previews } from "./previews";
 
 type Rgb = [number, number, number];
 
@@ -31,19 +32,6 @@ function contrastRatio(left: string, right: string): number {
     return (lighter + 0.05) / (darker + 0.05);
 }
 
-const previews = [
-    "login",
-    "login-providers",
-    "login-error",
-    "register",
-    "forgot-password",
-    "update-password",
-    "verify-email",
-    "update-profile",
-    "info",
-    "error"
-] as const;
-
 /**
  * Every theme in themes.json, with how to tell its mark apart from the others.
  * Each theme runs through the same previews and the same assertions, and its
@@ -62,7 +50,7 @@ const themes: {
     {
         name: "nebari",
         colorSchemes: ["light", "dark"],
-        card: ".nebari-login-card",
+        card: loginCards.nebari,
         assertBrand: async page => {
             await expect(page.locator(".nebari-logo-light")).toHaveCount(1);
         }
@@ -71,7 +59,7 @@ const themes: {
         // The unbranded starting point: stock shadcn components, no Nebari mark.
         name: "template",
         colorSchemes: ["light", "dark"],
-        card: '[data-login-theme="template"] [data-slot="card"]',
+        card: loginCards.template,
         assertBrand: async page => {
             await expect(page.locator(".nebari-logo")).toHaveCount(0);
         }
