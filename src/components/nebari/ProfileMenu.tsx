@@ -181,9 +181,7 @@ export function ProfileMenu({
                         )}
                     </div>
 
-                    {canChangeTheme && (
-                        <ThemePicker setThemeMode={setThemeMode} themeMode={themeMode} />
-                    )}
+                    {canChangeTheme && <ThemePicker setThemeMode={setThemeMode} themeMode={themeMode} />}
 
                     {children}
 

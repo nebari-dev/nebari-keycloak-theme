@@ -6,7 +6,6 @@ import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
 import { kcClassesMap } from "../userProfileClasses";
 
-
 type Props = PageProps<Extract<KcContext, { pageId: "login-update-profile.ftl" }>, I18n> & {
     UserProfileFormFields: LazyOrNot<(props: UserProfileFormFieldsProps) => React.ReactElement>;
     doMakeUserConfirmPassword: boolean;
@@ -33,7 +32,7 @@ export default function LoginUpdateProfile(props: Props) {
                     kcContext={kcContext}
                     i18n={i18n}
                     kcClsx={kcClsx}
-                    onIsFormSubmittableValueChange={() => { }}
+                    onIsFormSubmittableValueChange={() => {}}
                     doMakeUserConfirmPassword={doMakeUserConfirmPassword}
                 />
 

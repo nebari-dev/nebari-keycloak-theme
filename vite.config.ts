@@ -35,9 +35,7 @@ if (packagedThemeName !== undefined && !themeNames.includes(packagedThemeName)) 
  * below overrides it per deployment.
  */
 const themeCustomizationDefault =
-    packagedThemeName === undefined
-        ? true
-        : getThemeDefinition(packagedThemeName).themeCustomization;
+    packagedThemeName === undefined ? true : getThemeDefinition(packagedThemeName).themeCustomization;
 
 /**
  * PatternFly ships its stylesheets unlayered, and unlayered CSS outranks every
@@ -103,9 +101,7 @@ export default defineConfig({
                is rendered, so a deployment can flip this in its compose file or
                Helm values without rebuilding the JAR. Empty means "no override,
                use the theme's default". */
-            environmentVariables: [
-                { name: "NEBARI_THEME_CUSTOMIZATION", default: "" }
-            ],
+            environmentVariables: [{ name: "NEBARI_THEME_CUSTOMIZATION", default: "" }],
             extraThemeProperties: [
                 "parentTheme=keycloak.v2",
                 `themeCustomizationDefault=${themeCustomizationDefault ? "enabled" : "disabled"}`

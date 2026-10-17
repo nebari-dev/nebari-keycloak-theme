@@ -15,9 +15,7 @@ import { useRecaptchaSubmitCallback } from "../../recaptcha";
 import { readPublishedBranding } from "../../../themes/themeCatalog";
 
 type Props = PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n> & {
-    UserProfileFormFields: LazyOrNot<
-        (props: UserProfileFormFieldsProps) => React.ReactElement
-    >;
+    UserProfileFormFields: LazyOrNot<(props: UserProfileFormFieldsProps) => React.ReactElement>;
     doMakeUserConfirmPassword: boolean;
 };
 
@@ -59,8 +57,7 @@ export default function Register(props: Props) {
 
     useRecaptchaSubmitCallback("kc-register-form");
 
-    const isInvisibleRecaptcha =
-        recaptchaRequired && !recaptchaVisible && recaptchaAction !== undefined;
+    const isInvisibleRecaptcha = recaptchaRequired && !recaptchaVisible && recaptchaAction !== undefined;
 
     /* A realm can replace the title, which otherwise names the theme. Plain
        text from the validated branding config, rendered as a text node. */
@@ -83,10 +80,7 @@ export default function Register(props: Props) {
             infoNode={
                 <span>
                     {msg("alreadyHaveAnAccount")}{" "}
-                    <a
-                        href={url.loginUrl}
-                        className="text-foreground underline underline-offset-4"
-                    >
+                    <a href={url.loginUrl} className="text-foreground underline underline-offset-4">
                         {msg("doLogIn")}
                     </a>
                 </span>
@@ -109,10 +103,7 @@ export default function Register(props: Props) {
                 {termsAcceptanceRequired && (
                     <div className="flex flex-col gap-3">
                         <div className="text-sm font-medium">{msg("termsTitle")}</div>
-                        <div
-                            id="kc-registration-terms-text"
-                            className="text-muted-foreground text-sm"
-                        >
+                        <div id="kc-registration-terms-text" className="text-muted-foreground text-sm">
                             {msg("termsText")}
                         </div>
                         <div className="flex items-center gap-2">
@@ -120,12 +111,8 @@ export default function Register(props: Props) {
                                 id="termsAccepted"
                                 name="termsAccepted"
                                 checked={areTermsAccepted}
-                                onCheckedChange={checked =>
-                                    setAreTermsAccepted(checked === true)
-                                }
-                                aria-invalid={messagesPerField.existsError(
-                                    "termsAccepted"
-                                )}
+                                onCheckedChange={checked => setAreTermsAccepted(checked === true)}
+                                aria-invalid={messagesPerField.existsError("termsAccepted")}
                             />
                             <Label htmlFor="termsAccepted" className="font-normal">
                                 {msg("acceptTerms")}
@@ -139,15 +126,14 @@ export default function Register(props: Props) {
                     </div>
                 )}
 
-                {recaptchaRequired &&
-                    (recaptchaVisible || recaptchaAction === undefined) && (
-                        <div
-                            className="g-recaptcha"
-                            data-size="compact"
-                            data-sitekey={recaptchaSiteKey}
-                            data-action={recaptchaAction}
-                        />
-                    )}
+                {recaptchaRequired && (recaptchaVisible || recaptchaAction === undefined) && (
+                    <div
+                        className="g-recaptcha"
+                        data-size="compact"
+                        data-sitekey={recaptchaSiteKey}
+                        data-action={recaptchaAction}
+                    />
+                )}
 
                 {isInvisibleRecaptcha ? (
                     <Button
@@ -162,10 +148,7 @@ export default function Register(props: Props) {
                 ) : (
                     <Button
                         className="w-full"
-                        disabled={
-                            !isFormSubmittable ||
-                            (termsAcceptanceRequired && !areTermsAccepted)
-                        }
+                        disabled={!isFormSubmittable || (termsAcceptanceRequired && !areTermsAccepted)}
                         type="submit"
                     >
                         {msgStr("doRegister")}

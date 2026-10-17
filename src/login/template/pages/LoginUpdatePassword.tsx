@@ -59,9 +59,7 @@ export default function LoginUpdatePassword(
                 </Field>
 
                 <Field>
-                    <FieldLabel htmlFor="password-confirm">
-                        {msgStr("passwordConfirm")}
-                    </FieldLabel>
+                    <FieldLabel htmlFor="password-confirm">{msgStr("passwordConfirm")}</FieldLabel>
                     <PasswordInput
                         aria-invalid={confirmError !== undefined}
                         autoComplete="new-password"

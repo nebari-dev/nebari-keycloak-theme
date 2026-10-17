@@ -4,15 +4,9 @@ import type { KcContext } from "../../KcContext";
 import type { I18n } from "../../i18n";
 import { Alert, AlertDescription } from "@/components/shadcn/alert";
 import { Button } from "@/components/shadcn/button";
-import {
-    getInfoContinueTarget,
-    getInfoHeaderHtml,
-    getInfoMessageHtml
-} from "../../infoMessage";
+import { getInfoContinueTarget, getInfoHeaderHtml, getInfoMessageHtml } from "../../infoMessage";
 
-export default function Info(
-    props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>
-) {
+export default function Info(props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
     const { msg } = i18n;
 

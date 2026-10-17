@@ -13,9 +13,7 @@ import { Label } from "@/components/shadcn/label";
 import { PasswordInput } from "../PasswordInput";
 import { getThemeDefinition, parseThemeBrandingConfig } from "../../../themes/themeCatalog";
 
-export default function Login(
-    props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>
-) {
+export default function Login(props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
     const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
     const {
@@ -43,21 +41,16 @@ export default function Login(
     const hasLoginError = messagesPerField.existsError("username", "password");
 
     const themeDefinition = getThemeDefinition(kcContext.themeName);
-    const branding = parseThemeBrandingConfig(
-        themeDefinition,
-        msgStr(themeDefinition.brandingMessageKey)
-    );
+    const branding = parseThemeBrandingConfig(themeDefinition, msgStr(themeDefinition.brandingMessageKey));
 
     const onSubmit: FormEventHandler<HTMLFormElement> = () => {
         setIsLoginButtonDisabled(true);
         return true;
     };
 
-    const hasSocialProviders =
-        social?.providers !== undefined && social.providers.length !== 0;
+    const hasSocialProviders = social?.providers !== undefined && social.providers.length !== 0;
     const showPasswordForm =
-        realm.password &&
-        (branding.loginMode === "password-and-providers" || !hasSocialProviders);
+        realm.password && (branding.loginMode === "password-and-providers" || !hasSocialProviders);
 
     return (
         <Template
@@ -88,10 +81,7 @@ export default function Login(
                                 <a href={p.loginUrl}>
                                     {p.iconClasses && (
                                         <i
-                                            className={clsx(
-                                                kcClsx("kcCommonLogoIdP"),
-                                                p.iconClasses
-                                            )}
+                                            className={clsx(kcClsx("kcCommonLogoIdP"), p.iconClasses)}
                                             aria-hidden="true"
                                         />
                                     )}
@@ -128,11 +118,7 @@ export default function Login(
                                 defaultValue={login.username ?? ""}
                                 type="text"
                                 autoFocus
-                                autoComplete={
-                                    enableWebAuthnConditionalUI
-                                        ? "username webauthn"
-                                        : "username"
-                                }
+                                autoComplete={enableWebAuthnConditionalUI ? "username webauthn" : "username"}
                                 aria-invalid={hasLoginError}
                             />
                         </Field>
@@ -209,38 +195,28 @@ export default function Login(
                 <>
                     <form id="webauth" action={url.loginAction} method="post">
                         <input type="hidden" id="clientDataJSON" name="clientDataJSON" />
-                        <input
-                            type="hidden"
-                            id="authenticatorData"
-                            name="authenticatorData"
-                        />
+                        <input type="hidden" id="authenticatorData" name="authenticatorData" />
                         <input type="hidden" id="signature" name="signature" />
                         <input type="hidden" id="credentialId" name="credentialId" />
                         <input type="hidden" id="userHandle" name="userHandle" />
                         <input type="hidden" id="error" name="error" />
                     </form>
 
-                    {authenticators !== undefined &&
-                        authenticators.authenticators.length !== 0 && (
-                            <form id="authn_select">
-                                {authenticators.authenticators.map(authenticator => (
-                                    <input
-                                        key={authenticator.credentialId}
-                                        type="hidden"
-                                        name="authn_use_chk"
-                                        readOnly
-                                        value={authenticator.credentialId}
-                                    />
-                                ))}
-                            </form>
-                        )}
+                    {authenticators !== undefined && authenticators.authenticators.length !== 0 && (
+                        <form id="authn_select">
+                            {authenticators.authenticators.map(authenticator => (
+                                <input
+                                    key={authenticator.credentialId}
+                                    type="hidden"
+                                    name="authn_use_chk"
+                                    readOnly
+                                    value={authenticator.credentialId}
+                                />
+                            ))}
+                        </form>
+                    )}
 
-                    <Button
-                        className="w-full"
-                        id={webAuthnButtonId}
-                        type="button"
-                        variant="outline"
-                    >
+                    <Button className="w-full" id={webAuthnButtonId} type="button" variant="outline">
                         {msgStr("passkey-doAuthenticate")}
                     </Button>
                 </>

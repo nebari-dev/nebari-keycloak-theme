@@ -61,53 +61,56 @@ export function getKcContextMockForPreview(
     };
 }
 
-function getUnbrandedKcContextMock(
-    previewName: string | null,
-    themeName: string | null
-): KcContext {
+function getUnbrandedKcContextMock(previewName: string | null, themeName: string | null): KcContext {
     const name = (previewName ?? "login") as PreviewName;
 
     if (name === "login-providers") {
-        return withThemeName(getKcContextMock({
-            pageId: "login.ftl",
-            overrides: {
-                social: {
-                    displayInfo: true,
-                    providers: [
-                        {
-                            alias: "google",
-                            displayName: "Google",
-                            loginUrl: "#",
-                            providerId: "google"
-                        },
-                        {
-                            alias: "github",
-                            displayName: "GitHub",
-                            iconClasses: "fa fa-github",
-                            loginUrl: "#",
-                            providerId: "github"
-                        }
-                    ]
+        return withThemeName(
+            getKcContextMock({
+                pageId: "login.ftl",
+                overrides: {
+                    social: {
+                        displayInfo: true,
+                        providers: [
+                            {
+                                alias: "google",
+                                displayName: "Google",
+                                loginUrl: "#",
+                                providerId: "google"
+                            },
+                            {
+                                alias: "github",
+                                displayName: "GitHub",
+                                iconClasses: "fa fa-github",
+                                loginUrl: "#",
+                                providerId: "github"
+                            }
+                        ]
+                    }
                 }
-            }
-        }), themeName);
+            }),
+            themeName
+        );
     }
 
     if (name === "login-error") {
-        return withThemeName(getKcContextMock({
-            pageId: "login.ftl",
-            overrides: {
-                login: { username: "user@example.com" },
-                messagesPerField: {
-                    existsError: (fieldName: string) =>
-                        fieldName === "username" || fieldName === "password",
-                    get: (fieldName: string) =>
-                        fieldName === "username" || fieldName === "password"
-                            ? "Invalid username or password."
-                            : ""
+        return withThemeName(
+            getKcContextMock({
+                pageId: "login.ftl",
+                overrides: {
+                    login: { username: "user@example.com" },
+                    messagesPerField: {
+                        existsError: (fieldName: string) =>
+                            fieldName === "username" || fieldName === "password",
+                        get: (fieldName: string) =>
+                            fieldName === "username" || fieldName === "password"
+                                ? "Invalid username or password."
+                                : ""
+                    }
                 }
-            }
-        }), themeName);
+            }),
+            themeName
+        );
     }
 
     /* Keycloakify's mock header is the literal `<Message header>`. The info page
@@ -115,14 +118,14 @@ function getUnbrandedKcContextMock(
        placeholder is stripped as an unknown tag and the preview loses its
        heading. A plain-text header shows what a real one looks like. */
     if (name === "info") {
-        return withThemeName(getKcContextMock({
-            pageId: "info.ftl",
-            overrides: { messageHeader: "Your account has been updated" }
-        }), themeName);
+        return withThemeName(
+            getKcContextMock({
+                pageId: "info.ftl",
+                overrides: { messageHeader: "Your account has been updated" }
+            }),
+            themeName
+        );
     }
 
-    return withThemeName(
-        getKcContextMock({ pageId: previewPageIds[name] ?? "login.ftl" }),
-        themeName
-    );
+    return withThemeName(getKcContextMock({ pageId: previewPageIds[name] ?? "login.ftl" }), themeName);
 }

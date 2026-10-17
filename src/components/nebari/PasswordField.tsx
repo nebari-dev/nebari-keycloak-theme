@@ -28,17 +28,19 @@ export function PasswordField({ showLabel, hideLabel, ...props }: PasswordFieldP
     return (
         <Input
             {...props}
-            endAdornment={isInvalid ? undefined : (
-                <Button
-                    aria-label={isVisible ? hideLabel : showLabel}
-                    onClick={() => setIsVisible(visible => !visible)}
-                    size="icon-sm"
-                    tabIndex={-1}
-                    variant="ghost"
-                >
-                    {isVisible ? <EyeOff /> : <Eye />}
-                </Button>
-            )}
+            endAdornment={
+                isInvalid ? undefined : (
+                    <Button
+                        aria-label={isVisible ? hideLabel : showLabel}
+                        onClick={() => setIsVisible(visible => !visible)}
+                        size="icon-sm"
+                        tabIndex={-1}
+                        variant="ghost"
+                    >
+                        {isVisible ? <EyeOff /> : <Eye />}
+                    </Button>
+                )
+            }
             type={isVisible ? "text" : "password"}
         />
     );

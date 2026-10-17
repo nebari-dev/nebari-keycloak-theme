@@ -45,11 +45,7 @@ const injectedKcContext = window.kcContext as KcContext | undefined;
 const previewThemeName = matchThemeName(searchParams.get("theme") ?? undefined) ?? "nebari";
 const kcContext: KcContext =
     injectedKcContext ??
-    getKcContextMockForPreview(
-        searchParams.get("preview"),
-        previewThemeName,
-        searchParams.get("branding")
-    );
+    getKcContextMockForPreview(searchParams.get("preview"), previewThemeName, searchParams.get("branding"));
 
 /* `theme.properties` as Keycloak resolved it, child theme first. */
 const themeProperties = (kcContext as { properties?: Record<string, string | undefined> }).properties;

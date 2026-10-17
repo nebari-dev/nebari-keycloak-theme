@@ -40,7 +40,5 @@ const templateUiSet: typeof nebariUiSet = {
 export type LoginUiSet = typeof nebariUiSet;
 
 export function getLoginUiSet(themeName: string | undefined): LoginUiSet {
-    return getThemeDefinition(themeName).componentSet === "shadcn"
-        ? templateUiSet
-        : nebariUiSet;
+    return getThemeDefinition(themeName).componentSet === "shadcn" ? templateUiSet : nebariUiSet;
 }

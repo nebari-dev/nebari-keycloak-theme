@@ -37,10 +37,8 @@ export type CropViewport = {
 
 /** Convert the crop editor's rendered viewport into source-image pixels. */
 export function calculateSourceCrop(viewport: CropViewport): ImageCrop {
-    const imageLeft =
-        (viewport.viewportWidth - viewport.renderedWidth) / 2 + viewport.offsetX;
-    const imageTop =
-        (viewport.viewportHeight - viewport.renderedHeight) / 2 + viewport.offsetY;
+    const imageLeft = (viewport.viewportWidth - viewport.renderedWidth) / 2 + viewport.offsetX;
+    const imageTop = (viewport.viewportHeight - viewport.renderedHeight) / 2 + viewport.offsetY;
 
     return {
         x: Math.max(0, -imageLeft / viewport.scale),
@@ -81,9 +79,7 @@ export function validateBrandingImageFile(file: File): void {
 }
 
 /** Validate an upload and read its intrinsic pixel dimensions before editing. */
-export async function getBrandingImageDimensions(
-    file: File
-): Promise<ImageDimensions> {
+export async function getBrandingImageDimensions(file: File): Promise<ImageDimensions> {
     validateBrandingImageFile(file);
     const image = await loadImage(file);
 
@@ -119,11 +115,7 @@ function normalizeCrop(image: HTMLImageElement, crop?: ImageCrop): ImageCrop {
  * use a smaller storage budget because two appearance variants may be stored in
  * the realm alongside full-page backgrounds.
  */
-export async function prepareBrandingImage(
-    file: File,
-    kind: ImageKind,
-    crop?: ImageCrop
-): Promise<string> {
+export async function prepareBrandingImage(file: File, kind: ImageKind, crop?: ImageCrop): Promise<string> {
     validateBrandingImageFile(file);
 
     const image = await loadImage(file);
@@ -142,17 +134,7 @@ export async function prepareBrandingImage(
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Image processing is unavailable in this browser.");
 
-        context.drawImage(
-            image,
-            source.x,
-            source.y,
-            source.width,
-            source.height,
-            0,
-            0,
-            width,
-            height
-        );
+        context.drawImage(image, source.x, source.y, source.width, source.height, 0, 0, width, height);
         output = canvas.toDataURL("image/webp", quality);
         if (dataUrlBytes(output) <= MAX_STORED_BYTES[kind]) return output;
 

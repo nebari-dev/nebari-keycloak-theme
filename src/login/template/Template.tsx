@@ -58,10 +58,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     const { msg, msgStr } = i18n;
 
     const themeDefinition = getThemeDefinition(kcContext.themeName);
-    const branding = parseThemeBrandingConfig(
-        themeDefinition,
-        msgStr(themeDefinition.brandingMessageKey)
-    );
+    const branding = parseThemeBrandingConfig(themeDefinition, msgStr(themeDefinition.brandingMessageKey));
 
     /* Read once: the token overrides below key off this, so the appearance must
        not change under the user mid-session. */
@@ -119,10 +116,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
             }}
         >
             <div className="w-full max-w-sm">
-                <Card
-                    className="branding-card gap-6"
-                    style={{ borderRadius: `${branding.cardRadius}px` }}
-                >
+                <Card className="branding-card gap-6" style={{ borderRadius: `${branding.cardRadius}px` }}>
                     <CardHeader className="text-center">
                         {/* No default artwork: a template theme ships unbranded
                             on purpose. A logo appears only once a deployment
@@ -142,9 +136,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                                 )}
                                 {/* Plain text beside the mark; see the nebari Template. */}
                                 {wordmark !== "" && (
-                                    <span className="font-semibold text-2xl tracking-tight">
-                                        {wordmark}
-                                    </span>
+                                    <span className="font-semibold text-2xl tracking-tight">{wordmark}</span>
                                 )}
                             </div>
                         )}
@@ -157,13 +149,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
 
                     <CardContent className="flex flex-col gap-6">
                         {displayMessage && kcContext.message !== undefined && (
-                            <Alert
-                                variant={
-                                    kcContext.message.type === "error"
-                                        ? "destructive"
-                                        : "default"
-                                }
-                            >
+                            <Alert variant={kcContext.message.type === "error" ? "destructive" : "default"}>
                                 <AlertDescription
                                     dangerouslySetInnerHTML={{
                                         __html: kcSanitize(kcContext.message.summary)
@@ -183,9 +169,7 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                         {socialProvidersNode}
 
                         {displayInfo && infoNode && (
-                            <div className="text-muted-foreground text-center text-sm">
-                                {infoNode}
-                            </div>
+                            <div className="text-muted-foreground text-center text-sm">{infoNode}</div>
                         )}
                     </CardContent>
                 </Card>

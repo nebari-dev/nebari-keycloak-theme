@@ -59,7 +59,9 @@ export function Label({
         <NebariBadge
             {...props}
             className={cn(
-                !isOutline && "className" in mapped ? (mapped as { className?: string }).className : undefined,
+                !isOutline && "className" in mapped
+                    ? (mapped as { className?: string }).className
+                    : undefined,
                 isCompact && "px-1.5 py-0 text-[11px]",
                 className
             )}

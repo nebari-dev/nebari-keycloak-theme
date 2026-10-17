@@ -24,9 +24,7 @@ export type InfoContinueTarget = {
     label: "proceedWithAction" | "backToApplication";
 };
 
-export function getInfoContinueTarget(
-    kcContext: InfoKcContext
-): InfoContinueTarget | undefined {
+export function getInfoContinueTarget(kcContext: InfoKcContext): InfoContinueTarget | undefined {
     const { skipLink, pageRedirectUri, actionUri, client } = kcContext;
 
     /* Checked first and on its own: no target may survive it. */
@@ -50,16 +48,11 @@ export function getInfoContinueTarget(
 }
 
 /** Sanitized HTML for the page heading. */
-export function getInfoHeaderHtml(
-    kcContext: InfoKcContext,
-    i18n: Pick<I18n, "advancedMsgStr">
-): string {
+export function getInfoHeaderHtml(kcContext: InfoKcContext, i18n: Pick<I18n, "advancedMsgStr">): string {
     const { messageHeader, message } = kcContext;
 
     return kcSanitize(
-        messageHeader !== undefined
-            ? i18n.advancedMsgStr(messageHeader)
-            : (message.summary ?? "")
+        messageHeader !== undefined ? i18n.advancedMsgStr(messageHeader) : (message.summary ?? "")
     );
 }
 
@@ -67,10 +60,7 @@ export function getInfoHeaderHtml(
  * Sanitized HTML for the message body, with any required actions appended in
  * bold — the same shape Keycloak's own template produces.
  */
-export function getInfoMessageHtml(
-    kcContext: InfoKcContext,
-    i18n: Pick<I18n, "advancedMsgStr">
-): string {
+export function getInfoMessageHtml(kcContext: InfoKcContext, i18n: Pick<I18n, "advancedMsgStr">): string {
     const { message, requiredActions } = kcContext;
 
     let html = message.summary?.trim() ?? "";

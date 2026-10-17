@@ -52,7 +52,10 @@ for (const colorScheme of ["light", "dark"] as const) {
         const wrapper = page.locator(".nebari-login-wrapper");
         await expect(wrapper).toHaveAttribute("data-branded", "");
         await expect(wrapper).toHaveCSS("background-color", rgb(palette.pageBackground));
-        await expect(page.locator(".nebari-login-card")).toHaveCSS("background-color", rgb(palette.cardBackground));
+        await expect(page.locator(".nebari-login-card")).toHaveCSS(
+            "background-color",
+            rgb(palette.cardBackground)
+        );
         await expect(page.locator(".nebari-login-card")).toHaveCSS("border-radius", "16px");
         await expect(page.locator(".nebari-title")).toHaveCSS("color", rgb(palette.text));
         await expect(page.locator("#username")).toHaveCSS("background-color", rgb(palette.inputBackground));

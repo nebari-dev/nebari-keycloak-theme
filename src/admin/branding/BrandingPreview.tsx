@@ -6,11 +6,7 @@ import {
     getBrandingImage
 } from "../../branding/brandingConfig";
 import { loadBrandingFont } from "../../branding/fonts";
-import {
-    getThemeDefinition,
-    getThemeLogo,
-    type CustomThemeName
-} from "../../themes/themeCatalog";
+import { getThemeDefinition, getThemeLogo, type CustomThemeName } from "../../themes/themeCatalog";
 import type { LoginProvider } from "../../branding/loginProviders";
 
 type BrandingPreviewProps = {
@@ -31,19 +27,10 @@ type BrandingPreviewProps = {
     identityProviders: LoginProvider[] | undefined;
 };
 
-export function BrandingPreview({
-    branding,
-    mode,
-    themeName,
-    identityProviders
-}: BrandingPreviewProps) {
+export function BrandingPreview({ branding, mode, themeName, identityProviders }: BrandingPreviewProps) {
     const palette = branding[mode];
     const themeDefinition = getThemeDefinition(themeName);
-    const defaultLogo = getThemeLogo(
-        themeDefinition,
-        mode,
-        import.meta.env.BASE_URL
-    );
+    const defaultLogo = getThemeLogo(themeDefinition, mode, import.meta.env.BASE_URL);
     const logo = getBrandingImage(branding.logo, mode);
     const background = getBrandingImage(branding.backgroundImage, mode);
     /* `d9`, matching both login shells exactly — see the `backgroundImage` in
@@ -70,8 +57,7 @@ export function BrandingPreview({
     }, [branding.advanced.font]);
 
     const showPasswordForm =
-        branding.loginMode === "password-and-providers" ||
-        identityProviders?.length === 0;
+        branding.loginMode === "password-and-providers" || identityProviders?.length === 0;
 
     return (
         <div
@@ -104,9 +90,7 @@ export function BrandingPreview({
                                 style={logo ? undefined : defaultLogo?.style}
                             />
                         )}
-                        {wordmark && (
-                            <span className="branding-preview__wordmark">{wordmark}</span>
-                        )}
+                        {wordmark && <span className="branding-preview__wordmark">{wordmark}</span>}
                     </div>
                 )}
                 <h2>Sign in to your account</h2>
@@ -114,12 +98,22 @@ export function BrandingPreview({
                 {showPasswordForm && (
                     <>
                         <label htmlFor="branding-preview-email">Username or email</label>
-                        <input id="branding-preview-email" type="email" placeholder="Username or email" readOnly />
+                        <input
+                            id="branding-preview-email"
+                            type="email"
+                            placeholder="Username or email"
+                            readOnly
+                        />
                         <div className="branding-preview__label-row">
                             <label htmlFor="branding-preview-password">Password</label>
                             <span>Forgot password?</span>
                         </div>
-                        <input id="branding-preview-password" type="password" placeholder="Password" readOnly />
+                        <input
+                            id="branding-preview-password"
+                            type="password"
+                            placeholder="Password"
+                            readOnly
+                        />
                         <label className="branding-preview__remember">
                             <input type="checkbox" readOnly />
                             Remember me
@@ -132,8 +126,8 @@ export function BrandingPreview({
 
                 {identityProviders === undefined ? (
                     <div className="branding-preview__providers-unknown">
-                        Identity providers could not be read, so any provider
-                        buttons are missing from this preview.
+                        Identity providers could not be read, so any provider buttons are missing from this
+                        preview.
                     </div>
                 ) : (
                     identityProviders.length !== 0 && (
@@ -141,14 +135,11 @@ export function BrandingPreview({
                             {identityProviders.map(provider => (
                                 /* Keyed on the alias rather than the label: two
                                    providers may share a display name. */
-                                <div key={provider.id}>
-                                    Sign in with {provider.label}
-                                </div>
+                                <div key={provider.id}>Sign in with {provider.label}</div>
                             ))}
                         </div>
                     )
                 )}
-
             </div>
         </div>
     );

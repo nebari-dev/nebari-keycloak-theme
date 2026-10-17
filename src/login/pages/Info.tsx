@@ -5,15 +5,9 @@ import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-    getInfoContinueTarget,
-    getInfoHeaderHtml,
-    getInfoMessageHtml
-} from "../infoMessage";
+import { getInfoContinueTarget, getInfoHeaderHtml, getInfoMessageHtml } from "../infoMessage";
 
-export default function Info(
-    props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>
-) {
+export default function Info(props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
     const { msg } = i18n;
@@ -51,10 +45,7 @@ export default function Info(
 
                 {continueTarget !== undefined && (
                     <div className="nebari-form-actions">
-                        <Button
-                            className="w-full"
-                            render={<a href={continueTarget.href} />}
-                        >
+                        <Button className="w-full" render={<a href={continueTarget.href} />}>
                             {msg(continueTarget.label)}
                         </Button>
                     </div>

@@ -22,10 +22,7 @@ export default function LoginVerifyEmail(
             infoNode={
                 <p>
                     {msg("emailVerifyInstruction2")}{" "}
-                    <a
-                        href={url.loginAction}
-                        className="text-foreground underline underline-offset-4"
-                    >
+                    <a href={url.loginAction} className="text-foreground underline underline-offset-4">
                         {msgStr("doClickHere")}
                     </a>{" "}
                     {msg("emailVerifyInstruction3")}
@@ -34,9 +31,7 @@ export default function LoginVerifyEmail(
         >
             <Alert>
                 <MailIcon aria-hidden />
-                <AlertDescription>
-                    {msg("emailVerifyInstruction1", user?.email ?? "")}
-                </AlertDescription>
+                <AlertDescription>{msg("emailVerifyInstruction1", user?.email ?? "")}</AlertDescription>
             </Alert>
         </Template>
     );

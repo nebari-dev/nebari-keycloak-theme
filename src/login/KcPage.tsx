@@ -41,9 +41,7 @@ const Fallback = () => (
     <div className="nebari-login-wrapper">
         <div className="nebari-login-container">
             <div className="nebari-login-card">
-                <div style={{ textAlign: "center", padding: "20px" }}>
-                    Loading...
-                </div>
+                <div style={{ textAlign: "center", padding: "20px" }}>Loading...</div>
             </div>
         </div>
     </div>
@@ -152,7 +150,9 @@ export default function KcPage(props: { kcContext: KcContext }) {
                                     classes={undefined}
                                     Template={Template}
                                     doUseDefaultCss={true}
-                                    UserProfileFormFields={lazy(() => import("keycloakify/login/UserProfileFormFields"))}
+                                    UserProfileFormFields={lazy(
+                                        () => import("keycloakify/login/UserProfileFormFields")
+                                    )}
                                     doMakeUserConfirmPassword={true}
                                 />
                             </DefaultPageErrorBoundary>

@@ -11,19 +11,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordField } from "@/components/nebari/PasswordField";
-import {
-    getThemeDefinition,
-    parseThemeBrandingConfig
-} from "../../themes/themeCatalog";
+import { getThemeDefinition, parseThemeBrandingConfig } from "../../themes/themeCatalog";
 
 const socialIconSrc: Record<string, string> = {
     google: "google-g-logo.svg",
     github: "github-mark.svg"
 };
 
-export default function Login(
-    props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>
-) {
+export default function Login(props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
     const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
@@ -52,21 +47,16 @@ export default function Login(
     const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
     const hasLoginError = messagesPerField.existsError("username", "password");
     const themeDefinition = getThemeDefinition(kcContext.themeName);
-    const branding = parseThemeBrandingConfig(
-        themeDefinition,
-        msgStr(themeDefinition.brandingMessageKey)
-    );
+    const branding = parseThemeBrandingConfig(themeDefinition, msgStr(themeDefinition.brandingMessageKey));
 
     const onSubmit: FormEventHandler<HTMLFormElement> = () => {
         setIsLoginButtonDisabled(true);
         return true;
     };
 
-    const hasSocialProviders =
-        social?.providers !== undefined && social.providers.length !== 0;
+    const hasSocialProviders = social?.providers !== undefined && social.providers.length !== 0;
     const showPasswordForm =
-        realm.password &&
-        (branding.loginMode === "password-and-providers" || !hasSocialProviders);
+        realm.password && (branding.loginMode === "password-and-providers" || !hasSocialProviders);
 
     return (
         <Template
@@ -106,17 +96,16 @@ export default function Login(
             }
         >
             {showPasswordForm && (
-                <form
-                    id="kc-form-login"
-                    onSubmit={onSubmit}
-                    action={url.loginAction}
-                    method="post"
-                >
+                <form id="kc-form-login" onSubmit={onSubmit} action={url.loginAction} method="post">
                     {/* Username / Email Field */}
                     {!usernameHidden && (
                         <Field>
                             <FieldLabel htmlFor="username">
-                                {!realm.loginWithEmailAllowed ? msg("username") : !realm.registrationEmailAsUsername ? msg("usernameOrEmail") : msg("email")}
+                                {!realm.loginWithEmailAllowed
+                                    ? msg("username")
+                                    : !realm.registrationEmailAsUsername
+                                      ? msg("usernameOrEmail")
+                                      : msg("email")}
                             </FieldLabel>
                             <Input
                                 tabIndex={2}
@@ -126,11 +115,7 @@ export default function Login(
                                 type="text"
                                 placeholder={msgStr("usernameOrEmail")}
                                 autoFocus
-                                autoComplete={
-                                    enableWebAuthnConditionalUI
-                                        ? "username webauthn"
-                                        : "username"
-                                }
+                                autoComplete={enableWebAuthnConditionalUI ? "username webauthn" : "username"}
                                 aria-invalid={messagesPerField.existsError("username", "password")}
                             />
                             {hasLoginError && (
@@ -146,7 +131,11 @@ export default function Login(
                         <div className="nebari-label-row">
                             <FieldLabel htmlFor="password">{msg("password")}</FieldLabel>
                             {realm.resetPasswordAllowed && (
-                                <a tabIndex={5} href={url.loginResetCredentialsUrl} className="nebari-forgot-link">
+                                <a
+                                    tabIndex={5}
+                                    href={url.loginResetCredentialsUrl}
+                                    className="nebari-forgot-link"
+                                >
                                     {msg("doForgotPassword")}
                                 </a>
                             )}
@@ -217,31 +206,26 @@ export default function Login(
                 <>
                     <form id="webauth" action={url.loginAction} method="post">
                         <input type="hidden" id="clientDataJSON" name="clientDataJSON" />
-                        <input
-                            type="hidden"
-                            id="authenticatorData"
-                            name="authenticatorData"
-                        />
+                        <input type="hidden" id="authenticatorData" name="authenticatorData" />
                         <input type="hidden" id="signature" name="signature" />
                         <input type="hidden" id="credentialId" name="credentialId" />
                         <input type="hidden" id="userHandle" name="userHandle" />
                         <input type="hidden" id="error" name="error" />
                     </form>
 
-                    {authenticators !== undefined &&
-                        authenticators.authenticators.length !== 0 && (
-                            <form id="authn_select">
-                                {authenticators.authenticators.map(authenticator => (
-                                    <input
-                                        key={authenticator.credentialId}
-                                        type="hidden"
-                                        name="authn_use_chk"
-                                        readOnly
-                                        value={authenticator.credentialId}
-                                    />
-                                ))}
-                            </form>
-                        )}
+                    {authenticators !== undefined && authenticators.authenticators.length !== 0 && (
+                        <form id="authn_select">
+                            {authenticators.authenticators.map(authenticator => (
+                                <input
+                                    key={authenticator.credentialId}
+                                    type="hidden"
+                                    name="authn_use_chk"
+                                    readOnly
+                                    value={authenticator.credentialId}
+                                />
+                            ))}
+                        </form>
+                    )}
 
                     <div className="nebari-form-group">
                         <Button

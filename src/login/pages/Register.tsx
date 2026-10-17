@@ -15,9 +15,7 @@ import { useRecaptchaSubmitCallback } from "../recaptcha";
 import { readPublishedBranding } from "../../themes/themeCatalog";
 
 type Props = PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n> & {
-    UserProfileFormFields: LazyOrNot<
-        (props: UserProfileFormFieldsProps) => React.ReactElement
-    >;
+    UserProfileFormFields: LazyOrNot<(props: UserProfileFormFieldsProps) => React.ReactElement>;
     doMakeUserConfirmPassword: boolean;
 };
 
@@ -61,8 +59,7 @@ export default function Register(props: Props) {
 
     useRecaptchaSubmitCallback("kc-register-form");
 
-    const isInvisibleRecaptcha =
-        recaptchaRequired && !recaptchaVisible && recaptchaAction !== undefined;
+    const isInvisibleRecaptcha = recaptchaRequired && !recaptchaVisible && recaptchaAction !== undefined;
 
     /* A realm can replace the title, which otherwise names the theme. Plain
        text from the validated branding config, rendered as a text node. */
@@ -84,8 +81,7 @@ export default function Register(props: Props) {
             infoNode={
                 <div>
                     <span>
-                        {msg("alreadyHaveAnAccount")}{" "}
-                        <a href={url.loginUrl}>{msg("doLogIn")}</a>
+                        {msg("alreadyHaveAnAccount")} <a href={url.loginUrl}>{msg("doLogIn")}</a>
                     </span>
                 </div>
             }
@@ -107,9 +103,7 @@ export default function Register(props: Props) {
                             id="termsAccepted"
                             name="termsAccepted"
                             checked={areTermsAccepted}
-                            onCheckedChange={checked =>
-                                setAreTermsAccepted(checked === true)
-                            }
+                            onCheckedChange={checked => setAreTermsAccepted(checked === true)}
                             aria-invalid={messagesPerField.existsError("termsAccepted")}
                         >
                             {msg("acceptTerms")}
@@ -122,17 +116,16 @@ export default function Register(props: Props) {
                     </div>
                 )}
 
-                {recaptchaRequired &&
-                    (recaptchaVisible || recaptchaAction === undefined) && (
-                        <div className="nebari-form-group">
-                            <div
-                                className="g-recaptcha"
-                                data-size="compact"
-                                data-sitekey={recaptchaSiteKey}
-                                data-action={recaptchaAction}
-                            />
-                        </div>
-                    )}
+                {recaptchaRequired && (recaptchaVisible || recaptchaAction === undefined) && (
+                    <div className="nebari-form-group">
+                        <div
+                            className="g-recaptcha"
+                            data-size="compact"
+                            data-sitekey={recaptchaSiteKey}
+                            data-action={recaptchaAction}
+                        />
+                    </div>
+                )}
 
                 <div className="nebari-form-group">
                     {/* `type` has to be baked into the render element rather than
@@ -152,10 +145,7 @@ export default function Register(props: Props) {
                     ) : (
                         <Button
                             className="w-full"
-                            disabled={
-                                !isFormSubmittable ||
-                                (termsAcceptanceRequired && !areTermsAccepted)
-                            }
+                            disabled={!isFormSubmittable || (termsAcceptanceRequired && !areTermsAccepted)}
                             render={<button type="submit" />}
                         >
                             {msgStr("doRegister")}

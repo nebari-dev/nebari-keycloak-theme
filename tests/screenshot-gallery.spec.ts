@@ -24,9 +24,7 @@ function renderGallery(files: readonly string[]): string {
     const names = new Set(files.map(file => file.replace(/\.png$/, "")));
     // Each preview is `<page>.png` in light mode and `<page>-dark.png` in dark
     // mode; the full-page captures are named for their colour scheme instead.
-    const pages = [...names]
-        .filter(name => !name.endsWith("-dark") && !name.startsWith("full-page-"))
-        .sort();
+    const pages = [...names].filter(name => !name.endsWith("-dark") && !name.startsWith("full-page-")).sort();
 
     const rows = pages.map(page => {
         const light = names.has(page) ? image(`${page}.png`, `${page}, light`) : "";
