@@ -120,6 +120,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
                                 autoFocus
                                 autoComplete={enableWebAuthnConditionalUI ? "username webauthn" : "username"}
                                 aria-invalid={hasLoginError}
+                                aria-describedby={hasLoginError ? "input-error" : undefined}
                             />
                         </Field>
                     )}
@@ -139,6 +140,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
                         </div>
                         <PasswordInput
                             aria-invalid={hasLoginError}
+                            aria-describedby={hasLoginError ? "input-error" : undefined}
                             autoComplete="current-password"
                             hideLabel={msgStr("hidePassword")}
                             id="password"
@@ -147,7 +149,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
                             tabIndex={3}
                         />
                         {hasLoginError && (
-                            <FieldError aria-live="polite">
+                            <FieldError aria-live="polite" id="input-error">
                                 {messagesPerField.getFirstError("username", "password")}
                             </FieldError>
                         )}
