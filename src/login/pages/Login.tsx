@@ -32,7 +32,8 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
         auth,
         messagesPerField,
         enableWebAuthnConditionalUI,
-        authenticators
+        authenticators,
+        registrationDisabled
     } = kcContext;
 
     const { msg, msgStr } = i18n;
@@ -66,6 +67,15 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
             classes={classes}
             displayMessage={!messagesPerField.existsError("username", "password")}
             headerNode={msg("loginAccountTitle")}
+            displayInfo={realm.password && realm.registrationAllowed && !registrationDisabled}
+            infoNode={
+                <div id="kc-registration">
+                    {msg("noAccount")}{" "}
+                    <a className="nebari-link" href={url.registrationUrl}>
+                        {msg("doRegister")}
+                    </a>
+                </div>
+            }
             socialProvidersNode={
                 hasSocialProviders && (
                     <div className="nebari-social-providers">
