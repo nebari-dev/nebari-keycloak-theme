@@ -110,6 +110,12 @@ type ProfileMenuProps = {
     signOutLabel?: string;
     /** `false` shows the avatar alone, for `features.hasUsername === false`. */
     showName?: boolean;
+    /**
+     * The trigger's accessible name when it shows the avatar alone. With the
+     * name shown, the name is the accessible name: a label that hid the visible
+     * text would leave speech-input users unable to say what they see (WCAG
+     * 2.5.3).
+     */
     triggerLabel: string;
     /**
      * Theme state from `useNebariTheme`, which the console's header owns.
@@ -158,7 +164,7 @@ export function ProfileMenu({
     return (
         <DropdownMenu modal={false}>
             <DropdownMenuTrigger
-                aria-label={triggerLabel}
+                aria-label={showName ? undefined : triggerLabel}
                 className={cn(
                     buttonVariants({ variant: "ghost" }),
                     "h-auto px-2.5 py-1 text-header-foreground",

@@ -157,7 +157,9 @@ const HeaderContent = ({ theme }: { theme: ConsoleTheme }) => {
         <BarsIcon />
       </PageToggleButton>
 
-      <MenuBarBrand href={indexHref} aria-label={t("logo")}>
+      {/* Named by its content, the logo's alt text and any visible text, so
+          speech-input users can say what they see (WCAG 2.5.3). */}
+      <MenuBarBrand href={indexHref}>
         {resolvedLogo ? (
           <>
             <img src={resolvedLogo} alt={t("logo")} className={style.brand} />
