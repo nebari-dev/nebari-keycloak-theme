@@ -92,7 +92,8 @@
 .pf-v5-c-nav__link.pf-m-current,
 .pf-v5-c-nav__item.pf-m-current>.pf-v5-c-nav__link {
     background: var(--account-bg-7c3aed-a10, rgba(124, 58, 237, 0.10));
-    color: var(--account-fg-7c3aed, #7c3aed);
+    /* The darker violet: #7c3aed on this tint is 4.48:1, below WCAG AA. */
+    color: var(--account-fg-6d28d9, #6d28d9);
     font-weight: 600;
     box-shadow: inset 3px 0 0 var(--account-shadow-7c3aed, #7c3aed);
     border-radius: 0 6px 6px 0;

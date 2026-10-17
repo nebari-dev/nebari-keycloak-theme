@@ -890,6 +890,11 @@ input[type="radio"] {
   color: var(--success-foreground);
 }
 
+/* PatternFly's dark info-alert title, #2b9af3, is 4.08:1 on the card. */
+.pf-v5-theme-dark .pf-v5-c-alert.pf-m-info {
+  --pf-v5-c-alert__title--Color: var(--foreground);
+}
+
 .pf-v5-c-label,
 .pf-v5-c-badge,
 .pf-v5-c-chip {

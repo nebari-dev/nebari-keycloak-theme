@@ -35,7 +35,6 @@ export type KnownViolation = {
 };
 
 const ISSUES = "https://github.com/nebari-dev/nebari-keycloak-theme/issues";
-const CONTRAST_ISSUE = `${ISSUES}/68`;
 const KEYBOARD_ISSUE = `${ISSUES}/69`;
 const NAMES_ISSUE = `${ISSUES}/70`;
 
@@ -67,24 +66,6 @@ export const knownViolations: readonly KnownViolation[] = [
             "It is kept out of the Tab order because the positive tabindexes above would otherwise sort it after " +
             "the submit button; it is fixed with them.",
         issue: KEYBOARD_ISSUE
-    },
-
-    // The console skin, which every theme shares.
-    {
-        id: "admin-dark-info-alert-title",
-        rule: "color-contrast",
-        surfaces: ["admin"],
-        colors: [{ foreground: "#2b9af3", background: "#353538" }],
-        reason: "PatternFly's info-alert title colour on the dark alert background is 4.08:1.",
-        issue: CONTRAST_ISSUE
-    },
-    {
-        id: "account-current-nav-item-contrast",
-        rule: "color-contrast",
-        surfaces: ["account"],
-        colors: [{ foreground: "#7c3aed", background: "#e8e1f5" }],
-        reason: "The current Account nav item is 4.48:1 in the light scheme.",
-        issue: CONTRAST_ISSUE
     },
 
     // Vendored console markup: fixing these here would mean owning upstream files.

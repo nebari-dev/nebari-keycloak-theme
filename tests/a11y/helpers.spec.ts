@@ -110,17 +110,22 @@ test.describe("axe scans", () => {
         await expect(expectNoAxeViolations(page, nebari)).rejects.toThrow(/color-contrast/);
     });
 
+    // admin-user-list-kebab-unnamed in known-violations.ts: an unnamed toolbar
+    // kebab in a data table, in every theme's Admin Console, and nowhere else.
+    const kebab = `<button class="pf-v5-c-menu-toggle pf-m-plain"><svg aria-hidden="true"></svg></button>`;
+
     test("excuse a known violation only on the surfaces where it is known", async ({ page }) => {
-        // admin-dark-info-alert-title in known-violations.ts: every theme's
-        // Admin Console, and nowhere else.
-        await render(page, `<p style="color: #2b9af3; background: #353538">Info</p>`);
+        await render(
+            page,
+            `<div data-slot="keycloak-data-table"><div class="pf-v5-c-toolbar__item">${kebab}</div></div>`
+        );
         await expectNoAxeViolations(page, nebariAdmin);
         await expectNoAxeViolations(page, otherAdmin);
-        await expect(expectNoAxeViolations(page, nebari)).rejects.toThrow(/color-contrast/);
+        await expect(expectNoAxeViolations(page, nebari)).rejects.toThrow(/button-name/);
     });
 
-    test("don't excuse a colour pair the allowlist doesn't name", async ({ page }) => {
-        await render(page, `<p style="color: #2b9af3; background: #3d3d40">Near the info title</p>`);
-        await expect(expectNoAxeViolations(page, nebariAdmin)).rejects.toThrow(/color-contrast/);
+    test("excuse a known violation only on the elements its selector names", async ({ page }) => {
+        await render(page, `<div class="pf-v5-c-toolbar__item">${kebab}</div>`);
+        await expect(expectNoAxeViolations(page, nebariAdmin)).rejects.toThrow(/button-name/);
     });
 });
