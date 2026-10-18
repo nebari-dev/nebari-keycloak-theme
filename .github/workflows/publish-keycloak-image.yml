@@ -256,6 +256,7 @@ jobs:
       - name: Compose release notes
         env:
           SCREENSHOTS: https://github.com/${{ github.repository }}/blob/${{ github.sha }}/docs/screenshots.md
+          UPGRADING: https://github.com/${{ github.repository }}/blob/${{ github.sha }}/docs/upgrading.md
           VERSION: ${{ needs.jars.outputs.version }}
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
@@ -263,6 +264,8 @@ jobs:
             echo "## Nebari Keycloak themes $VERSION"
             echo
             echo "See [what the theme looks like]($SCREENSHOTS) in this release."
+            echo
+            echo "Coming from an earlier major version? Read [Upgrading]($UPGRADING) first."
             echo
             echo "### Install a theme"
             echo
