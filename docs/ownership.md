@@ -28,12 +28,22 @@ truth; this table explains them.
 | `admin/PageHeader.tsx` | The Admin header with the shared profile menu |
 | `admin/index.css` | Token bridge: restyles whatever stays on PatternFly |
 | `admin/page-nav.css` | Narrow bridge between PatternFly's layout shell and the Nebari sidebar |
+| `admin/routes.tsx` | Adds the Theme customization route, dropped when [`themeCustomization.ts`](../src/admin/themeCustomization.ts) turns the page off. Still carries the vendored `// @ts-nocheck` |
 | `admin/colorScheme.ts` | Applies the theme preference before React mounts |
-| `admin/assets/icon.svg` | The Nebari mark on the Admin welcome tab. The asset is owned instead of the component that renders it, because an SVG never gains upstream behaviour and `Dashboard.tsx` changes whenever Keycloak touches that tab |
+| `admin/assets/icon.svg` | The Nebari mark on the Admin welcome tab. The asset is owned instead of the component that renders it, because an SVG never gains upstream behaviour and `Dashboard.tsx` changes whenever Keycloak touches that tab. A realm can replace it at runtime with Theme customization's welcome mark |
 | `account/KcAccountUi.tsx` | The Account console entry point, which loads the Nebari styles |
 | `account/root/Header.tsx`, `account/root/header.module.css` | The Account header with the shared profile menu |
 | `account/colorScheme.ts` | Same as the Admin one |
 | `public/keycloak-theme/{admin,account}/early-color-scheme.js` | Apply the theme preference before first paint. Must change together with `colorScheme.ts` |
+
+### Written here, not vendored
+
+These files sit in the synced directories but have no upstream original, so they are tracked without being
+owned. There is nothing to hand back or merge:
+
+- `admin/branding/` and `admin/themeCustomization.ts`: the Theme customization page and its on/off switch
+- `account/nebari-account.css`: the Account console's Nebari styles
+- `shared/keycloak-ui-shared/controls/table/pagination.ts`: shared paging helpers for the owned table files
 
 ### Handed back
 
@@ -64,7 +74,8 @@ Then, in the same pull request:
   answer is "a feature silently disappears" rather than "a type error", it probably does &mdash; that is exactly
   what `check-page-nav-sync` exists for.
 - Owned files are type-checked like the rest of `src/`. If a vendored file arrives with `// @ts-nocheck`,
-  remove it when you take ownership, so the type check covers your changes.
+  remove it when you take ownership, so the type check covers your changes. `admin/routes.tsx` is the one
+  exception so far; its change is a single route entry.
 
 ## Handing a file back
 
@@ -100,4 +111,6 @@ packages. Dependabot ignores both on purpose, so it is always a deliberate, hand
 3. `npm run check`. A failure here is the guards doing their job &mdash; reconcile it rather than silencing it.
 4. For each owned file, diff it against the new upstream original in `node_modules/@keycloakify/...` and merge in
    what changed. This is the manual cost ownership buys.
-5. Check both consoles in the [compose loop](quick-start.md#the-compose-loop-consoles), since CI can't.
+5. Run `npm run test:a11y:consoles` and check both consoles in the
+   [compose loop](quick-start.md#the-compose-loop-consoles). CI checks the consoles for accessibility only, not
+   that each screen still works.

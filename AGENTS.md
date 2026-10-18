@@ -9,8 +9,10 @@ unbranded `template`; each is packaged in its own JAR with three Keycloak themes
 pages, the **Account** console and the **Admin** console. Every push to `main` publishes both in the multi-arch
 image `quay.io/nebari/nebari-keycloak-theme`.
 
-- The login theme (`src/login/`) is written in this repo on the `@nebari` design-system components.
-- `src/main.tsx` stamps the theme name on `<html>` as `data-brand` and the theme type as `data-kc-theme-type`.
+- The login pages (`src/login/`) are written in this repo: `nebari`'s on the `@nebari` design-system components,
+  `template`'s on stock shadcn/ui. `src/login/uiSets.ts` picks the set from the theme name.
+- `src/main.tsx` stamps the theme name on `<html>` as `data-brand` (a child theme's `brand` property, when it sets
+  one) and the theme type as `data-kc-theme-type`.
   Each theme's logo, default palette and editor switch live in the catalog,
   [`src/themes/themeCatalog.ts`](src/themes/themeCatalog.ts), checked against `themes.json` at build time.
 - **Downstream brands don't live here.** A brand built on this theme ships as a Theme customization preset or as
@@ -40,17 +42,19 @@ npm run check                        # upgrade guards
 npm run typecheck                    # tsc --noEmit, on src/ and on tests/ + Playwright configs
 npm run lint                         # Biome lint + format check, also run in CI
 npm run format                       # Biome formatter, writes in place
-npm run test:screenshots             # compare login pages against Linux baselines, per brand
+npm run test:screenshots             # every dev-server spec except a11y: screenshot baselines, branding, child themes
 npm run test:a11y                    # login-page accessibility (axe + keyboard), every theme and scheme
 npm run test:a11y:consoles           # Admin + Account accessibility; needs the compose Keycloak running
-npm run build-keycloak-theme         # guards + tsc + vite build + one JAR pair per brand in dist_keycloak/
+npm run docs:console-images          # recapture the Theme customization doc images; needs the compose Keycloak
+npm run build-keycloak-theme         # guards + tsc + vite build + one JAR pair per theme in dist_keycloak/
 docker compose up -d --build keycloak   # consoles, on the nebari realm
 ```
 
 ## Hard rules
 
-- **Never edit `src/components/ui/` or the registry hooks in `src/hooks/`.** `shadcn add` overwrites them. Change
-  a component at the call site (`className`, Base UI `render`) or wrap it under `src/components/nebari/`.
+- **Never edit `src/components/ui/`, `src/components/shadcn/` or the registry hooks in `src/hooks/`.** `shadcn add`
+  overwrites them. Change a component at the call site (`className`, Base UI `render`) or wrap it under
+  `src/components/nebari/`.
 - **Don't hand-edit generated files.** `src/kc.gen.tsx` and the Keycloakify-managed blocks in `src/.gitignore` and
   `public/keycloak-theme/.gitignore` are written by Keycloakify. Change ownership with `npx keycloakify own`, not by
   editing the ignore blocks.

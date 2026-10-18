@@ -26,9 +26,17 @@ implementations in [`src/login/pages/`](../src/login/pages/) &mdash; sign in, re
 password, update password, verify email and update profile. Every other page falls through to Keycloakify's
 default implementation, so a page this theme hasn't written still works, just unstyled.
 
-All eight share [`src/login/Template.tsx`](../src/login/Template.tsx) for the card, logo and messages, and are
-built from the design-system components &mdash; `Field`, `Input`, `Button`, `Checkbox`, `Alert` &mdash; plus
-[`PasswordField`](../src/components/nebari/PasswordField.tsx) for the reveal toggle.
+Each theme has its own set of those eight pages, chosen once by
+[`src/login/uiSets.ts`](../src/login/uiSets.ts) from the theme name Keycloak reports:
+
+| Set | Pages and shell | Components |
+| --- | --- | --- |
+| `nebari` | [`src/login/pages/`](../src/login/pages/), [`src/login/Template.tsx`](../src/login/Template.tsx) | The `@nebari` registry (Base UI) in `src/components/ui/`, plus [`PasswordField`](../src/components/nebari/PasswordField.tsx) for the reveal toggle |
+| `template` | [`src/login/template/pages/`](../src/login/template/pages/), [`src/login/template/Template.tsx`](../src/login/template/Template.tsx) | Stock shadcn/ui (Radix) in `src/components/shadcn/` |
+
+The two component libraries' APIs differ, so the sets can't share page code. Every member is loaded lazily, so a
+realm only downloads the set it uses. The shell owns the card, logo and messages, and applies a realm's
+[runtime branding](#runtime-branding).
 
 [`src/main.tsx`](../src/main.tsx) is the entry point. In production Keycloak injects the context; in the dev
 server the `?preview=` mock stands in for it, and `?theme=<name>` picks a theme from `themes.json`.
@@ -37,9 +45,21 @@ server the `?preview=` mock stands in for it, and `?theme=<name>` picks a theme 
 
 The theme is decided at runtime from the theme Keycloak is rendering. `src/main.tsx` stamps
 `kcContext.themeName` on `<html>` as `data-brand` and `kcContext.themeType` as `data-kc-theme-type`, so CSS
-and tests can tell which theme and which page type they are looking at. Each theme's logo, default palette
+and tests can tell which theme and which page type they are looking at. When a
+[child theme](child-themes.md) sets `brand` in its `theme.properties`, that name is stamped instead, and the
+child's `styles` are loaded after this theme's CSS ([`src/themes/childTheme.ts`](../src/themes/childTheme.ts)). Each theme's logo, default palette
 and editor switch are defined in [`src/themes/themeCatalog.ts`](../src/themes/themeCatalog.ts), which the
 login pages and both console mastheads read. A realm can override the logo and palette at runtime; see
+[Theme customization](theme-customization.md).
+
+## Runtime branding
+
+A realm's Theme customization config is stored in its localization messages, so it reaches the login pages
+through Keycloak's own message resolution with no request of its own. The login shell validates it with
+`normalizeBrandingConfig` and applies it as inline CSS custom properties (`--primary`, `--card`, ...), which the
+design-system components already read, plus a few data attributes for the advanced settings. On the `nebari`
+theme this is gated on `[data-branded]`, so an unbranded realm renders exactly as without it. The consoles read
+the same messages for their masthead logo. The details, and the constraints anyone changing it must keep, are in
 [Theme customization](theme-customization.md).
 
 ## The consoles: swapping components underneath

@@ -103,6 +103,34 @@ the page along with them.
   [`playwright.consoles.config.ts`](../playwright.consoles.config.ts), which CI doesn't run: after changing the
   editor, run `docker compose up -d --build keycloak`, then `npm run docs:console-images`, and commit the images.
 
+### Regenerate baselines on Linux
+
+Baselines are stored per platform and suite in `tests/screenshots/<platform>/<suite>/`, because each OS
+rasterises fonts slightly differently. CI runs on Linux, so **only the `linux/` baselines count**. Updating on macOS or Windows writes to
+a different directory and won't satisfy the check.
+
+If you aren't on Linux, run the update inside the Playwright container. Its tag must match the installed
+`@playwright/test` version (`npx playwright --version`), or the browser build won't match the one CI uses:
+
+```bash
+docker run --rm -v "$PWD":/work -v /work/node_modules -w /work --ipc=host \
+  mcr.microsoft.com/playwright:v1.64.0-noble \
+  sh -c "npm ci && npm run test:screenshots:update"
+```
+
+The second `-v` gives the container its own `node_modules`, so it installs Linux binaries without touching
+yours.
+
+### Rebaselining is a review decision, not a formality
+
+A baseline records what the branch renders, not what was intended. When you rebaseline, you are telling CI
+that the new rendering is correct &mdash; so look at the diff before committing it. This has already let a
+regression through once: a bare `:not([data-slot])` in a login-page selector turned the social sign-in buttons
+purple, the baseline was regenerated in the same commit, and CI went green on it.
+
+Each CI run uploads two artifacts to help with that: `playwright-report` (the diff when a comparison fails) and
+`theme-screenshots` (what the branch actually rendered, whether or not it matched).
+
 ## Accessibility tests
 
 [`tests/a11y/`](../tests/a11y/) checks the login pages and the Admin and Account consoles in every theme in
@@ -182,34 +210,6 @@ assignment, rather than silently scanning nothing. The login pages use `@axe-cor
 suites without a code change. Dependabot proposes them in their own pull request, so what the new rules find is
 reviewed on its own.
 
-### Regenerate baselines on Linux
-
-Baselines are stored per platform and brand in `tests/screenshots/<platform>/<brand>/`, because each OS
-rasterises fonts slightly differently. CI runs on Linux, so **only the `linux/` baselines count**. Updating on macOS or Windows writes to
-a different directory and won't satisfy the check.
-
-If you aren't on Linux, run the update inside the Playwright container. Its tag must match the installed
-`@playwright/test` version (`npx playwright --version`), or the browser build won't match the one CI uses:
-
-```bash
-docker run --rm -v "$PWD":/work -v /work/node_modules -w /work --ipc=host \
-  mcr.microsoft.com/playwright:v1.63.0-noble \
-  sh -c "npm ci && npm run test:screenshots:update"
-```
-
-The second `-v` gives the container its own `node_modules`, so it installs Linux binaries without touching
-yours.
-
-### Rebaselining is a review decision, not a formality
-
-A baseline records what the branch renders, not what was intended. When you rebaseline, you are telling CI
-that the new rendering is correct &mdash; so look at the diff before committing it. This has already let a
-regression through once: a CSS change in the consoles turned the social sign-in buttons purple, the baseline
-was regenerated in the same commit, and CI went green on it.
-
-Each CI run uploads two artifacts to help with that: `playwright-report` (the diff when a comparison fails) and
-`theme-screenshots` (what the branch actually rendered, whether or not it matched).
-
 ## Upgrade guards
 
 `npm run check` runs two scripts that catch breakage `tsc` cannot see. Both fail the build; neither is a type
@@ -244,7 +244,8 @@ the guard and still be wrong.
 ## What the type check covers
 
 `npm run typecheck` checks everything under `src/`, including the owned console files such as `PageNav.tsx` and
-`KeycloakDataTable.tsx`. The only file that opts out with `// @ts-nocheck` is the generated `src/kc.gen.tsx`.
+`KeycloakDataTable.tsx`. Two files opt out with `// @ts-nocheck`: the generated `src/kc.gen.tsx`, and the owned
+`src/admin/routes.tsx`, which keeps the vendored file's opt-out.
 It then checks `tests/` and both Playwright configs through [`tsconfig.tests.json`](../tsconfig.tests.json), which
 adds Node's types: Playwright transpiles the specs without checking them, so this is the only check they get.
 [Ownership](ownership.md) covers the owned files.

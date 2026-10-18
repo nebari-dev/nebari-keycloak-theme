@@ -47,6 +47,13 @@ These are defined in `getKcContextMockForPreview` in [`src/login/KcContext.ts`](
 The same previews are what the [screenshot](development.md#screenshot-tests) and
 [accessibility](development.md#accessibility-tests) tests check.
 
+Two more parameters:
+
+- `&theme=template` renders the unbranded `template` theme instead of `nebari`, for example
+  http://localhost:5173/?preview=login&theme=template.
+- `&branding=<url-encoded JSON>` applies a Theme customization config, validated the same way a realm's is.
+  See [Theme customization](theme-customization.md).
+
 ## The compose loop (consoles)
 
 The dev server can't show the consoles. They authenticate against a real Keycloak, so there is no mock to
@@ -71,6 +78,10 @@ stock consoles.** So use the `nebari` realm, with its own accounts:
 | Admin | http://localhost:8080/admin/nebari/console/ | `nebari-admin` / `nebari-admin` |
 | Account | http://localhost:8080/realms/nebari/account/ | `demo` / `demo` |
 
+In the Admin Console, **Configure &rarr; Theme customization** is the runtime branding editor; see
+[Theme customization](theme-customization.md). Both themes, `nebari` and `template`, are installed, so a realm
+can switch between them under **Realm settings &rarr; Themes**.
+
 `admin` / `admin` from `docker-compose.yml` is the *master* realm's bootstrap admin. It can administer the
 `nebari` realm, but only from http://localhost:8080/admin/master/console/, which renders in master's own stock
 theme &mdash; a Keycloak session belongs to the realm it was created in. That is why the seeded realm also has
@@ -87,9 +98,11 @@ docker compose down -v
 ```
 
 `-v` drops the Postgres volume, so the next `up` re-imports `realm-export.json` from scratch. Without it,
-Keycloak keeps the realm it imported the first time and ignores later edits to the file.
+Keycloak keeps the realm it imported the first time and ignores later edits to the file. It also clears the
+`a11y-nebari` and `a11y-template` realms that `npm run test:a11y:consoles` creates in the same database.
 
 ## Next
 
-- [Development](development.md) &mdash; the rest of the scripts, the screenshot baselines, and the upgrade guards
+- [Development](development.md) &mdash; the rest of the scripts, the screenshot baselines, the accessibility tests and
+  the upgrade guards
 - [Architecture](architecture.md) &mdash; how the consoles are restyled without forking them

@@ -27,7 +27,11 @@ Please give us a reasonable chance to release a fix before disclosing the issue 
 In scope:
 
 - The theme's templates, styles, and scripts
-- The released theme JAR files
+- The released theme JAR files and the published image, `quay.io/nebari/nebari-keycloak-theme`
+- The runtime branding config: the Theme customization page writes it, any realm administrator with
+  `manage-realm` can set it, and the login page renders it to every unauthenticated visitor. A way to get
+  markup, script or style past its validation (`normalizeBrandingConfig`) is a vulnerability, even though it
+  takes realm-admin rights to plant
 
 Out of scope here:
 
