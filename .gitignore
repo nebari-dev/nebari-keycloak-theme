@@ -5,6 +5,8 @@ pnpm-lock.yaml
 
 # Build outputs
 dist/
+# ...but not a child theme's resources/dist/logo/ overrides in the examples.
+!examples/**/dist/
 dist_keycloak/
 build/
 *.jar
