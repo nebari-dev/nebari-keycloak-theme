@@ -1,6 +1,6 @@
 {
   "name": "nebari-keycloak-theme",
-  "version": "1.1.2",
+  "version": "2.0.0",
   "description": "Keycloak login, account and admin themes in the Nebari design system, built with Keycloakify.",
   "license": "Apache-2.0",
   "repository": {
