@@ -26,7 +26,7 @@ Each release on GitHub attaches every JAR, so you don't need to build them yours
 
 Every push to `main` publishes a complete Keycloak image, `quay.io/nebari/nebari-keycloak-theme`, for
 `linux/amd64` and `linux/arm64`, with the Keycloak 26 JAR of every theme in [`themes.json`](../themes.json). It
-is based on `quay.io/keycloak/keycloak:26.8.0`. Its tags:
+is based on `quay.io/keycloak/keycloak:26.8.1`. Its tags:
 
 | Tag | Published | Moves? |
 | --- | --- | --- |
@@ -43,11 +43,11 @@ The image's entrypoint is `kc.sh`, so pass `start` (or `start-dev`) and your usu
 If you already build a Keycloak image, add the JAR as a provider and rebuild:
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.8.0 AS builder
+FROM quay.io/keycloak/keycloak:26.8.1 AS builder
 COPY nebari-keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/
 RUN /opt/keycloak/bin/kc.sh build
 
-FROM quay.io/keycloak/keycloak:26.8.0
+FROM quay.io/keycloak/keycloak:26.8.1
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 ```
 

@@ -1,10 +1,11 @@
-ARG KEYCLOAK_VERSION=26.8.0
 # Which theme JARs to install. The default takes every theme that was built, so
 # a local `docker compose up --build` can switch a realm between them. Narrow it
 # to one file to publish an image carrying a single theme.
 ARG THEME_JAR=*-keycloak-theme-for-kc-all-other-versions.jar
 
-FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} AS builder
+# The Keycloak version is written into both FROM lines rather than an ARG,
+# so Dependabot can see it and bumps both together.
+FROM quay.io/keycloak/keycloak:26.8.1 AS builder
 ARG THEME_JAR
 
 # Enable health and metrics support
@@ -19,7 +20,7 @@ COPY dist_keycloak/${THEME_JAR} /opt/keycloak/providers/
 # Build Keycloak with the custom theme
 RUN /opt/keycloak/bin/kc.sh build
 
-FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+FROM quay.io/keycloak/keycloak:26.8.1
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
 # Repeated from the builder stage: an ENV does not cross stages, and without it
