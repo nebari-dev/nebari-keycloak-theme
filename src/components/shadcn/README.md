@@ -7,7 +7,7 @@ built on Base UI.
 
 | Directory | Registry | Primitive layer | Used by |
 | --- | --- | --- | --- |
-| `src/components/ui/` | `@nebari` | Base UI | the `nebari` login theme, Admin Console |
+| `src/components/ui/` | `@nebari` | Base UI | the `nebari` login theme, both consoles, the Theme customization editor |
 | `src/components/shadcn/` | shadcn/ui | Radix | the `template` login theme |
 
 ## Why they are separate

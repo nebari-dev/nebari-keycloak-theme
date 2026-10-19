@@ -1,7 +1,8 @@
 # Deployment
 
-Getting the theme into Keycloak and switching it on are two separate steps. Installing makes `nebari` available;
-[selecting it](#selecting-the-theme) on a realm is what users actually see.
+Getting the theme into Keycloak and switching it on are two separate steps. Installing makes the themes
+available; [selecting one](#selecting-the-theme) on a realm is what users actually see. Coming from 1.x, read
+[Upgrading](upgrading.md) first.
 
 ## What gets built
 
@@ -31,7 +32,7 @@ is based on `quay.io/keycloak/keycloak:26.8.1`. Its tags:
 | Tag | Published | Moves? |
 | --- | --- | --- |
 | `sha-<commit>` | Every push to `main` | Never. **Pin this one** for anything reproducible |
-| `<version>`, e.g. `1.2.0` | Once, with the GitHub release for that version | Never |
+| `<version>`, e.g. `2.0.0` | Once, with the GitHub release for that version | Never |
 | `latest` | Every push to `main` | Yes |
 
 See [Releasing](releasing.md#versions-and-tags).
@@ -51,9 +52,9 @@ FROM quay.io/keycloak/keycloak:26.8.1
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 ```
 
-This repo's own [`Dockerfile`](../Dockerfile) is the working version of this, with the Keycloak version and JAR
-name as build arguments. Its default `THEME_JAR` installs every brand's Keycloak 26 JAR, which is what the local
-compose image uses; the publish workflow narrows it to one.
+This repo's own [`Dockerfile`](../Dockerfile) is the working version of this, with the JAR name as a build
+argument. Its default `THEME_JAR` installs every theme's Keycloak 26 JAR, which is what both the local compose
+image and the published image use; narrow it to one file for an image that carries a single theme.
 
 ### An existing Keycloak
 
@@ -72,9 +73,8 @@ A theme applies per realm. In the Admin Console of the realm you want to change,
 | Admin console theme | `nebari` |
 | Account theme | `nebari` |
 
-A realm that still selects `collab` or `openteams` needs moving to `nebari` before upgrading: that theme is no
-longer shipped here. Its look is available as a Theme customization preset; see
-[Theme customization](theme-customization.md).
+Use `template` instead for the unbranded theme, the starting point for a brand of your own. A realm that still
+selects `collab` or `openteams` needs moving first; see [Upgrading](upgrading.md#the-collab-theme-is-gone).
 
 Leave **Email theme** alone &mdash; this theme doesn't provide one.
 
@@ -92,10 +92,24 @@ The same setting in a realm export, which is how the local dev realm does it in
 The `master` realm is selected separately. If you theme a workspace realm but not `master`, administrators who
 sign in through `master` still see the stock console.
 
+## Branding a realm
+
+Two ways to put your own brand on the theme, neither of which needs a fork:
+
+- **Theme customization.** The Admin Console's **Configure &rarr; Theme customization** page, open to realm
+  administrators with `manage-realm`, rebrands that realm's login pages at runtime. The result is stored in the
+  realm, so it survives restarts; to have a fresh database start branded, seed a preset into the realm export
+  or through the Admin API, as described in
+  [Seeding a preset](theme-customization.md#seeding-a-preset-so-a-realm-starts-branded). A deployment that
+  doesn't want the page sets `NEBARI_THEME_CUSTOMIZATION=disabled` on the Keycloak container.
+- **A child theme.** A theme with `parent=nebari`, shipped as the published image plus your own theme folder.
+  [`examples/child-theme/`](../examples/child-theme/) is a complete one with its Dockerfile; see
+  [Child themes](child-themes.md).
+
 ## Nebari Infrastructure Core
 
-NIC doesn't select this theme yet. Its Keycloak runs the stock image and no NIC component sets a realm theme.
-Adopting it means two changes on the NIC side:
+NIC doesn't select this theme by default yet. Its Keycloak runs the stock image and no NIC component sets a
+realm theme. Adopting it means two changes on the NIC side:
 
 1. Run a Keycloak that has the theme installed &mdash; the published image, or the JAR added to the existing one
 2. Set the three theme keys on the realms NIC manages

@@ -46,9 +46,10 @@
   <a href="AGENTS.md">AGENTS.md</a>
 </p>
 
-> **Status:** v1 is released and published as a container image, but no Nebari Infrastructure Core (NIC)
-> component selects it yet. Selecting it in a deployment is a per-realm setting &mdash; see
-> [Deployment](docs/deployment.md#selecting-the-theme).
+> **Status:** 2.0 is the current release, published as `quay.io/nebari/nebari-keycloak-theme`. Coming from
+> 1.x? Read [Upgrading](docs/upgrading.md) first: the Collab theme is gone and the image moved from ghcr.io to
+> Quay. Nebari Infrastructure Core (NIC) doesn't select this theme by default yet; selecting it is a per-realm
+> setting &mdash; see [Deployment](docs/deployment.md#selecting-the-theme).
 
 ## What is in it
 
@@ -66,7 +67,7 @@ The consoles are roughly 520 views vendored from Keycloak. Rather than rewriting
 components they import underneath them, so upstream Keycloak changes keep flowing in. How that works, and
 where it stops, is in [Architecture](docs/architecture.md).
 
-## Brands
+## Themes
 
 [`themes.json`](themes.json) lists the themes to build, and each one is packaged into its own JAR:
 
@@ -77,8 +78,15 @@ where it stops, is in [Architecture](docs/architecture.md).
 
 Each JAR is named `<theme>-keycloak-theme-for-kc-all-other-versions.jar` (Keycloak 26+) or
 `<theme>-keycloak-theme-for-kc-22-to-25.jar`. The image `quay.io/nebari/nebari-keycloak-theme` (amd64 and
-arm64) carries both. The Admin Console's **Theme customization** page rebrands any theme's login pages per realm without a rebuild &mdash; see [Theme customization](docs/theme-customization.md),
-which also covers adding a theme.
+arm64) carries both.
+
+Two ways to brand them without a fork:
+
+- **Theme customization**, an Admin Console page that rebrands a realm's login pages at runtime: name, logos,
+  palette, layout, font and more, previewed before publishing and portable as JSON. See
+  [Theme customization](docs/theme-customization.md), which also covers adding a theme to this repo.
+- **A child theme**, a Keycloak theme with `parent=nebari` in your own repository and image, for your own CSS,
+  logo files and login wording. See [Child themes](docs/child-themes.md).
 
 ## Quick start
 
@@ -141,7 +149,9 @@ check catches and how to read a failure.
 | `themes.json` | The themes to build; one JAR pair per theme |
 | `biome.json` | Lint and format rules, and the files each one skips &mdash; see [Development](docs/development.md#lint-and-format) |
 | `scripts/` | The per-theme JAR build, and upgrade guards that catch silent breakage on a Keycloak bump |
-| `tests/` | Playwright screenshot tests and their Linux baselines, one folder per theme; accessibility tests in `tests/a11y/` |
+| `tests/` | Playwright tests against the dev server: screenshot baselines (one folder per suite), branding and child-theme checks, and the login accessibility suite in `tests/a11y/` |
+| `tests/a11y/`, `tests/console/` | The console accessibility suites and the doc-image capture, which need a real Keycloak; run from `playwright.consoles.config.ts` |
+| `examples/child-theme/` | A complete example child theme, `acme`, with its Dockerfile |
 | `docs/` | Everything below |
 
 ## Documentation
@@ -154,6 +164,7 @@ check catches and how to read a failure.
 | [Ownership](docs/ownership.md) | Which Keycloak files this theme forks, why, and what keeps them honest |
 | [Customization](docs/customization.md) | Tokens, logo, translations, login pages and design-system components |
 | [Deployment](docs/deployment.md) | JARs, the published image, and selecting the theme on a realm |
+| [Upgrading](docs/upgrading.md) | What changes between major versions, and what to do about it |
 | [Theme customization](docs/theme-customization.md) | The runtime branding editor, the `template` theme, and adding a theme |
 | [Child themes](docs/child-themes.md) | Extending this theme from another repository: CSS, logos and login wording, without a fork |
 | [Screenshots](docs/screenshots.md) | Every login page in light and dark mode, as `main` renders it |

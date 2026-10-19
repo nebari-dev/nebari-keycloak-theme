@@ -7,19 +7,21 @@ The list is built with `import.meta.glob('/custom_themes/*.json')`, so committin
 a file here is all it takes — there is no index to update. The files are inlined
 into the bundle at build time, so they ship inside the theme JAR.
 
-## Why this directory exists
+## What belongs here
 
-A published theme is stored in the realm's localization messages, which means it
-lives in Keycloak's database. That survives a container restart, but **not** a
-fresh deployment: `realm-export.json` carries no `localizationTexts`, so a clean
-instance starts from `DEFAULT_BRANDING_CONFIG`.
+The presets this repository ships for every deployment: today, each theme's own
+defaults, so a realm can be returned to the unbranded look. A deployment's own
+brand does not belong here. It is exported from the editor and imported or seeded
+into that deployment's realms, or built as a child theme; see
+[Theme customization](../docs/theme-customization.md#seeding-a-preset-so-a-realm-starts-branded)
+and [Child themes](../docs/child-themes.md).
 
-Committing a theme here is what makes it survive. It ships inside the theme JAR
-and can be re-imported into any realm.
+A realm with nothing published, including every realm on a fresh database, uses
+the active theme's `defaultBranding` from the catalog.
 
 ## Adding a preset
 
-1. Build the theme in the console, then **⋮ → Export theme as JSON**.
+1. Build the theme in the console, then **Theme options (the options menu) &rarr; Export theme as JSON**.
 2. Save it into this directory and give it a descriptive filename — the filename
    is the preset's id.
 
@@ -47,7 +49,8 @@ works — it just imports as "Imported theme".
 
 Presets are untrusted input like any other import: `parseThemeExport` runs every
 config through `normalizeBrandingConfig`, which clamps colours to `#rrggbb`,
-bounds `cardRadius`, and restricts images to `data:` images or `http(s)` URLs.
+bounds `cardRadius`, and accepts images only as HTTPS URLs or PNG, JPEG or WebP
+data URIs (no SVG).
 A file that fails to parse is skipped with an error in the dialog rather than
 breaking the page.
 
@@ -65,9 +68,11 @@ Either appearance may be empty and will fall back to the other. Version 1 files
 with a single `logo` or `backgroundImage` string remain valid; normalization
 copies that image to both appearances, and the next export writes version 2.
 
-`nebari-default.json` is generated from `DEFAULT_BRANDING_CONFIG` and
-`template-default.json` from `TEMPLATE_BRANDING_CONFIG`; regenerate them rather
-than hand-editing if those defaults change.
+`nebari-default.json` mirrors `DEFAULT_BRANDING_CONFIG` and
+`template-default.json` mirrors `TEMPLATE_BRANDING_CONFIG`. They are kept by hand,
+so update them when those defaults change. Fields a file leaves out take the
+defaults during normalization: neither file has an `advanced` block, so both
+import with the advanced settings at their defaults.
 
 The template preset is an unbranded but complete starting point. Its input
 surface differs from its card, its neutral border maintains at least 3:1

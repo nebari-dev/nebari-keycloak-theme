@@ -1,5 +1,13 @@
 # Customization
 
+This page is about changing this repository: its tokens, logos, wording and pages, for every deployment that
+uses the theme. To brand one deployment, you usually don't need to:
+
+- **[Theme customization](theme-customization.md)** rebrands a realm's login pages at runtime from the Admin
+  Console: name, logos, palette, layout, font and more, with no rebuild.
+- **A [child theme](child-themes.md)** adds your own CSS, logo files and login wording from your own repository,
+  on top of the published image.
+
 ## Colours and tokens
 
 All tokens live in [`src/theme.css`](../src/theme.css), in three groups:
@@ -59,13 +67,20 @@ another's. Add a custom key instead.
 
 The consoles use Keycloak's own translations and aren't customised here.
 
+The login pages only see Keycloak's own message for the keys passed through to them; every other key uses the
+bundled text above. So a realm's localization override, or a child theme's `messages_*.properties`, changes a
+login string only for a passed-through key. A child theme passes keys through by listing them in
+`messageOverrides`; see [Child themes](child-themes.md).
+
 ## Login pages
 
 ### Changing an existing page
 
-Pages live in [`src/login/pages/`](../src/login/pages/) and are built from design-system components. Preview
-your change at http://localhost:5173/?preview=&lt;name&gt; &mdash; the names are listed in
-[Quick start](quick-start.md#the-dev-server-login-pages).
+Each theme has its own pages: [`src/login/pages/`](../src/login/pages/) for `nebari`, built from the `@nebari`
+design-system components, and [`src/login/template/pages/`](../src/login/template/pages/) for `template`, built
+from stock shadcn/ui; see [Architecture](architecture.md#the-login-theme). A change meant for both themes is
+made in both. Preview it at http://localhost:5173/?preview=&lt;name&gt;, adding `&amp;theme=template` for the
+template theme &mdash; the names are listed in [Quick start](quick-start.md#the-dev-server-login-pages).
 
 The update-profile page, and registration when the realm has User Profile enabled, render their fields through
 Keycloakify's `UserProfileFormFields`. That takes CSS class names rather than components, so those fields are
@@ -76,8 +91,10 @@ styled by the `.nebari-*` classes in `theme.css`. If you change how an input loo
 A page this theme doesn't implement still works &mdash; it falls through to Keycloakify's default, unstyled. To
 style one:
 
-1. Create it in `src/login/pages/`, using an existing page as the template.
-2. Add a `case` for its `.ftl` page id in [`src/login/KcPage.tsx`](../src/login/KcPage.tsx).
+1. Create it in both `src/login/pages/` and `src/login/template/pages/`, using an existing page in each as the
+   template.
+2. Register both in [`src/login/uiSets.ts`](../src/login/uiSets.ts), and add a `case` for its `.ftl` page id in
+   [`src/login/KcPage.tsx`](../src/login/KcPage.tsx).
 3. Add a preview for it in `getKcContextMockForPreview` in
    [`src/login/KcContext.ts`](../src/login/KcContext.ts).
 4. Add the preview name to `previews`, and the page to `loginPages`, in

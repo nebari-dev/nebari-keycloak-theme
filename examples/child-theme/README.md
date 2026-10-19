@@ -6,6 +6,10 @@ copied from the parent.
 
 See [`docs/child-themes.md`](../../docs/child-themes.md) for how it works and what a child can change.
 
+The logos are `resources/dist/logo/nebari-logo-light.svg` and `-dark.svg` in each of `login/`, `account/` and
+`admin/`, at the same path as the parent's, which is what makes them replace it. Watch for a `dist/` rule in your
+own `.gitignore`: it matches those folders too, and the logos were missing from this example for that reason.
+
 ## Try it in the compose loop
 
 From the repository root:
@@ -24,7 +28,8 @@ Then set the `nebari` realm's login, account and admin themes to `acme` under **
 
 ## Ship it as an image
 
-[`Dockerfile`](Dockerfile) builds on the published Nebari image and adds the theme folder:
+[`Dockerfile`](Dockerfile) builds on a pinned release of the published Nebari image and adds the theme folder.
+Bump the tag in `NEBARI_THEME_IMAGE` to take a new release of the parent:
 
 ```bash
 docker build -t acme-keycloak-theme examples/child-theme

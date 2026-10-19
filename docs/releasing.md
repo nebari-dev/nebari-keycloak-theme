@@ -39,16 +39,20 @@ access. So before the first publish, a Quay admin of the `nebari` organization h
 Without a bump, pushes still publish fresh images but no new release. The JAR's own version metadata is taken
 from `version` in `package.json` too, so there is no second number to keep in step.
 
+**For a major version, update [Upgrading](upgrading.md) in the same pull request** with what a deployment has to
+change. The generated release notes list the JARs and link that page and [the screenshots](screenshots.md);
+they carry no changelog of their own.
+
 ## Versions and tags
 
 | What | Moves after it is published? |
 | --- | --- |
-| GitHub release `v1.2.0` and its JARs | No |
-| Image tag `1.2.0` | No &mdash; pushed once, with the release |
+| GitHub release `v2.0.0` and its JARs | No |
+| Image tag `2.0.0` | No &mdash; pushed once, with the release |
 | Image tag `sha-<commit>` | No |
 | Image tag `latest` | Yes |
 
-The release `v1.2.0` and the image `:1.2.0` always come from the same commit. Releases up to `v1.1.2` were
+The release `v2.0.0` and the image `:2.0.0` always come from the same commit. Releases up to `v1.1.2` were
 published to `ghcr.io/nebari-dev/nebari-keycloak-theme`, where the version tag did move; that package gets no
 new versions.
 
@@ -57,8 +61,13 @@ new versions.
 Dependabot runs monthly for npm, GitHub Actions and the Keycloak base image in the Dockerfile, configured in
 [`.github/dependabot.yml`](../.github/dependabot.yml). The policy:
 
-- **Minor and patch updates** arrive grouped in one pull request. `@biomejs/biome` gets its own, because a new
-  Biome version can change formatter output and the pull request has to run `npm run format` too.
+- **Minor and patch updates** arrive grouped in one pull request, with two exceptions, each pinned exactly and
+  proposed in its own pull request:
+  - `@biomejs/biome`, because a new version can change formatter output, so that pull request has to run
+    `npm run format` too.
+  - `axe-core` and `@axe-core/playwright`, because a new axe release adds rules, which can fail the
+    [accessibility suites](development.md#accessibility-tests) without a code change. That pull request shows
+    what the new rules find.
 - **Major updates are never proposed.** Nearly every dependency sits under a peer pin from the Keycloakify,
   PatternFly and Vite stack, so a major bump fails `npm ci` with `ERESOLVE`. Take them by hand.
 - **Some packages are held further:**

@@ -16,7 +16,7 @@ theme let it do more:
 
 | `theme.properties` key | Effect | Where |
 | --- | --- | --- |
-| `parent=nebari` | Inherit everything from the Nebari theme (or `parent=template` for the unbranded one) | Keycloak itself |
+| `parent=nebari` | Inherit everything from the Nebari theme. `parent=template` works too, but the logo-file hook below needs `nebari` | Keycloak itself |
 | `brand=<name>` | Stamped on `<html>` as `data-brand="<name>"`, so the child's CSS can scope its rules to this brand. The theme name compiled into this build is always the parent's, so this is how a child identifies itself | All three |
 | `styles=<paths>` | Stylesheets from the child's own `resources/`, loaded after this theme's CSS and kept last | All three |
 | `messageOverrides=<keys>` | Login strings the child overrides in `messages/messages_<locale>.properties` | Login pages |
@@ -85,6 +85,12 @@ in any release.
 `resources/dist/logo/` replace them. Only files under `logo/` work this way. The bundled JavaScript and CSS have
 hashed names that change every release.
 
+This needs `parent=nebari`. The `template` theme ships no logo of its own and shows only one published through
+Theme customization, so there is no file for a child of `template` to replace; publish the logo there instead.
+
+If the child's repository ignores `dist/` folders, as many JavaScript projects do, make an exception for
+`resources/dist/logo/`, or the logos never get committed.
+
 **Login wording: list the keys you override.** The login pages bundle their text, so a key in the child's
 `messages_<locale>.properties` only takes effect when it is also listed in `messageOverrides`:
 
@@ -100,7 +106,9 @@ registerTitle=Create your Acme account
 ```
 
 Keycloak resolves each listed key as it would for any theme, so a realm's own localization override still wins
-over the child's file.
+over the child's file. A register title published in Theme customization's advanced settings wins over both. On
+`template`, the register page reads `templateRegisterTitle` rather than `registerTitle`, so list and override
+that key instead.
 
 **Runtime branding still applies.** A realm on `acme` can open Theme customization like any other, and a
 published config is applied on top of the child's styles.
