@@ -1,0 +1,4 @@
+services:
+  keycloak:
+    volumes:
+      - ./examples/collab/theme:/opt/keycloak/themes/collab:ro

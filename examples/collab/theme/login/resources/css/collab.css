@@ -1,0 +1,285 @@
+/* Collab sign-in, layered on the Nebari login theme.
+   Values are from the Figma frame "Sign in · Light · 1440 · blue centre".
+   Palette roles (page, card, input, text, border, primary) come from the
+   realm's Theme customization preset; this file adds what the preset cannot. */
+
+@font-face {
+    font-family: "Inter Variable";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../fonts/inter.woff2") format("woff2-variations");
+}
+
+:root[data-brand="collab"] {
+    --font-sans: "Inter Variable", "Inter", sans-serif;
+    --Font-Sans: "Inter Variable", "Inter", sans-serif;
+
+    --collab-text-faint: #6b6b75;
+    --collab-text-brand: #022791;
+    --collab-button-secondary: #f7f8fa;
+    --collab-checkbox-border: #d4d4d8;
+    --collab-glow: #dde3f8;
+    --collab-glow-core: #c9d2f2;
+    --collab-orbit-opacity: 1;
+    --collab-card-shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 12px 32px -4px rgba(5, 15, 64, .12);
+}
+
+:root[data-brand="collab"][data-theme="dark"] {
+    --collab-text-faint: #8c96b3;
+    --collab-text-brand: #9db3ff;
+    --collab-button-secondary: #1a1a1a;
+    --collab-checkbox-border: #3d3d3d;
+    --collab-glow: #1b2959;
+    --collab-glow-core: #23293f;
+    --collab-orbit-opacity: .6;
+    --collab-card-shadow: 0 1px 3px rgba(0, 0, 0, .3), 0 12px 32px -4px rgba(0, 0, 0, .5);
+}
+
+/* ---- Backdrop: centre glow and two counter-rotating orbits ---- */
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] {
+    font-family: var(--font-sans);
+    background-color: var(--background);
+    background-image:
+        radial-gradient(circle at 50% 50%,
+            color-mix(in srgb, var(--collab-glow-core) 70%, transparent) 220px,
+            color-mix(in srgb, var(--collab-glow-core) 59%, transparent) 290px,
+            color-mix(in srgb, var(--collab-glow-core) 35%, transparent) 360px,
+            color-mix(in srgb, var(--collab-glow-core) 11%, transparent) 430px,
+            transparent 500px),
+        radial-gradient(circle at 50% 50%,
+            var(--collab-glow) 220px,
+            color-mix(in srgb, var(--collab-glow) 84%, transparent) 300px,
+            color-mix(in srgb, var(--collab-glow) 50%, transparent) 380px,
+            color-mix(in srgb, var(--collab-glow) 16%, transparent) 460px,
+            transparent 540px);
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded]::before,
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded]::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: calc(50% + 170px);
+    left: calc(50% + 280px);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    opacity: var(--collab-orbit-opacity);
+    pointer-events: none;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded]::before {
+    width: 980px;
+    height: 980px;
+    margin: -490px 0 0 -490px;
+    background-image: url("../img/orbit-1.svg");
+    transform-origin: 490px 490px;
+    animation: collab-orbit 300s linear infinite;
+}
+
+/* The ring's centre sits at (701.79, 703.75) inside the exported SVG. */
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded]::after {
+    width: 1401.79px;
+    height: 1403.75px;
+    margin: -703.75px 0 0 -701.79px;
+    background-image: url("../img/orbit-3.svg");
+    transform-origin: 701.79px 703.75px;
+    animation: collab-orbit 300s linear infinite reverse;
+}
+
+@keyframes collab-orbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root[data-brand="collab"] .nebari-login-wrapper[data-branded]::before,
+    :root[data-brand="collab"] .nebari-login-wrapper[data-branded]::after {
+        animation: none;
+    }
+}
+
+/* ---- Card ---- */
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-login-card {
+    width: min(400px, 100%);
+    padding: 32px;
+    box-shadow: var(--collab-card-shadow);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+/* ---- Lockup: 20px mark and 14px name, left-aligned ---- */
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-logo-header {
+    justify-content: flex-start;
+    margin: 0 0 24px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-lockup {
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-lockup .nebari-logo {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-wordmark {
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 0;
+}
+
+/* ---- Heading ---- */
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-header {
+    gap: 0;
+    margin: 0 0 32px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-header .nebari-title {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+}
+
+/* Prototype only: the subtitle has no element in the parent's markup. */
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-login-card:has(#kc-form-login) .nebari-header::after {
+    content: "Use your organisation account to continue.";
+    display: block;
+    margin-top: 16px;
+    color: var(--muted-foreground);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+}
+
+/* ---- Form ---- */
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] form {
+    gap: 16px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] [data-slot="field"] {
+    gap: 6px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] [data-slot="field-label"],
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-label,
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] [data-slot="checkbox-text"] {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-label-row {
+    min-height: 18px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] [data-slot="input"] {
+    height: auto;
+    padding: 10px 12px;
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 20px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] [data-slot="input"]::placeholder {
+    color: var(--collab-text-faint);
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] [data-slot="checkbox"] {
+    gap: 8px;
+    align-items: center;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] [data-slot="checkbox-control"] {
+    width: 16px;
+    height: 16px;
+    border-color: var(--collab-checkbox-border);
+    border-radius: 4px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-form-options {
+    min-height: 18px;
+    font-size: 12px;
+}
+
+/* "Forgot password?" sits on the remember-me row, right-aligned. It is drawn
+   16px (the form gap) below its own field, which is where that row starts. */
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] form:has(.nebari-form-options) [data-slot="field"]:has(.nebari-forgot-link) {
+    position: relative;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] form:has(.nebari-form-options) .nebari-forgot-link {
+    position: absolute;
+    top: calc(100% + 16px);
+    right: 0;
+    z-index: 1;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-forgot-link {
+    color: var(--collab-text-brand);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+}
+
+/* ---- Buttons ---- */
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] #kc-login {
+    height: 36px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-social-section {
+    margin-top: 16px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-social-providers {
+    gap: 12px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-social-button {
+    min-height: 36px;
+    padding: 7px 12px;
+    background: var(--collab-button-secondary);
+    border-color: var(--border);
+    border-radius: 8px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-social-button:hover {
+    background: var(--muted);
+    border-color: var(--border);
+}
+
+/* The parent inverts provider icons in dark mode for single-colour marks; the
+   Google mark is multicolour. */
+:root[data-brand="collab"] .nebari-social-icon[src$="google-g-logo.svg"] {
+    filter: none;
+}
+
+:root[data-brand="collab"] .nebari-login-wrapper[data-branded] .nebari-link {
+    color: var(--collab-text-brand);
+}

@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="980" height="980" viewBox="0 0 980 980" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="orbit 1">
+<path id="ring 1" opacity="0.55" d="M979.5 490C979.5 760.343 760.343 979.5 490 979.5C219.657 979.5 0.5 760.343 0.5 490C0.5 219.657 219.657 0.5 490 0.5C760.343 0.5 979.5 219.657 979.5 490Z" stroke="#9FAEE6"/>
+<circle id="dot" opacity="0.9" cx="742.369" cy="69.9881" r="4.5" fill="#022791"/>
+<circle id="dot_2" opacity="0.8" cx="421.805" cy="4.76865" r="2.75" fill="#9FAEE6"/>
+<circle id="dot_3" opacity="0.8" cx="712.455" cy="53.4068" r="2.25" fill="#FAA944"/>
+<circle id="dot_4" opacity="0.8" cx="57.3557" cy="720.041" r="3.5" fill="#FAA944"/>
+<circle id="dot_5" opacity="0.8" cx="44.119" cy="693.2" r="1.75" fill="#FF8A69"/>
+<circle id="dot_6" opacity="0.8" cx="566.653" cy="6.03271" r="2.25" fill="#9FAEE6"/>
+</g>
+</svg>

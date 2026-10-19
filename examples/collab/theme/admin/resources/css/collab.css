@@ -1,0 +1,74 @@
+/* Collab accents on the Nebari consoles. Values are the light and dark tokens
+   of the Collab Hub admin frames in Figma; layout stays Keycloak's. */
+
+@font-face {
+    font-family: "Inter Variable";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../fonts/inter.woff2") format("woff2-variations");
+}
+
+:root[data-brand="collab"] {
+    --font-sans: "Inter Variable", "Inter", sans-serif;
+    --Font-Sans: "Inter Variable", "Inter", sans-serif;
+
+    --primary: #022791;
+    --primary-hover: #1540ba;
+    --primary-foreground: #ffffff;
+    --ring: #022791;
+    --accent: #e7ecfc;
+    --accent-foreground: #022791;
+
+    --background: #ffffff;
+    --foreground: #262628;
+    --muted-foreground: #55555e;
+    --border: #e4e4e7;
+
+    --header-background: #ffffff;
+    --header-border: #e4e4e7;
+    --header-foreground: #262628;
+    --header-action-hover: #f4f4f6;
+
+    --sidebar: #f7f8fa;
+    --sidebar-foreground: #3f3f46;
+    --sidebar-primary: #022791;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e7ecfc;
+    --sidebar-accent-foreground: #022791;
+    --sidebar-border: #e4e4e7;
+    --sidebar-ring: #022791;
+}
+
+:root[data-brand="collab"][data-theme="dark"] {
+    --primary: #5a6aa2;
+    --primary-hover: #6b7bb3;
+    --primary-foreground: #ffffff;
+    --ring: #9db3ff;
+    --accent: #23293f;
+    --accent-foreground: #9db3ff;
+
+    --background: #080c18;
+    --foreground: #edf1ff;
+    --card: #0f1424;
+    --muted-foreground: #9aa3bf;
+    --border: #303030;
+
+    --header-background: #080c18;
+    --header-border: #303030;
+    --header-foreground: #edf1ff;
+    --header-action-hover: #182033;
+
+    --sidebar: #0f0f0f;
+    --sidebar-foreground: #c5cce0;
+    --sidebar-primary: #9db3ff;
+    --sidebar-primary-foreground: #080c18;
+    --sidebar-accent: #23293f;
+    --sidebar-accent-foreground: #edf1ff;
+    --sidebar-border: #303030;
+    --sidebar-ring: #9db3ff;
+}
+
+:root[data-brand="collab"] body {
+    font-family: var(--font-sans);
+}

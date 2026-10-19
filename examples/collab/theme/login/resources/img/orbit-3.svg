@@ -1,0 +1,15 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1401.79" height="1403.75" viewBox="0 0 1401.79 1403.75" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="orbit 3">
+<path id="ring 3" opacity="0.45" d="M1401.29 703.75C1401.29 1090.07 1088.11 1403.25 701.791 1403.25C315.467 1403.25 2.29067 1090.07 2.29067 703.75C2.29067 317.427 315.467 4.25 701.791 4.25C1088.11 4.25 1401.29 317.427 1401.29 703.75Z" stroke="#9FAEE6"/>
+<circle id="dot" opacity="0.8" cx="701.791" cy="3.75" r="3.75" fill="#FF8A69"/>
+<circle id="dot_2" opacity="0.8" cx="362.424" cy="91.5162" r="3.5" fill="#022791"/>
+<circle id="dot_3" opacity="0.8" cx="1072.73" cy="110.116" r="2.75" fill="#FAA944"/>
+<circle id="dot_4" opacity="0.8" cx="108.157" cy="332.807" r="2.75" fill="#FF8A69"/>
+<circle id="dot_5" opacity="0.8" cx="1359.58" cy="943.164" r="2.75" fill="#FAA944"/>
+<circle id="dot_6" opacity="0.8" cx="44.0058" cy="943.164" r="3.5" fill="#022791"/>
+<circle id="dot_7" opacity="0.8" cx="34.1888" cy="914.244" r="1.75" fill="#9FAEE6"/>
+<circle id="dot_8" opacity="0.8" cx="2.75" cy="667.115" r="2.75" fill="#FF8A69"/>
+<circle id="dot_9" opacity="0.8" cx="5.01334" cy="636.658" r="1.75" fill="#FAA944"/>
+<circle id="dot_10" opacity="0.8" cx="462.377" cy="1361.53" r="2.25" fill="#FAA944"/>
+</g>
+</svg>
