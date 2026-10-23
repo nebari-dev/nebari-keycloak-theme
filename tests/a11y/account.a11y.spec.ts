@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expectNoAxeViolations } from "./axe";
-import { expect, realmFor, sessionFile, test, waitForConsole } from "./consoles";
+import { expect, expectOnlyMainScrolls, realmFor, sessionFile, test, waitForConsole } from "./consoles";
 import { expectKeyboardAccessible } from "./keyboard";
 import { colorSchemes, themes } from "./themes";
 
@@ -45,6 +45,13 @@ for (const theme of themes) {
                         await expectNoAxeViolations(page, target);
                     });
                 }
+            });
+        }
+
+        for (const screen of screens) {
+            test(`${screen.name}: only the main area scrolls`, async ({ page }) => {
+                await openScreen(page, realm, screen.path);
+                await expectOnlyMainScrolls(page);
             });
         }
 
