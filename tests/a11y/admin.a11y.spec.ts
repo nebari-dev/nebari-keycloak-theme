@@ -1,6 +1,15 @@
 import type { Locator, Page } from "@playwright/test";
 import { expectNoAxeViolations } from "./axe";
-import { TEST_GROUP, adminApi, expect, realmFor, sessionFile, test, waitForConsole } from "./consoles";
+import {
+    TEST_GROUP,
+    adminApi,
+    expect,
+    expectOnlyMainScrolls,
+    realmFor,
+    sessionFile,
+    test,
+    waitForConsole
+} from "./consoles";
 import { expectKeyboardAccessible, tabThrough } from "./keyboard";
 import { knownViolationsFor, type A11yTarget } from "./known-violations";
 import { colorSchemes, themes } from "./themes";
@@ -207,6 +216,15 @@ for (const theme of themes) {
                 }
             });
         }
+
+        test.describe("layout", () => {
+            for (const screen of screens) {
+                test(`${screen.name}: only the main area scrolls`, async ({ page }) => {
+                    await openScreen(page, realm, screen.route(records));
+                    await expectOnlyMainScrolls(page);
+                });
+            }
+        });
 
         test.describe("keyboard", () => {
             // Every screen is walked with Tab and Shift+Tab. A long table page

@@ -212,3 +212,19 @@ export async function waitForConsole(page: Page, themeType: "admin" | "account")
     await expect(page.getByRole("progressbar")).toHaveCount(0, { timeout: 15_000 });
     await page.evaluate(() => document.fonts.ready);
 }
+
+/**
+ * The consoles scroll inside their main area; the window itself never should.
+ * Something positioned against the page instead (a hidden file input or a
+ * switch's native input, before the main area became their containing block)
+ * stretches the document, and scrolling the window then shows bare background
+ * below the console.
+ */
+export async function expectOnlyMainScrolls(page: Page) {
+    const { documentHeight, windowHeight } = await page.evaluate(() => ({
+        documentHeight: document.documentElement.scrollHeight,
+        windowHeight: window.innerHeight
+    }));
+
+    expect(documentHeight, "the window scrolls past the console").toBeLessThanOrEqual(windowHeight);
+}

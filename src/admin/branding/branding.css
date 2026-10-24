@@ -79,7 +79,12 @@
     gap: 1.25rem;
 }
 
+/* `position: relative` contains the visually hidden file input (`sr-only` is
+   absolutely positioned). Without it the input is placed against the page, not
+   the console's scrolling main area, so the lower image fields stretched the
+   document and the window scrolled past the console onto bare background. */
 .branding-image-control {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.75rem;

@@ -16,6 +16,19 @@
     background: var(--account-bg-0d0d14, #0d0d14);
 }
 
+/* The console scrolls inside the page's main area (or its drawer), which
+   PatternFly leaves unpositioned. An absolutely positioned element with no
+   positioned ancestor of its own, such as the hidden native input Base UI
+   renders beside a switch or checkbox, or an sr-only file input, was then
+   placed against the page instead: it stretched the document, and the window
+   scrolled past the console onto bare background. Making the scroller the
+   containing block keeps them inside it. Unlayered, like the other page-shell
+   rules here; it sets nothing PatternFly sets. */
+.pf-v5-c-page__main,
+.pf-v5-c-page__drawer {
+    position: relative;
+}
+
 /* Main content area sections */
 .pf-v5-c-page__main-section {
     background: transparent;
