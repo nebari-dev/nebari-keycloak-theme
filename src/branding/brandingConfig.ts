@@ -47,6 +47,12 @@ export type BrandingAdvanced = {
     cardOpacity: number;
     /** Backdrop blur behind the card in pixels, 0 to 40. */
     cardBlur: number;
+    /**
+     * The login logo's height in pixels, 24 to 96; its width follows the
+     * image's aspect ratio. 0 keeps the theme's own size (a 32px-tall box on
+     * `nebari`, 40px on `template`), so the two themes keep their defaults.
+     */
+    logoHeight: number;
     buttonShape: BrandingButtonShape;
     /** A trailing arrow on the primary button. */
     buttonArrow: boolean;
@@ -64,6 +70,7 @@ export const DEFAULT_BRANDING_ADVANCED: BrandingAdvanced = {
     font: "theme",
     cardOpacity: 100,
     cardBlur: 0,
+    logoHeight: 0,
     buttonShape: "theme",
     buttonArrow: false,
     wordmark: "",
@@ -225,6 +232,13 @@ function boundedInteger(value: unknown, fallback: number, min: number, max: numb
         : fallback;
 }
 
+export const LOGO_HEIGHT_RANGE = { min: 24, max: 96 } as const;
+
+/* 0 means "the theme's own size"; anything else is clamped into the range. */
+function logoHeight(value: unknown, fallback: number): number {
+    return value === 0 ? 0 : boundedInteger(value, fallback, LOGO_HEIGHT_RANGE.min, LOGO_HEIGHT_RANGE.max);
+}
+
 function oneOf<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
     return allowed.includes(value as T) ? (value as T) : fallback;
 }
@@ -306,6 +320,7 @@ function normalizeAdvanced(value: unknown, fallback: BrandingAdvanced): Branding
         font: oneOf(advanced.font, BRANDING_FONTS, fallback.font),
         cardOpacity: boundedInteger(advanced.cardOpacity, fallback.cardOpacity, 5, 100),
         cardBlur: boundedInteger(advanced.cardBlur, fallback.cardBlur, 0, 40),
+        logoHeight: logoHeight(advanced.logoHeight, fallback.logoHeight),
         buttonShape: oneOf(advanced.buttonShape, BRANDING_BUTTON_SHAPES, fallback.buttonShape),
         buttonArrow: typeof advanced.buttonArrow === "boolean" ? advanced.buttonArrow : fallback.buttonArrow,
         wordmark: optionalText(advanced.wordmark, fallback.wordmark, 40),
@@ -485,6 +500,7 @@ function getAdvancedCssVariables(advanced: BrandingAdvanced): Record<string, str
         /* Both values are clamped integers by the time they get here. */
         "--branding-card-opacity": `${advanced.cardOpacity}%`,
         "--branding-card-blur": `${advanced.cardBlur}px`,
+        ...(advanced.logoHeight === 0 ? {} : { "--branding-logo-height": `${advanced.logoHeight}px` }),
         ...(advanced.font === "theme"
             ? {}
             : {
@@ -508,6 +524,8 @@ export function getBrandingDataAttributes(
         "data-button-arrow": advanced.buttonArrow ? "" : undefined,
         /* Even blur(0) changes how a card is composited, so the glass rules only
            apply when the card is actually translucent or blurred. */
-        "data-card-glass": advanced.cardOpacity < 100 || advanced.cardBlur > 0 ? "" : undefined
+        "data-card-glass": advanced.cardOpacity < 100 || advanced.cardBlur > 0 ? "" : undefined,
+        /* Only an explicit size: without it each theme keeps its own logo box. */
+        "data-logo-size": advanced.logoHeight === 0 ? undefined : ""
     };
 }

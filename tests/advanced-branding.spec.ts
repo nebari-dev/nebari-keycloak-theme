@@ -34,9 +34,10 @@ async function primaryButton(page: Page) {
     return page.locator('#kc-login, button[type="submit"]').first();
 }
 
-for (const [theme, defaults, card] of [
-    ["nebari", DEFAULT_BRANDING_CONFIG, ".nebari-login-card"],
-    ["template", TEMPLATE_BRANDING_CONFIG, '[data-login-theme="template"] .branding-card']
+/* Each theme's own logo height, which a realm keeps until it sets one. */
+for (const [theme, defaults, card, themeLogoHeight] of [
+    ["nebari", DEFAULT_BRANDING_CONFIG, ".nebari-login-card", "32px"],
+    ["template", TEMPLATE_BRANDING_CONFIG, '[data-login-theme="template"] .branding-card', "40px"]
 ] as const) {
     test.describe(`${theme} theme`, () => {
         const branding: BrandingConfig = {
@@ -68,6 +69,26 @@ for (const [theme, defaults, card] of [
             expect(fill).toMatch(/(rgba|color)\(.*\b0?\.4\b/);
 
             await expect(page.locator('link[rel~="icon"]').first()).toHaveAttribute("href", PIXEL);
+        });
+
+        test("sizes the logo when a height is set, and scales the wordmark with it", async ({ page }) => {
+            await page.goto(
+                preview(theme, "login", { ...branding, advanced: { ...advanced, logoHeight: 56 } })
+            );
+            await expect(page.locator(card)).toBeVisible();
+
+            await expect(page.locator(`img[src="${PIXEL}"]`).first()).toHaveCSS("height", "56px");
+            await expect(page.getByText("Example", { exact: true })).toHaveCSS("font-size", "42px");
+        });
+
+        test("keeps the theme's logo size when no height is set", async ({ page }) => {
+            await page.goto(
+                preview(theme, "login", { ...branding, advanced: { ...advanced, wordmark: "" } })
+            );
+            await expect(page.locator(card)).toBeVisible();
+
+            await expect(page.locator(`img[src="${PIXEL}"]`).first()).toHaveCSS("height", themeLogoHeight);
+            await expect(page.locator("[data-logo-size]")).toHaveCount(0);
         });
 
         test("replaces the register title", async ({ page }) => {

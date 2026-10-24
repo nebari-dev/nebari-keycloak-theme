@@ -3,7 +3,8 @@ import { DEFAULT_BRANDING_ADVANCED, type BrandingConfig } from "../src/branding/
 import {
     exampleAdvanced as advanced,
     exampleBrand as brand,
-    exampleWithBackground as withBackground
+    exampleWithBackground as withBackground,
+    exampleWordmark
 } from "./fixtures/branding/example";
 import { loginCards } from "./previews";
 
@@ -77,6 +78,27 @@ test.describe("theme customization docs", () => {
             });
             await expect(page.locator("#kc-login")).toHaveScreenshot(shot(name), { animations: "disabled" });
         });
+    }
+
+    // A wide logo in the theme's own box, and at an explicit height.
+    for (const colorScheme of ["light", "dark"] as const) {
+        for (const [name, logoHeight] of [
+            ["theme", 0],
+            ["56", 56]
+        ] as const) {
+            test(`wide logo, ${name} height, ${colorScheme}`, async ({ page }) => {
+                await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+                await open(page, "nebari", "login", {
+                    ...brand,
+                    logo: { light: exampleWordmark, dark: exampleWordmark },
+                    advanced: { ...DEFAULT_BRANDING_ADVANCED, logoHeight }
+                });
+                await expect(page.locator(loginCards.nebari)).toHaveScreenshot(
+                    shot(`logo-height-${name}-${colorScheme}`),
+                    { animations: "disabled" }
+                );
+            });
+        }
     }
 
     test("providers-only login mode", async ({ page }) => {

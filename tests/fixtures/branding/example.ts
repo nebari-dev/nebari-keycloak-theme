@@ -20,6 +20,9 @@ export const exampleBackgroundFile = new URL("./example-background-light.webp", 
 
 const mark = dataUri("example-mark.png", "image/png");
 
+/** The mark with its name set beside it: a wide (3.2:1) logo. */
+export const exampleWordmark = dataUri("example-wordmark.png", "image/png");
+
 /** Palette, logo and company name: what the editor's main cards set. */
 export const exampleBrand: BrandingConfig = {
     ...DEFAULT_BRANDING_CONFIG,

@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import {
     BRANDING_BUTTON_SHAPES,
     BRANDING_FONTS,
+    LOGO_HEIGHT_RANGE,
     serializeBrandingConfig,
     type BrandingAdvanced,
     type BrandingButtonShape,
@@ -395,6 +396,38 @@ function AdvancedSettingsCard({ value, onChange, onImageError }: AdvancedSetting
                             Arrow on the sign-in button
                         </Checkbox>
                     </div>
+
+                    <Field>
+                        <div className="branding-color-label">
+                            <FieldLabel>
+                                Logo height (
+                                {value.logoHeight === 0 ? "the theme's size" : `${value.logoHeight}px`})
+                            </FieldLabel>
+                            {value.logoHeight !== 0 && (
+                                <Button
+                                    className="branding-relink"
+                                    onClick={() => onChange("logoHeight", 0)}
+                                    size="sm"
+                                    variant="ghost"
+                                >
+                                    <RotateCcwIcon />
+                                    Use the theme's size
+                                </Button>
+                            )}
+                        </div>
+                        <Slider
+                            max={LOGO_HEIGHT_RANGE.max}
+                            min={LOGO_HEIGHT_RANGE.min}
+                            onValueChange={next =>
+                                onChange("logoHeight", Array.isArray(next) ? next[0] : next)
+                            }
+                            value={value.logoHeight === 0 ? 32 : value.logoHeight}
+                        />
+                        <FieldDescription>
+                            How tall the logo is on the login card; its width follows the image. The console
+                            headers keep their own size.
+                        </FieldDescription>
+                    </Field>
 
                     <Field>
                         <FieldLabel htmlFor="branding-wordmark">Wordmark</FieldLabel>

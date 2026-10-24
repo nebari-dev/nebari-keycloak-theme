@@ -50,7 +50,13 @@ export function BrandingPreview({ branding, mode, themeName, identityProviders }
        the admin REST representation — so a realm that has disabled password
        authentication outright will show a password form here that the real page
        omits. */
-    const { wordmark } = branding.advanced;
+    const { wordmark, logoHeight } = branding.advanced;
+    /* The theme's own logo carries an inline box; an explicit height replaces
+       it, as on the login card, so only the filter is kept. */
+    const defaultLogoStyle =
+        logoHeight === 0 || defaultLogo === undefined
+            ? defaultLogo?.style
+            : { objectFit: "contain" as const, filter: defaultLogo.style.filter };
 
     useEffect(() => {
         loadBrandingFont(branding.advanced.font);
@@ -87,7 +93,7 @@ export function BrandingPreview({ branding, mode, themeName, identityProviders }
                                           ? `${branding.companyName} logo`
                                           : "Company logo"
                                 }
-                                style={logo ? undefined : defaultLogo?.style}
+                                style={logo ? undefined : defaultLogoStyle}
                             />
                         )}
                         {wordmark && <span className="branding-preview__wordmark">{wordmark}</span>}
