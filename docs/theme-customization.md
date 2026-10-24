@@ -92,6 +92,7 @@ field lives in `BrandingConfig.advanced` and goes through `normalizeAdvanced` in
 | --- | --- | --- |
 | Font | `theme`, `inter-tight`, `dm-sans`, `system` | Both login themes |
 | Card opacity, blur | 5 to 100 %, 0 to 40 px | Both login themes |
+| Logo height | 24 to 96 px, or the theme's own size (the default: a 32 px-tall box on `nebari`, 40 px on `template`). The width follows the image, and a wordmark scales with it | Login card, both login themes. The console headers keep their own size |
 | Button shape | `theme`, `rounded`, `pill`, `square` | Both login themes |
 | Arrow on the sign-in button | on or off | Both login themes |
 | Wordmark | Plain text, up to 40 characters | Login card, both console mastheads |
@@ -117,6 +118,12 @@ Button shapes and the arrow, on the `nebari` theme. **Theme** keeps the login th
 | Theme | Rounded | Pill | Square | Theme, with arrow |
 | --- | --- | --- | --- | --- |
 | <img src="../tests/screenshots/linux/theme-customization/button-theme.png" alt="Sign In button, theme shape" width="160"> | <img src="../tests/screenshots/linux/theme-customization/button-rounded.png" alt="Sign In button, rounded" width="160"> | <img src="../tests/screenshots/linux/theme-customization/button-pill.png" alt="Sign In button, pill" width="160"> | <img src="../tests/screenshots/linux/theme-customization/button-square.png" alt="Sign In button, square" width="160"> | <img src="../tests/screenshots/linux/theme-customization/button-arrow.png" alt="Sign In button with a trailing arrow" width="160"> |
+
+A wide logo, here 3.2:1, in the theme's own box and at a 56 px logo height:
+
+| The theme's size | 56 px |
+| --- | --- |
+| <img src="../tests/screenshots/linux/theme-customization/logo-height-theme-light.png" alt="Login card with a wide logo drawn small in the theme's 32 px box" width="300"> | <img src="../tests/screenshots/linux/theme-customization/logo-height-56-light.png" alt="The same login card with the logo 56 px tall and its width following the image" width="300"> |
 
 The settings apply to both login themes. The same config on `template`:
 

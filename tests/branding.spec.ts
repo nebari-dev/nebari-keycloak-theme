@@ -172,6 +172,17 @@ test.describe("advanced settings", () => {
         expect([rejected.cardOpacity, rejected.cardBlur]).toEqual([100, 0]);
     });
 
+    test("keep the logo at the theme's size unless the height is a number in range", () => {
+        const heightOf = (logoHeight: unknown) =>
+            normalizeBrandingConfig({ ...defaults, advanced: { logoHeight } }, defaults).advanced.logoHeight;
+
+        // 0 is "the theme's own size", not a height to clamp up to 24.
+        expect([heightOf(undefined), heightOf(0)]).toEqual([0, 0]);
+        expect([heightOf(48), heightOf(48.6)]).toEqual([48, 49]);
+        expect([heightOf(4), heightOf(500)]).toEqual([24, 96]);
+        expect([heightOf("64px; width: 9999px"), heightOf(Number.NaN)]).toEqual([0, 0]);
+    });
+
     test("keep text plain, short and free of direction overrides", () => {
         const advanced = normalizeBrandingConfig(
             {

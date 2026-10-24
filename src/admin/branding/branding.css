@@ -728,6 +728,18 @@
     letter-spacing: -0.01em;
 }
 
+/* An explicit logo height, as on the login card. */
+.branding-preview[data-logo-size] .branding-preview__logo {
+    width: auto;
+    max-width: 100%;
+    height: var(--branding-logo-height);
+}
+
+.branding-preview[data-logo-size] .branding-preview__wordmark {
+    font-size: calc(var(--branding-logo-height) * 0.75);
+    line-height: var(--branding-logo-height);
+}
+
 /* The font property is only set when a realm picks one. */
 .branding-preview .branding-preview__card {
     font-family: var(--font-sans, "Geist Variable", "Geist", sans-serif);

@@ -1334,6 +1334,23 @@ a.nebari-button.nebari-button-primary:visited {
     backdrop-filter: blur(var(--branding-card-blur, 0px));
 }
 
+/* Logo height. `data-logo-size` is set only for an explicit size; otherwise each
+   theme keeps its own box. The height is a clamped number of pixels, the width
+   follows the image's aspect ratio and never exceeds the card, and a text
+   wordmark beside the mark scales with it. */
+:root .nebari-login-wrapper[data-branded][data-logo-size] .nebari-logo,
+:root [data-login-theme="template"][data-logo-size] .branding-logo {
+    width: auto;
+    max-width: 100%;
+    height: var(--branding-logo-height);
+}
+
+:root .nebari-login-wrapper[data-branded][data-logo-size] .nebari-wordmark,
+:root [data-login-theme="template"][data-logo-size] .branding-wordmark {
+    font-size: calc(var(--branding-logo-height) * 0.75);
+    line-height: var(--branding-logo-height);
+}
+
 /* A chosen font arrives as `--font-sans` on the login wrapper. Text that only
    inherits its font from <body> resolved that variable at the root, so the
    family is restated here, where the override is in scope. */

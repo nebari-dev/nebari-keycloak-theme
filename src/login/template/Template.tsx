@@ -131,12 +131,14 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
                                                 ? `${branding.companyName} logo`
                                                 : ""
                                         }
-                                        className="h-10 w-auto object-contain"
+                                        className="branding-logo h-10 w-auto object-contain"
                                     />
                                 )}
                                 {/* Plain text beside the mark; see the nebari Template. */}
                                 {wordmark !== "" && (
-                                    <span className="font-semibold text-2xl tracking-tight">{wordmark}</span>
+                                    <span className="branding-wordmark font-semibold text-2xl tracking-tight">
+                                        {wordmark}
+                                    </span>
                                 )}
                             </div>
                         )}
