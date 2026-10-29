@@ -668,8 +668,16 @@ export function KeycloakDataTable<T extends RowData>({
     }
 
     columns.forEach((column, columnIndex) => {
+      /* TanStack throws on a column without an id. PatternFly's table never
+         needed one, so vendored screens leave `name` empty on button-only
+         columns (a user's Groups tab, Identity provider links, Admin events);
+         an unnamed or repeated column gets one from its position instead. */
+      const id =
+        column.name && !result.some((existing) => existing.id === column.name)
+          ? column.name
+          : `keycloak-column-${columnIndex}`;
       result.push({
-        id: column.name,
+        id,
         accessorFn: (row) => get(row, column.name),
         enableHiding: false,
         enableSorting: false,
