@@ -127,9 +127,10 @@ jobs:
           retention-days: 14
 
   # The Admin and Account consoles only run inside Keycloak, so this job builds
-  # the theme JARs, starts the compose loop and runs the console accessibility
-  # suites against it (playwright.consoles.config.ts): every screen in every
-  # theme, in both colour schemes.
+  # the theme JARs, starts the compose loop and runs the console suites against
+  # it (playwright.consoles.config.ts): accessibility on the screens used most,
+  # in every theme and both colour schemes, and a smoke test that opens every
+  # Admin screen and tab.
   consoles:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -176,6 +177,11 @@ jobs:
 
       - name: Accessibility (Admin and Account consoles)
         run: npm run test:a11y:consoles
+
+      # Runs even when accessibility failed: a crash is the more urgent report.
+      - name: Smoke test (Admin Console)
+        if: ${{ success() || failure() }}
+        run: npm run test:smoke:consoles
 
       - name: Keycloak logs
         if: failure()

@@ -45,6 +45,7 @@ npm run format                       # Biome formatter, writes in place
 npm run test:screenshots             # every dev-server spec except a11y: screenshot baselines, branding, child themes
 npm run test:a11y                    # login-page accessibility (axe + keyboard), every theme and scheme
 npm run test:a11y:consoles           # Admin + Account accessibility; needs the compose Keycloak running
+npm run test:smoke:consoles          # opens every Admin screen and tab, fails on a crash; needs the compose Keycloak
 npm run docs:console-images          # recapture the Theme customization doc images; needs the compose Keycloak
 npm run build-keycloak-theme         # guards + tsc + vite build + one JAR pair per theme in dist_keycloak/
 docker compose up -d --build keycloak   # consoles, on the nebari realm
@@ -74,9 +75,12 @@ docker compose up -d --build keycloak   # consoles, on the nebari realm
 - **The dev server can't show the consoles.** They need a real Keycloak. Rebuild the JAR *and* the image &mdash;
   `docker compose up -d --build keycloak` &mdash; and sign in on the `nebari` realm, not `master`. Forgetting
   `--build` makes it look like nothing changed.
-- **CI only checks the consoles for accessibility.** It runs login-page pixels and accessibility, console
-  accessibility against a real Keycloak, the type check, lint and the guards. Nothing checks that a console screen
-  still works: for a console change, check it in the compose loop and say in the pull request that you did.
+- **CI checks that console screens open, not that they work.** It runs login-page pixels and accessibility, console
+  accessibility and a smoke test of every Admin screen and tab against a real Keycloak, the type check, lint and
+  the guards. The smoke test catches a screen that crashes or throws; nothing saves a form or follows a flow. For a
+  console change, check it in the compose loop and say in the pull request that you did.
+- **Don't add to `KNOWN_PAGE_ERRORS` in `tests/a11y/consoles.ts` to make a test pass**, for the same reason as
+  below.
 - **Don't add to `tests/a11y/known-violations.ts` to make a test pass.** Fix the problem, or file the issue first
   and link it from the entry.
 - **The type check covers `src/`, `tests/` and the Playwright configs**, through `tsconfig.json` and

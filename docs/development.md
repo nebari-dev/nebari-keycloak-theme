@@ -15,6 +15,7 @@ Setting up is covered in [Quick start](quick-start.md). This page is the referen
 | `npm run test:screenshots:update` | Accepts the current rendering as the new baselines |
 | `npm run test:a11y` | [Accessibility tests](#accessibility-tests) for the login pages, against the dev server |
 | `npm run test:a11y:consoles` | Accessibility tests for the Admin and Account consoles, against the compose loop |
+| `npm run test:smoke:consoles` | [Smoke test](#console-smoke-test) of every Admin screen and tab, against the compose loop |
 | `npm run docs:console-images` | Recaptures the Admin Console images in [Theme customization](theme-customization.md) from the compose loop |
 | `npm run lint` | Biome lint and format check, failing on warnings |
 | `npm run format` | Biome formatter, writing changes in place |
@@ -61,8 +62,8 @@ Every pull request runs [`playwright.yml`](../.github/workflows/playwright.yml),
   4. **Screenshot comparison** &mdash; `npm run test:screenshots` against `tests/screenshots/linux/<theme>/`
   5. **Login-page accessibility** &mdash; `npm run test:a11y`, including the tests of the checks themselves
 - **`consoles`**, against a real Keycloak: builds the theme JARs, starts the compose loop, and runs
-  `npm run test:a11y:consoles`. On failure it prints the Keycloak log, and it uploads the report as
-  `playwright-report-consoles`.
+  `npm run test:a11y:consoles` and `npm run test:smoke:consoles`. On failure it prints the Keycloak log, and it
+  uploads the report as `playwright-report-consoles`.
 
 Pull requests and pushes to `main` also run the publisher. On a pull request it builds the JARs and the image
 for both architectures without pushing, so a packaging failure shows up before merge. See
@@ -168,10 +169,14 @@ project that runs every other spec. The console suites are projects of
 [`playwright.consoles.config.ts`](../playwright.consoles.config.ts), so a plain `npx playwright test` never needs
 Keycloak. Their setup project creates a realm per theme, `a11y-<theme>`, cloned from `realm-export.json` through
 the admin REST API as the master `admin`, and never touches the `nebari` realm. It adds what an empty realm
-hides &mdash; an identity provider so the Account Console lists Linked accounts, a group, and the right to view
-it &mdash; then signs in once per console. The Admin screens are the ones used most: users, roles, groups,
-clients, client scopes, realm settings, Theme customization, authentication, identity providers, user
-federation, sessions and events.
+hides &mdash; an identity provider and a linked account so the Account Console lists Linked accounts, a group
+and the right to view it, and the records listed under [Console smoke test](#console-smoke-test) &mdash; then
+signs in once per console. The Admin screens are the ones used most: users, roles, groups, clients, client
+scopes, realm settings, Theme customization, authentication, identity providers, user federation, sessions and
+events.
+
+Every console test also fails on an error the page leaves uncaught, and checks for the main area once the
+screen has loaded: a crash replaces the whole console with an error page that would otherwise pass every check.
 
 ### Reading a failure
 
@@ -209,6 +214,34 @@ assignment, rather than silently scanning nothing. The login pages use `@axe-cor
 `axe-core` and `@axe-core/playwright` are pinned exactly, because a new axe release adds rules that can fail the
 suites without a code change. Dependabot proposes them in their own pull request, so what the new rules find is
 reviewed on its own.
+
+## Console smoke test
+
+The accessibility suites look closely at the screens used most. The smoke test,
+[`tests/console/admin.smoke.ts`](../tests/console/admin.smoke.ts), looks briefly at all of them: it
+opens every Admin screen, including detail and create pages, clicks through every tab and nested tab, and fails
+if the console crashes, a route is unknown, or the page throws. It is the check for the main risk in this
+theme: a vendored screen handing one of our replacement components something it doesn't expect. It runs in
+the `nebari` theme only, because the Admin Console's code is the same in every theme.
+
+```bash
+docker compose up -d --build keycloak
+npm run test:smoke:consoles                    # about 30 seconds
+```
+
+A table only builds its rows once it has data, so the setup adds records for the screens to show: admin and
+user events, a subgroup, a confidential client with authorization services (a role, a scope, a resource, a
+policy and a permission), an identity provider mapper, an organization (which turns on identity-first sign-in,
+so `signIn` handles both forms) and a linked account. A new screen whose table stays empty needs a record here
+before the smoke test can see it.
+
+A failure names the trail of tabs that led to it, for example
+`group > Admin events: no main area, so the console crashed`. Open the same screen and tab in the compose loop
+with devtools open.
+
+Errors the consoles throw today are listed in `KNOWN_PAGE_ERRORS` in
+[`tests/a11y/consoles.ts`](../tests/a11y/consoles.ts), each with its issue. As with known violations, don't add
+an entry to make a test pass.
 
 ## Upgrade guards
 
