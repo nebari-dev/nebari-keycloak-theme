@@ -218,7 +218,7 @@ reviewed on its own.
 ## Console smoke test
 
 The accessibility suites look closely at the screens used most. The smoke test,
-[`tests/console/admin.smoke.spec.ts`](../tests/console/admin.smoke.spec.ts), looks briefly at all of them: it
+[`tests/console/admin.smoke.ts`](../tests/console/admin.smoke.ts), looks briefly at all of them: it
 opens every Admin screen, including detail and create pages, clicks through every tab and nested tab, and fails
 if the console crashes, a route is unknown, or the page throws. It is the check for the main risk in this
 theme: a vendored screen handing one of our replacement components something it doesn't expect. It runs in

@@ -53,7 +53,7 @@ export default defineConfig({
         {
             name: "smoke-admin",
             testDir: "./tests/console",
-            testMatch: "*.smoke.spec.ts",
+            testMatch: "*.smoke.ts",
             dependencies: ["consoles-setup"]
         },
         {
