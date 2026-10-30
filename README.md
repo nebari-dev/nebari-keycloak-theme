@@ -124,6 +124,7 @@ focus is always visible, nothing traps focus).
 ```bash
 npm run test:a11y            # login pages, from the dev server
 npm run test:a11y:consoles   # Admin and Account consoles; needs the compose Keycloak above
+npm run test:smoke:consoles  # opens every Admin screen and tab; needs the compose Keycloak above
 ```
 
 A failure names the rule and the element &mdash; for contrast, the two colours and the ratio &mdash; or, for
@@ -150,7 +151,7 @@ check catches and how to read a failure.
 | `biome.json` | Lint and format rules, and the files each one skips &mdash; see [Development](docs/development.md#lint-and-format) |
 | `scripts/` | The per-theme JAR build, and upgrade guards that catch silent breakage on a Keycloak bump |
 | `tests/` | Playwright tests against the dev server: screenshot baselines (one folder per suite), branding and child-theme checks, and the login accessibility suite in `tests/a11y/` |
-| `tests/a11y/`, `tests/console/` | The console accessibility suites and the doc-image capture, which need a real Keycloak; run from `playwright.consoles.config.ts` |
+| `tests/a11y/`, `tests/console/` | The console accessibility suites, the Admin smoke test and the doc-image capture, which need a real Keycloak; run from `playwright.consoles.config.ts` |
 | `examples/child-theme/` | A complete example child theme, `acme`, with its Dockerfile |
 | `docs/` | Everything below |
 

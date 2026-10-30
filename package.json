@@ -28,6 +28,7 @@
     "test:screenshots:update": "playwright test --project=chromium --update-snapshots=all",
     "test:a11y": "playwright test --project=a11y-login",
     "test:a11y:consoles": "playwright test -c playwright.consoles.config.ts --project=a11y-admin --project=a11y-account",
+    "test:smoke:consoles": "playwright test -c playwright.consoles.config.ts --project=smoke-admin",
     "docs:console-images": "playwright test -c playwright.consoles.config.ts --project=docs-images"
   },
   "dependencies": {

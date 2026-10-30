@@ -9,6 +9,8 @@ import { KEYCLOAK_URL } from "./tests/a11y/environment";
  *
  * - `a11y-admin` and `a11y-account`: the console accessibility suites
  *   (`npm run test:a11y:consoles`), run by CI.
+ * - `smoke-admin`: opens every Admin screen and tab and checks the console
+ *   survives (`npm run test:smoke:consoles`), run by CI.
  * - `docs-images`: recaptures the images in docs/theme-customization.md
  *   (`npm run docs:console-images`), run by hand.
  */
@@ -46,6 +48,12 @@ export default defineConfig({
             name: "a11y-account",
             testDir: "./tests/a11y",
             testMatch: "account.a11y.spec.ts",
+            dependencies: ["consoles-setup"]
+        },
+        {
+            name: "smoke-admin",
+            testDir: "./tests/console",
+            testMatch: "*.smoke.spec.ts",
             dependencies: ["consoles-setup"]
         },
         {
