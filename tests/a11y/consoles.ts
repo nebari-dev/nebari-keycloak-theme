@@ -211,6 +211,10 @@ export async function waitForConsole(page: Page, themeType: "admin" | "account")
     await page.waitForLoadState("networkidle");
     await expect(page.getByRole("progressbar")).toHaveCount(0, { timeout: 15_000 });
     await page.evaluate(() => document.fonts.ready);
+    // Again, now the data is in: a screen that crashes rendering it is
+    // replaced by the console's error page, which has no main area but passes
+    // every other check here.
+    await expect(page.getByRole("main")).toBeVisible();
 }
 
 /**
