@@ -61,7 +61,7 @@
     "i18next-fetch-backend": "^6.0.0",
     "jszip": "^3.10.1",
     "lodash-es": "^4.17.22",
-    "lucide-react": "^1.56.0",
+    "lucide-react": "^1.64.0",
     "oidc-spa": "~10.0.5",
     "p-debounce": "^5.1.0",
     "react": "^18.3.1",
@@ -77,7 +77,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@biomejs/biome": "2.5.15",
-    "@playwright/test": "^1.64.0",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/file-saver": "^2.0.7",
     "@types/lodash-es": "^4.17.12",
@@ -86,7 +86,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "axe-core": "4.13.0",
-    "keycloakify": "^11.16.1",
+    "keycloakify": "^11.16.4",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.5.3",
     "vite": "^7.3.7"
