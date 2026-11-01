@@ -1,6 +1,7 @@
 import { Children, createElement, isValidElement, type ElementType, type ReactNode } from "react";
 import { Button as NebariButton, type ButtonProps as NebariButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { labelIncludingVisibleText, textOf } from "./accessibleName";
 
 type NebariVariant = NonNullable<NebariButtonProps["variant"]>;
 type NebariSize = NonNullable<NebariButtonProps["size"]>;
@@ -153,6 +154,9 @@ export function Button({
             size={resolveSize(variant, size, children)}
             variant={variant === undefined ? undefined : VARIANT_MAP[variant as keyof typeof VARIANT_MAP]}
             {...(isAriaDisabled ? { "aria-disabled": true } : {})}
+            {...(props["aria-labelledby"] === undefined
+                ? { "aria-label": labelIncludingVisibleText(props["aria-label"], textOf(children)) }
+                : {})}
             {...(isLoading && spinnerAriaValueText !== undefined
                 ? { "aria-label": props["aria-label"] ?? spinnerAriaValueText }
                 : {})}

@@ -32,9 +32,18 @@ so they stay on PatternFly and are restyled through the token bridge in
 | --- | --- |
 | `Table` / `Th` / `Td` (specialized views only) | Standard resource lists now render Nebari's Data Table through the owned shared `KeycloakDataTable` compatibility layer. A smaller set of form-layout, tree, drag-and-drop and nested-detail views still owns PatternFly-specific row semantics, so those table bodies remain PatternFly and use the token bridge. Their shared filtering and pagination toolbar is Nebari-rendered. |
 | `Radio` | Base UI's radio needs a `RadioGroup` ancestor for roving focus. PatternFly's `Radio` is standalone and the views render bare ones in loops, so a drop-in swap would break keyboard navigation. |
-| `Select` / `MenuToggle` | Popper placement, typeahead and chip state are managed inside PatternFly. |
+| `Select` / `MenuToggle` | Popper placement, typeahead and chip state are managed inside PatternFly. `MenuToggle` is wrapped (see below) but still renders PatternFly's. |
 | `Modal` | Focus trapping, portal and scroll locking. |
 | `Alert` (toasts) | `AlertGroup` owns the toast queue and timers. |
 | `Tooltip` | Nebari's `TooltipTrigger` anchors itself through a ref on the rendered element. The registry components take `ref` as a plain prop — the React 19 convention — and this app is on React 18, where a function component cannot receive one, so the anchor would come back null and the tooltip would not position. `src/components/nebari/ProfileMenu.tsx`, the menu trigger both console headers use, works around this by rendering a DOM element; doing the same across 16 tooltip call sites is not worth the churn until the app moves to React 19. |
 | `variant="control"` buttons | Designed to sit flush inside a PatternFly `InputGroup`; rounded Nebari corners would detach them. |
 | `Page` / outer `PageSidebar` / `PageToggleButton` | `Page` owns the Admin Console's breakpoint-aware open state. `PageNav.tsx` keeps `PageSidebar` only as that responsive shell and renders the complete visible navigation with Nebari's Sidebar primitives. The masthead toggle must remain connected to the same Page context. |
+
+## Accessible names (WCAG 2.5.3)
+
+Keycloak labels some controls with an `aria-label` that leaves out their visible text: select toggles named
+after the field ("Protocol") while showing the selected value, and buttons named "Add" that read "Add valid
+redirect URIs". axe's `label-content-name-mismatch` rule fails both. `Button` and a thin `MenuToggle` wrapper
+pass the label through [`accessibleName.ts`](accessibleName.ts), which puts the visible text into the name
+("Protocol: OpenID Connect") or drops a label the visible text already contains. `MenuToggle` otherwise renders
+PatternFly's component unchanged.
