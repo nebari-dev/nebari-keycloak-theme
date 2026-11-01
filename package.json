@@ -75,7 +75,7 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.13.0",
+    "@axe-core/playwright": "4.14.0",
     "@biomejs/biome": "2.6.4",
     "@playwright/test": "^1.64.0",
     "@tailwindcss/vite": "^4.3.3",
@@ -85,7 +85,7 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "axe-core": "4.13.0",
+    "axe-core": "4.14.0",
     "keycloakify": "^11.16.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.5.3",
