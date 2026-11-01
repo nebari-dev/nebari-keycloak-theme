@@ -73,7 +73,7 @@ resolve to Nebari components &mdash; in every view, without editing any of them.
 ```mermaid
 flowchart LR
     V["~520 console views<br/>(vendored, untouched)"] --> S["PatternFly shim<br/>src/shared/@patternfly/react-core"]
-    S -->|"Button, TextInput, TextArea,<br/>Switch, Checkbox, Label"| A["Adapters<br/>src/components/patternfly"]
+    S -->|"Button, TextInput, TextArea,<br/>Switch, Checkbox, Label, MenuToggle"| A["Adapters<br/>src/components/patternfly"]
     S -->|"everything else"| P["PatternFly<br/>restyled by src/admin/index.css"]
     A --> U["Nebari components<br/>src/components/ui"]
 ```

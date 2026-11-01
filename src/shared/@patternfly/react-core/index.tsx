@@ -32,6 +32,7 @@ import {
 
 export { TextInput, TextArea, Switch, Checkbox } from "@/components/patternfly/FormControls";
 export { Label } from "@/components/patternfly/Label";
+export { MenuToggle } from "@/components/patternfly/MenuToggle";
 
 /**
  * `variant="control"` is the one variant that stays on PatternFly: those
